@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import worker from "../../src/worker/index";
-import { createMockD1Database } from "../support/mock-d1";
+import { createMockD1Database, readMockD1State } from "../support/mock-d1";
 
 type FetchHandler = NonNullable<typeof worker.fetch>;
 type WorkerRequest = Parameters<FetchHandler>[0];
@@ -19,11 +19,11 @@ function createAssetFetcher(): Fetcher {
   };
 }
 
-function createEnv(): WorkerEnv {
+function createEnv(database = createMockD1Database()): WorkerEnv {
   return {
     ADMIN_SECRET: "local-admin-secret-token",
     ASSETS: createAssetFetcher(),
-    DB: createMockD1Database()
+    DB: database
   } as WorkerEnv;
 }
 
@@ -56,5 +56,66 @@ describe("student API", () => {
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({ error: "Not found" });
+  });
+
+  it("creates a scan record from a valid mentor QR payload", async () => {
+    const database = createMockD1Database();
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database),
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(201);
+
+    await expect(response.json()).resolves.toMatchObject({
+      scan: {
+        studentId: "student-001",
+        mentorId: "mentor-001"
+      },
+      mentor: {
+        personId: "mentor-001",
+        displayName: "Mentor Local 01"
+      }
+    });
+
+    expect(readMockD1State(database).scanRecords).toHaveLength(1);
+    expect(readMockD1State(database).scanRecords[0]).toMatchObject({
+      student_id: "student-001",
+      mentor_id: "mentor-001"
+    });
+  });
+
+  it("rejects an invalid mentor QR payload without writing a record", async () => {
+    const database = createMockD1Database();
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "not-a-mentor-qr"
+        })
+      }) as WorkerRequest,
+      createEnv(database),
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "Invalid mentor QR payload."
+    });
+    expect(readMockD1State(database).scanRecords).toHaveLength(0);
   });
 });

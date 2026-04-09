@@ -1,5 +1,54 @@
 import type { ScanRecord } from "../types";
 
+type CreateScanRecordInput = {
+  scanId: string;
+  studentId: string;
+  mentorId: string;
+  eventDate: string;
+  scannedAt: string;
+};
+
+export async function createScanRecord(
+  db: D1Database,
+  input: CreateScanRecordInput
+): Promise<ScanRecord> {
+  await db
+    .prepare(
+      `
+        INSERT INTO scan_records (
+          scan_id,
+          student_id,
+          mentor_id,
+          event_date,
+          scanned_at,
+          notes,
+          updated_at
+        )
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+      `
+    )
+    .bind(
+      input.scanId,
+      input.studentId,
+      input.mentorId,
+      input.eventDate,
+      input.scannedAt,
+      "",
+      input.scannedAt
+    )
+    .run();
+
+  return {
+    scan_id: input.scanId,
+    student_id: input.studentId,
+    mentor_id: input.mentorId,
+    event_date: input.eventDate,
+    scanned_at: input.scannedAt,
+    notes: "",
+    updated_at: input.scannedAt
+  };
+}
+
 export async function listStudentHistory(
   db: D1Database,
   studentId: string,

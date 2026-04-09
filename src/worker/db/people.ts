@@ -20,6 +20,26 @@ export async function findPersonBySecretToken(
   return result ?? null;
 }
 
+export async function findPersonById(
+  db: D1Database,
+  role: Exclude<Role, "admin">,
+  personId: string
+): Promise<PersonRecord | null> {
+  const statement = db
+    .prepare(
+      `
+        SELECT person_id, display_name, role, secret_id, secret_path_token
+        FROM people
+        WHERE role = ?1 AND person_id = ?2
+        LIMIT 1
+      `
+    )
+    .bind(role, personId);
+
+  const result = await statement.first<PersonRecord>();
+  return result ?? null;
+}
+
 export async function listPeopleByRole(
   db: D1Database,
   role: Exclude<Role, "admin">,
