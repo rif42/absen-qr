@@ -1,6 +1,6 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
-import { createScanRecord } from "../db/scan-records";
-import { badRequest, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
+import { createScanRecord, listStudentHistory } from "../db/scan-records";
+import { badRequest, conflict, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { parseMentorQrPayload } from "../services/mentor-qr";
 import { getRolePageAssetPath, rewriteRequestPath } from "../services/secret-links";
 import type { Env } from "../types";
@@ -12,6 +12,7 @@ export function handleStudentPage(request: Request, env: Env): Promise<Response>
 export async function handleStudentApi(request: Request, env: Env, secretToken: string): Promise<Response> {
   const pathname = new URL(request.url).pathname;
   const apiPath = pathname.replace(`/student/${secretToken}/api`, "") || "/";
+  const currentEventDate = new Date().toISOString().slice(0, 10);
 
   if (apiPath === "/me") {
     if (request.method !== "GET") {
@@ -73,12 +74,18 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return badRequest("Invalid mentor QR payload.");
     }
 
+    const existingHistory = await listStudentHistory(env.DB, student.person_id, currentEventDate);
+
+    if (existingHistory.some((scanRecord) => scanRecord.mentor_id === mentor.person_id)) {
+      return conflict("Duplicate mentor scan already recorded for this event day.");
+    }
+
     const scannedAt = new Date().toISOString();
     const scan = await createScanRecord(env.DB, {
       scanId: crypto.randomUUID(),
       studentId: student.person_id,
       mentorId: mentor.person_id,
-      eventDate: scannedAt.slice(0, 10),
+      eventDate: currentEventDate,
       scannedAt
     });
 
@@ -105,7 +112,28 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return methodNotAllowed(["GET"]);
     }
 
-    return notImplemented("GET /student/:secret/api/history", { secretToken });
+    const student = await findPersonBySecretToken(env.DB, "student", secretToken);
+
+    if (!student) {
+      return notFound();
+    }
+
+    const history = await listStudentHistory(env.DB, student.person_id, currentEventDate);
+    const historyEntries = await Promise.all(
+      history.map(async (scanRecord) => {
+        const mentor = await findPersonById(env.DB, "mentor", scanRecord.mentor_id);
+
+        return {
+          scanId: scanRecord.scan_id,
+          mentorId: scanRecord.mentor_id,
+          mentorName: mentor?.display_name ?? "Mentor",
+          scannedAt: scanRecord.scanned_at,
+          notes: scanRecord.notes
+        };
+      })
+    );
+
+    return json({ history: historyEntries });
   }
 
   return notImplemented("student api route placeholder", { secretToken, apiPath });

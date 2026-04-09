@@ -46,6 +46,14 @@
           <div class="card-label">Today’s mentor history</div>
           <div id="history-loading" class="muted-block">Waiting for identity to resolve…</div>
 
+          <div id="history-error" class="error-panel hidden" role="alert">
+            <p class="error-title">We could not load today’s mentor history.</p>
+            <p class="error-copy" id="history-error-message">
+              The history request failed. Your identity is still available on this page.
+            </p>
+            <button type="button" class="button" id="history-retry-button">Try again</button>
+          </div>
+
           <div id="history-empty" class="empty-state hidden">
             <p class="empty-title">No mentor scans recorded for this event day yet.</p>
             <p class="empty-copy">

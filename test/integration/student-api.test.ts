@@ -28,6 +28,8 @@ function createEnv(database = createMockD1Database()): WorkerEnv {
 }
 
 describe("student API", () => {
+  const currentEventDate = new Date().toISOString().slice(0, 10);
+
   it("returns the student identity for a valid student secret token", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
@@ -117,5 +119,110 @@ describe("student API", () => {
       error: "Invalid mentor QR payload."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(0);
+  });
+
+  it("rejects a duplicate mentor scan for the same event day", async () => {
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-duplicate-existing",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: currentEventDate,
+          scanned_at: `${currentEventDate}T08:00:00.000Z`,
+          notes: "",
+          updated_at: `${currentEventDate}T08:00:00.000Z`
+        }
+      ]
+    });
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database),
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error: "Duplicate mentor scan already recorded for this event day."
+    });
+    expect(readMockD1State(database).scanRecords).toHaveLength(1);
+  });
+
+  it("returns only the current student's mentor history for the current event day", async () => {
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-history-1",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: currentEventDate,
+          scanned_at: `${currentEventDate}T08:00:00.000Z`,
+          notes: "First mentor",
+          updated_at: `${currentEventDate}T08:00:00.000Z`
+        },
+        {
+          scan_id: "scan-history-2",
+          student_id: "student-001",
+          mentor_id: "mentor-002",
+          event_date: currentEventDate,
+          scanned_at: `${currentEventDate}T09:00:00.000Z`,
+          notes: "Second mentor",
+          updated_at: `${currentEventDate}T09:00:00.000Z`
+        },
+        {
+          scan_id: "scan-other-student",
+          student_id: "student-002",
+          mentor_id: "mentor-001",
+          event_date: currentEventDate,
+          scanned_at: `${currentEventDate}T10:00:00.000Z`,
+          notes: "Other student",
+          updated_at: `${currentEventDate}T10:00:00.000Z`
+        },
+        {
+          scan_id: "scan-other-day",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: "2099-01-01",
+          scanned_at: "2099-01-01T11:00:00.000Z",
+          notes: "Other day",
+          updated_at: "2099-01-01T11:00:00.000Z"
+        }
+      ]
+    });
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
+      createEnv(database),
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      history: [
+        {
+          scanId: "scan-history-2",
+          mentorId: "mentor-002",
+          mentorName: "Mentor Local 02",
+          scannedAt: `${currentEventDate}T09:00:00.000Z`,
+          notes: "Second mentor"
+        },
+        {
+          scanId: "scan-history-1",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          scannedAt: `${currentEventDate}T08:00:00.000Z`,
+          notes: "First mentor"
+        }
+      ]
+    });
   });
 });

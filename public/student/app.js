@@ -8,19 +8,23 @@
     studentMeta: document.getElementById('student-meta'),
     errorMessage: document.getElementById('error-message'),
     historyLoading: document.getElementById('history-loading'),
+    historyError: document.getElementById('history-error'),
+    historyErrorMessage: document.getElementById('history-error-message'),
     historyEmpty: document.getElementById('history-empty'),
     historyList: document.getElementById('history-list'),
     retryButton: document.getElementById('retry-button'),
+    historyRetryButton: document.getElementById('history-retry-button'),
   };
 
   const studentPath = getStudentPath();
 
   if (!studentPath) {
-    showError('Invalid student link. Open this page from a /student/:secretToken URL.');
+    showIdentityError('Invalid student link. Open this page from a /student/:secretToken URL.');
     return;
   }
 
   elements.retryButton.addEventListener('click', loadIdentity);
+  elements.historyRetryButton.addEventListener('click', loadIdentity);
   loadIdentity();
 
   function getStudentPath() {
@@ -55,9 +59,34 @@
         throw new Error('Identity response did not include a student profile.');
       }
 
-      renderSuccess(student, normalizeHistory(payload));
+      renderIdentitySuccess(student);
+      await loadHistory();
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Identity request failed.');
+      showIdentityError(error instanceof Error ? error.message : 'Identity request failed.');
+    }
+  }
+
+  async function loadHistory() {
+    elements.historyLoading.classList.remove('hidden');
+    elements.historyError.classList.add('hidden');
+    elements.historyEmpty.classList.add('hidden');
+    elements.historyList.classList.add('hidden');
+
+    try {
+      const response = await fetch(`${studentPath}/api/history`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`History request failed with status ${response.status}.`);
+      }
+
+      const payload = await response.json();
+      renderHistorySuccess(normalizeHistory(payload));
+    } catch (error) {
+      showHistoryError(error instanceof Error ? error.message : 'History request failed.');
     }
   }
 
@@ -83,11 +112,9 @@
 
   function normalizeHistory(payload) {
     const source =
-      payload?.history ||
-      payload?.scans ||
-      payload?.records ||
-      payload?.mentorHistory ||
-      [];
+      Array.isArray(payload)
+        ? payload
+        : payload?.history || payload?.scans || payload?.records || payload?.mentorHistory || [];
 
     if (!Array.isArray(source)) {
       return [];
@@ -100,22 +127,33 @@
     }));
   }
 
-  function renderSuccess(student, history) {
+  function renderIdentitySuccess(student) {
     elements.identityLoading.classList.add('hidden');
     elements.identityError.classList.add('hidden');
     elements.identitySuccess.classList.remove('hidden');
-    elements.historyLoading.classList.add('hidden');
+    elements.historyLoading.classList.remove('hidden');
+    elements.historyError.classList.add('hidden');
+    elements.historyEmpty.classList.add('hidden');
+    elements.historyList.classList.add('hidden');
+    elements.historyList.replaceChildren();
 
     elements.studentName.textContent = student.displayName;
     elements.studentMeta.textContent = `Secret id: ${student.secretId}`;
-    elements.status.textContent = 'Identity loaded successfully.';
-    elements.status.className = 'status status-success';
+    elements.status.textContent = 'Identity loaded. Loading today’s mentor history...';
+    elements.status.className = 'status status-loading';
     document.title = `${student.displayName} • Student Attendance`;
+  }
+
+  function renderHistorySuccess(history) {
+    elements.historyLoading.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
 
     if (history.length === 0) {
       elements.historyEmpty.classList.remove('hidden');
       elements.historyList.classList.add('hidden');
       elements.historyList.replaceChildren();
+      elements.status.textContent = 'Identity loaded. No mentor scans recorded for today yet.';
+      elements.status.className = 'status status-success';
       return;
     }
 
@@ -138,17 +176,31 @@
         return item;
       })
     );
+    elements.status.textContent = 'Identity and mentor history loaded.';
+    elements.status.className = 'status status-success';
   }
 
-  function showError(message) {
+  function showIdentityError(message) {
     setState('error');
     elements.errorMessage.textContent = message;
     elements.status.textContent = 'Identity load failed.';
     elements.status.className = 'status status-error';
     elements.historyLoading.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
+  }
+
+  function showHistoryError(message) {
+    elements.historyLoading.classList.add('hidden');
+    elements.historyEmpty.classList.add('hidden');
+    elements.historyList.classList.add('hidden');
+    elements.historyList.replaceChildren();
+    elements.historyErrorMessage.textContent = message;
+    elements.historyError.classList.remove('hidden');
+    elements.status.textContent = 'Identity loaded, but mentor history could not be loaded.';
+    elements.status.className = 'status status-error';
   }
 
   function setState(state) {
@@ -157,6 +209,7 @@
     elements.identityError.classList.toggle('hidden', state !== 'error');
     elements.historyLoading.classList.toggle('hidden', state !== 'loading');
     if (state === 'loading') {
+      elements.historyError.classList.add('hidden');
       elements.historyEmpty.classList.add('hidden');
       elements.historyList.classList.add('hidden');
     }

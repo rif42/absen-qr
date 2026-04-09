@@ -30,11 +30,25 @@ const DEFAULT_PEOPLE: PersonRecord[] = [
     secret_path_token: "local-student-token-001"
   },
   {
+    person_id: "student-002",
+    display_name: "Student Local 02",
+    role: "student",
+    secret_id: "student-secret-002",
+    secret_path_token: "local-student-token-002"
+  },
+  {
     person_id: "mentor-001",
     display_name: "Mentor Local 01",
     role: "mentor",
     secret_id: "mentor-secret-001",
     secret_path_token: "local-mentor-token-001"
+  },
+  {
+    person_id: "mentor-002",
+    display_name: "Mentor Local 02",
+    role: "mentor",
+    secret_id: "mentor-secret-002",
+    secret_path_token: "local-mentor-token-002"
   }
 ];
 
@@ -85,6 +99,18 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
           throw new Error(`Unsupported first() SQL in mock D1: ${sql}`);
         },
         async all<T>(): Promise<QueryResult<T>> {
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where student_id = ?1 and event_date = ?2")
+          ) {
+            const [studentId, eventDate] = params as [string, string];
+            const results = state.scanRecords
+              .filter((scanRecord) => scanRecord.student_id === studentId && scanRecord.event_date === eventDate)
+              .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
+
+            return createQueryResult(results as T[]);
+          }
+
           return createQueryResult([]);
         },
         async run(): Promise<{ success: true; meta: Record<string, unknown> }> {
