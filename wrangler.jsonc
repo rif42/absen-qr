@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "absen-qr",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-04-09",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "html_handling": "force-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "vars": {
+    "ADMIN_SECRET": "local-admin-secret-token"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "absen-qr-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "preview_database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "./migrations"
+    }
+  ]
+}
