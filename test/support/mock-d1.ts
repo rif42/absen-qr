@@ -3,6 +3,7 @@ import type { PersonRecord, ScanRecord } from "../../src/worker/types";
 type MockState = {
   people: PersonRecord[];
   scanRecords: ScanRecord[];
+  insertScanRecordErrorMessage: string | null;
 };
 
 type MockD1Database = D1Database & {
@@ -55,7 +56,8 @@ const DEFAULT_PEOPLE: PersonRecord[] = [
 function cloneState(seed?: Partial<MockState>): MockState {
   return {
     people: (seed?.people ?? DEFAULT_PEOPLE).map((person) => ({ ...person })),
-    scanRecords: (seed?.scanRecords ?? []).map((scanRecord) => ({ ...scanRecord }))
+    scanRecords: (seed?.scanRecords ?? []).map((scanRecord) => ({ ...scanRecord })),
+    insertScanRecordErrorMessage: seed?.insertScanRecordErrorMessage ?? null
   };
 }
 
@@ -115,6 +117,12 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
         },
         async run(): Promise<{ success: true; meta: Record<string, unknown> }> {
           if (normalizedSql.startsWith("insert into scan_records")) {
+            if (state.insertScanRecordErrorMessage) {
+              const message = state.insertScanRecordErrorMessage;
+              state.insertScanRecordErrorMessage = null;
+              throw new Error(message);
+            }
+
             const [scanId, studentId, mentorId, eventDate, scannedAt, notes, updatedAt] = params as [
               string,
               string,

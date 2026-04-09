@@ -172,16 +172,69 @@ test/
 - seed script loads identities with roles and secret IDs
 
 ### Phase 2 — Student Flow
-- implement student secret-link page
-- implement QR scanning flow
-- persist scan records
-- enforce duplicate-scan rejection
-- implement same-day student history
+Phase 2 should be split into smaller sub-phases so each step has a clean manual test path and a natural commit boundary before moving to the next riskier behavior.
 
-**Exit criteria**
+#### Phase 2A — Student route, identity, and empty-state shell
+- implement the student secret-link page wiring
+- implement `GET /api/student/me`
+- render resolved student identity and an empty same-day history shell
+- verify that student secret links do not resolve as mentor or admin pages
+
+**Manual test focus**
+- open a valid student secret link and confirm the correct student identity appears
+- confirm the page loads an empty-state history when no scans exist yet
+- confirm cross-role or malformed links are rejected
+
+**Commit boundary**
+- safe to commit once the student shell resolves identity correctly without any scan-write behavior yet
+
+#### Phase 2B — Record creation without camera dependency
+- implement `POST /api/student/scan`
+- validate the scanned mentor identity payload on the server
+- persist one scan record for a valid student→mentor interaction
+- prove the end-to-end record creation path using a direct API request or temporary non-camera test input before browser camera work begins
+
+**Manual test focus**
+- submit one valid mentor payload and confirm exactly one record is written
+- confirm invalid mentor payloads fail cleanly and write nothing
+- verify the created row contains the expected student, mentor, and event-day fields
+
+**Commit boundary**
+- safe to commit once server-side scan creation is correct and manually testable without QR hardware or camera behavior
+
+#### Phase 2C — Duplicate rejection and same-day history
+- enforce duplicate same-day scan rejection through application handling on top of the DB uniqueness rule
+- implement `GET /api/student/history`
+- render same-day mentor history on the student page
+- show deterministic duplicate-scan messaging
+
+**Manual test focus**
+- first valid student→mentor scan succeeds
+- second same-day scan for the same student→mentor pair is rejected with a stable message
+- student history shows only that student’s mentors for the current event-day
+
+**Commit boundary**
+- safe to commit once the student record lifecycle is correct for create, reject-duplicate, and read-history behavior
+
+#### Phase 2D — Camera and QR integration
+- integrate browser camera access on the student page
+- decode mentor QR payloads and submit them through the already-verified scan endpoint
+- handle unreadable or invalid QR results with clear feedback
+- refresh success and error UI after real camera-driven scans
+
+**Manual test focus**
+- scan a real mentor QR from the browser and confirm the record is created
+- confirm unreadable or invalid QR input shows a clear error
+- confirm successful camera-driven scans update same-day history immediately
+
+**Commit boundary**
+- safe to commit once the camera path uses the existing verified APIs rather than introducing new record logic
+
+**Phase 2 exit criteria**
 - valid mentor scan creates one record
 - duplicate same-day scan is rejected
 - student history shows only that student’s current event-day mentors
+- camera-based QR scanning works against the same server-side validation path
 
 ### Phase 3 — Mentor Flow
 - implement mentor secret-link page
@@ -265,7 +318,7 @@ test/
 ## Implementation Order Recommendation
 Build in this order:
 1. schema + seed + secret-link resolution
-2. student scan flow
+2. student flow in sub-phases: identity shell → record creation → duplicate/history → camera integration
 3. mentor live note flow
 4. admin correction and export tools
 5. hardening, QA, and polish

@@ -1,0 +1,24 @@
+- main [ref=e2]:
+  - region "Mentor attendance" [ref=e3]:
+    - generic [ref=e4]: Student secret link
+    - heading "Mentor attendance" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Your student link is loading. Use the camera scanner to record mentor QR codes and review today’s history.
+    - status [ref=e7]: Resolving your student identity...
+  - generic [ref=e8]:
+    - article [ref=e9]:
+      - generic [ref=e10]: Student identity
+      - generic [ref=e11]: Loading identity details…
+    - article [ref=e12]:
+      - generic [ref=e13]: Camera scanner
+      - generic [ref=e14]:
+        - generic "Mentor QR camera preview" [ref=e15]
+        - generic [ref=e16]:
+          - paragraph [ref=e17]: Preparing scanner…
+          - paragraph [ref=e18]: Your student identity must load before the camera can start.
+      - generic [ref=e19]:
+        - button "Start scanner" [disabled] [ref=e20]
+        - paragraph [ref=e21]: The rear camera is preferred. Camera access requires a secure context such as HTTPS or localhost.
+      - status [ref=e22]: Preparing scanner…
+    - article [ref=e23]:
+      - generic [ref=e24]: Today’s mentor history
+      - generic [ref=e25]: Waiting for identity to resolve…

@@ -49,6 +49,15 @@ export async function createScanRecord(
   };
 }
 
+export function isDuplicateScanRecordError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const normalizedMessage = error.message.toLowerCase();
+  return normalizedMessage.includes("unique constraint failed") && normalizedMessage.includes("scan_records");
+}
+
 export async function listStudentHistory(
   db: D1Database,
   studentId: string,

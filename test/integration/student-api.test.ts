@@ -22,13 +22,14 @@ function createAssetFetcher(): Fetcher {
 function createEnv(database = createMockD1Database()): WorkerEnv {
   return {
     ADMIN_SECRET: "local-admin-secret-token",
+    EVENT_DATE: "2026-01-15",
     ASSETS: createAssetFetcher(),
     DB: database
   } as WorkerEnv;
 }
 
 describe("student API", () => {
-  const currentEventDate = new Date().toISOString().slice(0, 10);
+  const configuredEventDate = "2026-01-15";
 
   it("returns the student identity for a valid student secret token", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
@@ -82,7 +83,8 @@ describe("student API", () => {
     await expect(response.json()).resolves.toMatchObject({
       scan: {
         studentId: "student-001",
-        mentorId: "mentor-001"
+        mentorId: "mentor-001",
+        eventDate: configuredEventDate
       },
       mentor: {
         personId: "mentor-001",
@@ -93,8 +95,36 @@ describe("student API", () => {
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
     expect(readMockD1State(database).scanRecords[0]).toMatchObject({
       student_id: "student-001",
-      mentor_id: "mentor-001"
+      mentor_id: "mentor-001",
+      event_date: configuredEventDate
     });
+  });
+
+  it("maps a database uniqueness conflict to the duplicate scan response", async () => {
+    const database = createMockD1Database({
+      insertScanRecordErrorMessage:
+        "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
+    });
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database),
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error: "Duplicate mentor scan already recorded for this event day."
+    });
+    expect(readMockD1State(database).scanRecords).toHaveLength(0);
   });
 
   it("rejects an invalid mentor QR payload without writing a record", async () => {
@@ -128,10 +158,10 @@ describe("student API", () => {
           scan_id: "scan-duplicate-existing",
           student_id: "student-001",
           mentor_id: "mentor-001",
-          event_date: currentEventDate,
-          scanned_at: `${currentEventDate}T08:00:00.000Z`,
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "",
-          updated_at: `${currentEventDate}T08:00:00.000Z`
+          updated_at: `${configuredEventDate}T08:00:00.000Z`
         }
       ]
     });
@@ -164,28 +194,28 @@ describe("student API", () => {
           scan_id: "scan-history-1",
           student_id: "student-001",
           mentor_id: "mentor-001",
-          event_date: currentEventDate,
-          scanned_at: `${currentEventDate}T08:00:00.000Z`,
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "First mentor",
-          updated_at: `${currentEventDate}T08:00:00.000Z`
+          updated_at: `${configuredEventDate}T08:00:00.000Z`
         },
         {
           scan_id: "scan-history-2",
           student_id: "student-001",
           mentor_id: "mentor-002",
-          event_date: currentEventDate,
-          scanned_at: `${currentEventDate}T09:00:00.000Z`,
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Second mentor",
-          updated_at: `${currentEventDate}T09:00:00.000Z`
+          updated_at: `${configuredEventDate}T09:00:00.000Z`
         },
         {
           scan_id: "scan-other-student",
           student_id: "student-002",
           mentor_id: "mentor-001",
-          event_date: currentEventDate,
-          scanned_at: `${currentEventDate}T10:00:00.000Z`,
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T10:00:00.000Z`,
           notes: "Other student",
-          updated_at: `${currentEventDate}T10:00:00.000Z`
+          updated_at: `${configuredEventDate}T10:00:00.000Z`
         },
         {
           scan_id: "scan-other-day",
@@ -212,14 +242,14 @@ describe("student API", () => {
           scanId: "scan-history-2",
           mentorId: "mentor-002",
           mentorName: "Mentor Local 02",
-          scannedAt: `${currentEventDate}T09:00:00.000Z`,
+          scannedAt: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Second mentor"
         },
         {
           scanId: "scan-history-1",
           mentorId: "mentor-001",
           mentorName: "Mentor Local 01",
-          scannedAt: `${currentEventDate}T08:00:00.000Z`,
+          scannedAt: `${configuredEventDate}T08:00:00.000Z`,
           notes: "First mentor"
         }
       ]

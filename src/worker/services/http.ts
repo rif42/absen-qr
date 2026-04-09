@@ -24,6 +24,10 @@ export function conflict(message = "Conflict"): Response {
   return json({ error: message }, { status: 409 });
 }
 
+export function internalServerError(message = "Internal server error"): Response {
+  return json({ error: message }, { status: 500 });
+}
+
 export function methodNotAllowed(allowed: string[]): Response {
   return json(
     { error: "Method not allowed", allowed },

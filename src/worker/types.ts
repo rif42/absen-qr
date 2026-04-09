@@ -19,6 +19,7 @@ export type SecretLinkRouteMatch = PageRouteMatch | ApiRouteMatch;
 
 export type Env = {
   ADMIN_SECRET: string;
+  EVENT_DATE: string;
   ASSETS: Fetcher;
   DB: D1Database;
 };

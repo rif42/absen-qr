@@ -1,6 +1,7 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
-import { createScanRecord, listStudentHistory } from "../db/scan-records";
-import { badRequest, conflict, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
+import { createScanRecord, isDuplicateScanRecordError, listStudentHistory } from "../db/scan-records";
+import { getConfiguredEventDate } from "../services/event-day";
+import { badRequest, conflict, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { parseMentorQrPayload } from "../services/mentor-qr";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import type { Env } from "../types";
@@ -12,7 +13,6 @@ export function handleStudentPage(request: Request, env: Env): Promise<Response>
 export async function handleStudentApi(request: Request, env: Env, secretToken: string): Promise<Response> {
   const pathname = new URL(request.url).pathname;
   const apiPath = pathname.replace(`/student/${secretToken}/api`, "") || "/";
-  const currentEventDate = new Date().toISOString().slice(0, 10);
 
   if (apiPath === "/me") {
     if (request.method !== "GET") {
@@ -37,6 +37,14 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
   if (apiPath === "/scan") {
     if (request.method !== "POST") {
       return methodNotAllowed(["POST"]);
+    }
+
+    let currentEventDate: string;
+
+    try {
+      currentEventDate = getConfiguredEventDate(env);
+    } catch {
+      return internalServerError("Invalid EVENT_DATE configuration.");
     }
 
     const student = await findPersonBySecretToken(env.DB, "student", secretToken);
@@ -81,13 +89,23 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     }
 
     const scannedAt = new Date().toISOString();
-    const scan = await createScanRecord(env.DB, {
-      scanId: crypto.randomUUID(),
-      studentId: student.person_id,
-      mentorId: mentor.person_id,
-      eventDate: currentEventDate,
-      scannedAt
-    });
+    let scan;
+
+    try {
+      scan = await createScanRecord(env.DB, {
+        scanId: crypto.randomUUID(),
+        studentId: student.person_id,
+        mentorId: mentor.person_id,
+        eventDate: currentEventDate,
+        scannedAt
+      });
+    } catch (error) {
+      if (isDuplicateScanRecordError(error)) {
+        return conflict("Duplicate mentor scan already recorded for this event day.");
+      }
+
+      return internalServerError("Could not create scan record.");
+    }
 
     return json(
       {
@@ -110,6 +128,14 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
   if (apiPath === "/history") {
     if (request.method !== "GET") {
       return methodNotAllowed(["GET"]);
+    }
+
+    let currentEventDate: string;
+
+    try {
+      currentEventDate = getConfiguredEventDate(env);
+    } catch {
+      return internalServerError("Invalid EVENT_DATE configuration.");
     }
 
     const student = await findPersonBySecretToken(env.DB, "student", secretToken);
