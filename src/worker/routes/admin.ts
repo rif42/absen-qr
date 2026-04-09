@@ -1,4 +1,4 @@
-import { getRolePageAssetPath, rewriteRequestPath } from "../services/secret-links";
+import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { forbidden, methodNotAllowed, notImplemented } from "../services/http";
 import type { Env } from "../types";
 
@@ -11,7 +11,7 @@ export function handleAdminPage(request: Request, env: Env, secretToken: string)
     return forbidden();
   }
 
-  return env.ASSETS.fetch(rewriteRequestPath(request, getRolePageAssetPath("admin")));
+  return fetchAssetWithRedirectFallback(request, env.ASSETS, getRolePageAssetPath("admin"));
 }
 
 export function handleAdminApi(request: Request, env: Env, secretToken: string): Response {

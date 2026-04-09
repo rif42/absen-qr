@@ -2,11 +2,11 @@ import { findPersonById, findPersonBySecretToken } from "../db/people";
 import { createScanRecord, listStudentHistory } from "../db/scan-records";
 import { badRequest, conflict, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { parseMentorQrPayload } from "../services/mentor-qr";
-import { getRolePageAssetPath, rewriteRequestPath } from "../services/secret-links";
+import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import type { Env } from "../types";
 
 export function handleStudentPage(request: Request, env: Env): Promise<Response> {
-  return env.ASSETS.fetch(rewriteRequestPath(request, getRolePageAssetPath("student")));
+  return fetchAssetWithRedirectFallback(request, env.ASSETS, getRolePageAssetPath("student"));
 }
 
 export async function handleStudentApi(request: Request, env: Env, secretToken: string): Promise<Response> {

@@ -9,14 +9,16 @@
       content="Student secret-link page for the single event-day mentor attendance pilot."
     />
     <link rel="stylesheet" href="/student/styles.css" />
-    <script src="/student/app.js" defer></script>
+    <script type="module" src="/student/app.js"></script>
   </head>
   <body>
     <main class="shell">
       <section class="hero card" aria-labelledby="page-title">
         <div class="eyebrow">Student secret link</div>
         <h1 id="page-title">Mentor attendance</h1>
-        <p class="lede">Your page is loading your identity and today’s event-day mentor history.</p>
+        <p class="lede">
+          Your student link is loading. Use the camera scanner to record mentor QR codes and review today’s history.
+        </p>
 
         <div class="status status-loading" id="status-banner" role="status" aria-live="polite">
           Resolving your student identity...
@@ -39,6 +41,45 @@
               The secret token may be invalid, expired, or unreachable right now.
             </p>
             <button type="button" class="button" id="retry-button">Try again</button>
+          </div>
+        </article>
+
+        <article class="card scanner-card">
+          <div class="card-label">Camera scanner</div>
+
+          <div class="scanner-stage" id="scanner-stage">
+            <video
+              id="scanner-video"
+              class="scanner-video"
+              muted
+              playsinline
+              aria-label="Mentor QR camera preview"
+            ></video>
+
+            <div id="scanner-placeholder" class="scanner-placeholder">
+              <p class="scanner-placeholder-title" id="scanner-placeholder-title">Preparing scanner…</p>
+              <p class="scanner-placeholder-copy" id="scanner-placeholder-copy">
+                Your student identity must load before the camera can start.
+              </p>
+            </div>
+          </div>
+
+          <div class="scanner-actions">
+            <button type="button" class="button scanner-toggle-button" id="scanner-toggle-button" disabled>
+              Start scanner
+            </button>
+            <p class="scanner-hint">
+              The rear camera is preferred. Camera access requires a secure context such as HTTPS or localhost.
+            </p>
+          </div>
+
+          <div id="scanner-status" class="status status-neutral" role="status" aria-live="polite">
+            Scanner stopped.
+          </div>
+
+          <div id="scanner-feedback" class="scan-feedback hidden" aria-live="polite">
+            <p class="scan-feedback-title" id="scanner-feedback-title"></p>
+            <p class="scan-feedback-copy" id="scanner-feedback-copy"></p>
           </div>
         </article>
 

@@ -49,3 +49,20 @@ export function rewriteRequestPath(request: Request, pathname: string): Request 
   url.pathname = pathname;
   return new Request(url.toString(), request);
 }
+
+export async function fetchAssetWithRedirectFallback(request: Request, assets: Fetcher, pathname: string): Promise<Response> {
+  const initialResponse = await assets.fetch(rewriteRequestPath(request, pathname));
+
+  if (initialResponse.status < 300 || initialResponse.status >= 400) {
+    return initialResponse;
+  }
+
+  const location = initialResponse.headers.get("location");
+
+  if (!location) {
+    return initialResponse;
+  }
+
+  const redirectedPathname = new URL(location, request.url).pathname;
+  return assets.fetch(rewriteRequestPath(request, redirectedPathname));
+}

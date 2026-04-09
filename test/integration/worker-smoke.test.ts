@@ -58,6 +58,38 @@ function createAssetFetcher(): Fetcher {
   };
 }
 
+function createRedirectingStudentAssetFetcher(): Fetcher {
+  return {
+    fetch(request: Request): Promise<Response> {
+      const url = new URL(request.url);
+
+      if (url.pathname === "/student/index.html") {
+        return Promise.resolve(
+          new Response(null, {
+            status: 307,
+            headers: {
+              location: "/student/"
+            }
+          })
+        );
+      }
+
+      if (url.pathname === "/student/") {
+        return Promise.resolve(
+          new Response("<html><body>Student redirect target</body></html>", {
+            headers: { "content-type": "text/html; charset=utf-8" }
+          })
+        );
+      }
+
+      return Promise.resolve(new Response("Not found", { status: 404 }));
+    },
+    connect(): Socket {
+      throw new Error("Socket connections are not used in this test.");
+    }
+  };
+}
+
 function createEnv(): MockEnv {
   return {
     ADMIN_SECRET: "local-admin-secret-token",
@@ -89,5 +121,20 @@ describe("worker scaffold", () => {
 
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toContain("Student placeholder");
+  });
+
+  it("serves the student page content even if assets redirect index requests", async () => {
+    const fetchHandler = worker.fetch as FetchHandler;
+    const response = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001") as WorkerRequest,
+      {
+        ...createEnv(),
+        ASSETS: createRedirectingStudentAssetFetcher()
+      } as WorkerEnv,
+      {} as WorkerContext
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.text()).resolves.toContain("Student redirect target");
   });
 });

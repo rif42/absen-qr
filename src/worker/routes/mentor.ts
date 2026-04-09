@@ -1,9 +1,9 @@
-import { getRolePageAssetPath, rewriteRequestPath } from "../services/secret-links";
+import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { methodNotAllowed, notImplemented } from "../services/http";
 import type { Env } from "../types";
 
 export function handleMentorPage(request: Request, env: Env): Promise<Response> {
-  return env.ASSETS.fetch(rewriteRequestPath(request, getRolePageAssetPath("mentor")));
+  return fetchAssetWithRedirectFallback(request, env.ASSETS, getRolePageAssetPath("mentor"));
 }
 
 export function handleMentorApi(request: Request, secretToken: string): Response {
