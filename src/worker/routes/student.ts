@@ -1,12 +1,13 @@
 import { getRolePageAssetPath, rewriteRequestPath } from "../services/secret-links";
-import { methodNotAllowed, notImplemented } from "../services/http";
+import { findPersonBySecretToken } from "../db/people";
+import { json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import type { Env } from "../types";
 
 export function handleStudentPage(request: Request, env: Env): Promise<Response> {
   return env.ASSETS.fetch(rewriteRequestPath(request, getRolePageAssetPath("student")));
 }
 
-export function handleStudentApi(request: Request, secretToken: string): Response {
+export async function handleStudentApi(request: Request, env: Env, secretToken: string): Promise<Response> {
   const pathname = new URL(request.url).pathname;
   const apiPath = pathname.replace(`/student/${secretToken}/api`, "") || "/";
 
@@ -15,7 +16,19 @@ export function handleStudentApi(request: Request, secretToken: string): Respons
       return methodNotAllowed(["GET"]);
     }
 
-    return notImplemented("GET /student/:secret/api/me", { secretToken });
+    const student = await findPersonBySecretToken(env.DB, "student", secretToken);
+
+    if (!student) {
+      return notFound();
+    }
+
+    return json({
+      student: {
+        personId: student.person_id,
+        displayName: student.display_name,
+        secretId: student.secret_id
+      }
+    });
   }
 
   if (apiPath === "/scan") {

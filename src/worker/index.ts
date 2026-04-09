@@ -33,7 +33,7 @@ const worker: ExportedHandler<Env> = {
 
     switch (routeMatch.role) {
       case "student":
-        return handleStudentApi(request, routeMatch.secretToken);
+        return handleStudentApi(request, env, routeMatch.secretToken);
       case "mentor":
         return handleMentorApi(request, routeMatch.secretToken);
       case "admin":

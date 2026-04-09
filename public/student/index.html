@@ -3,13 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Student Placeholder</title>
+    <title>Student Attendance</title>
+    <meta
+      name="description"
+      content="Student secret-link page for the single event-day mentor attendance pilot."
+    />
+    <link rel="stylesheet" href="/student/styles.css" />
+    <script src="/student/app.js" defer></script>
   </head>
   <body>
-    <main>
-      <h1>Student role placeholder</h1>
-      <p>This static page is the phase 1 scaffold for the student secret-link flow.</p>
-      <p>Planned next: QR scanning, deterministic success/error feedback, and same-day history.</p>
+    <main class="shell">
+      <section class="hero card" aria-labelledby="page-title">
+        <div class="eyebrow">Student secret link</div>
+        <h1 id="page-title">Mentor attendance</h1>
+        <p class="lede">Your page is loading your identity and today’s event-day mentor history.</p>
+
+        <div class="status status-loading" id="status-banner" role="status" aria-live="polite">
+          Resolving your student identity...
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card identity-card">
+          <div class="card-label">Student identity</div>
+          <div id="identity-loading" class="muted-block">Loading identity details…</div>
+
+          <div id="identity-success" class="identity-details hidden">
+            <p class="identity-name" id="student-name"></p>
+            <p class="identity-meta" id="student-meta"></p>
+          </div>
+
+          <div id="identity-error" class="error-panel hidden" role="alert">
+            <p class="error-title">We could not load your student link.</p>
+            <p class="error-copy" id="error-message">
+              The secret token may be invalid, expired, or unreachable right now.
+            </p>
+            <button type="button" class="button" id="retry-button">Try again</button>
+          </div>
+        </article>
+
+        <article class="card history-card">
+          <div class="card-label">Today’s mentor history</div>
+          <div id="history-loading" class="muted-block">Waiting for identity to resolve…</div>
+
+          <div id="history-empty" class="empty-state hidden">
+            <p class="empty-title">No mentor scans recorded for this event day yet.</p>
+            <p class="empty-copy">
+              Once you scan a mentor QR code, the mentors you scanned today will appear here.
+            </p>
+          </div>
+
+          <ul id="history-list" class="history-list hidden" aria-label="Mentor scans for today"></ul>
+        </article>
+      </section>
     </main>
   </body>
 </html>
