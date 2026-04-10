@@ -16,9 +16,9 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "absen-qr-local",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "preview_database_id": "00000000-0000-0000-0000-000000000000",
+      "database_name": "absen-qr",
+      "database_id": "956b2173-168d-455c-bd0d-9b08b1601262",
+      "preview_database_id": "956b2173-168d-455c-bd0d-9b08b1601262",
       "migrations_dir": "./migrations"
     }
   ]
