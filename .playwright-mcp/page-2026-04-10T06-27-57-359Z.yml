@@ -1,0 +1,13 @@
+- main [ref=e2]:
+  - generic "Mentor attendance" [ref=e3]:
+    - heading "Mentor attendance" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - article [ref=e6]:
+      - heading "Mentor identity" [level=2] [ref=e7]
+      - status [ref=e8]: Loading mentor identity…
+    - article [ref=e9]:
+      - heading "Mentor QR code" [level=2] [ref=e10]
+      - generic [ref=e11]: Loading QR code…
+    - article [ref=e12]:
+      - heading "Recent scans and notes" [level=2] [ref=e13]
+      - generic [ref=e14]: Loading recent scans…
