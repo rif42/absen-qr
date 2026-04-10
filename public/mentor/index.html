@@ -1,15 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Mentor Placeholder</title>
-  </head>
-  <body>
-    <main>
-      <h1>Mentor role placeholder</h1>
-      <p>This static page is the phase 1 scaffold for the mentor secret-link flow.</p>
-      <p>Planned next: stable QR display, polling-based recent scans, and note entry.</p>
-    </main>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mentor Attendance</title>
+  <meta name="description" content="Mentor secret-link page for the single event-day QR attendance pilot." />
+  <link rel="stylesheet" href="/mentor/styles.css" />
+  <script type="module" src="/mentor/app.js"></script>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="page-header" aria-labelledby="page-title">
+      <h1 id="page-title">Mentor attendance</h1>
+    </header>
+
+    <section class="stack">
+      <article class="card identity-card">
+        <h2>Mentor identity</h2>
+        <div id="mentor-loading" class="status status-loading" role="status" aria-live="polite">
+          Loading mentor identity…
+        </div>
+
+        <div id="mentor-success" class="identity-details hidden">
+          <p class="identity-name" id="mentor-name"></p>
+          <p class="identity-meta" id="mentor-meta"></p>
+        </div>
+
+        <div id="mentor-error" class="error-panel hidden" role="alert">
+          <p class="error-title">We could not load your mentor link.</p>
+          <p class="error-copy" id="mentor-error-message">
+            The secret token may be invalid, expired, or unreachable right now.
+          </p>
+          <button type="button" class="button" id="retry-button">Try again</button>
+        </div>
+      </article>
+
+      <article class="card qr-card">
+        <h2>Mentor QR code</h2>
+
+        <div id="qr-loading" class="muted-block">Loading QR code…</div>
+
+        <div id="qr-display" class="qr-display hidden" role="img" aria-label="Mentor QR code"></div>
+
+        <button type="button" class="button qr-copy-button hidden" id="qr-copy">Copy QR payload</button>
+      </article>
+
+      <article class="card recent-scans-card">
+        <h2>Recent scans and notes</h2>
+
+        <div id="recent-scans-loading" class="muted-block">Loading recent scans…</div>
+
+        <div id="recent-scans-empty" class="empty-state hidden">
+          <p class="empty-title">No recent mentor scans yet.</p>
+          <p class="empty-copy">
+            Once a student scans your QR code, the newest scans and their notes will appear here.
+          </p>
+        </div>
+
+        <div id="recent-scans-error" class="error-panel hidden" role="alert">
+          <p class="error-title">We could not load recent scans.</p>
+          <p class="error-copy" id="recent-scans-error-message">
+            The recent scans request failed. Your QR code is still available above.
+          </p>
+          <button type="button" class="button" id="recent-scans-retry-button">Try again</button>
+        </div>
+
+        <ul id="recent-scans-list" class="recent-scans-list hidden" aria-label="Recent mentor scans"></ul>
+      </article>
+    </section>
+  </main>
+</body>
+
 </html>
