@@ -97,3 +97,54 @@ export async function listMentorRecentScans(
 
   return result.results;
 }
+
+export async function findMentorScanRecordById(
+  db: D1Database,
+  mentorId: string,
+  scanId: string
+): Promise<ScanRecord | null> {
+  const result = await db
+    .prepare(
+      `
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        FROM scan_records
+        WHERE mentor_id = ?1 AND scan_id = ?2
+        LIMIT 1
+      `
+    )
+    .bind(mentorId, scanId)
+    .first<ScanRecord>();
+
+  return result ?? null;
+}
+
+export async function updateScanRecordNotes(
+  db: D1Database,
+  mentorId: string,
+  scanId: string,
+  notes: string,
+  updatedAt: string
+): Promise<ScanRecord | null> {
+  const existingRecord = await findMentorScanRecordById(db, mentorId, scanId);
+
+  if (!existingRecord) {
+    return null;
+  }
+
+  await db
+    .prepare(
+      `
+        UPDATE scan_records
+        SET notes = ?1, updated_at = ?2
+        WHERE mentor_id = ?3 AND scan_id = ?4
+      `
+    )
+    .bind(notes, updatedAt, mentorId, scanId)
+    .run();
+
+  return {
+    ...existingRecord,
+    notes,
+    updated_at: updatedAt
+  };
+}

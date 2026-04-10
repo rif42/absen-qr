@@ -140,6 +140,15 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return (person ?? null) as T | null;
           }
 
+          if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where mentor_id = ?1 and scan_id = ?2")) {
+            const [mentorId, scanId] = params as [string, string];
+            const scanRecord = state.scanRecords.find(
+              (candidate) => candidate.mentor_id === mentorId && candidate.scan_id === scanId
+            );
+
+            return (scanRecord ?? null) as T | null;
+          }
+
           throw new Error(`Unsupported first() SQL in mock D1: ${sql}`);
         },
         async all<T>(): Promise<QueryResult<T>> {
@@ -150,6 +159,18 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             const [studentId, eventDate] = params as [string, string];
             const results = state.scanRecords
               .filter((scanRecord) => scanRecord.student_id === studentId && scanRecord.event_date === eventDate)
+              .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
+
+            return createQueryResult(results as T[]);
+          }
+
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where mentor_id = ?1 and event_date = ?2")
+          ) {
+            const [mentorId, eventDate] = params as [string, string];
+            const results = state.scanRecords
+              .filter((scanRecord) => scanRecord.mentor_id === mentorId && scanRecord.event_date === eventDate)
               .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
 
             return createQueryResult(results as T[]);
@@ -184,6 +205,18 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
               notes,
               updated_at: updatedAt
             });
+          }
+
+          if (normalizedSql.startsWith("update scan_records set notes = ?1, updated_at = ?2 where mentor_id = ?3 and scan_id = ?4")) {
+            const [notes, updatedAt, mentorId, scanId] = params as [string, string, string, string];
+            const scanRecord = state.scanRecords.find(
+              (candidate) => candidate.mentor_id === mentorId && candidate.scan_id === scanId
+            );
+
+            if (scanRecord) {
+              scanRecord.notes = notes;
+              scanRecord.updated_at = updatedAt;
+            }
           }
 
           return {
