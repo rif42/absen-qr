@@ -18,3 +18,9 @@ Minimum required reading:
 - Do not invent extra scope beyond the v1 documents without user approval.
 - Keep CSV export order exactly as documented.
 - Preserve the locked v1 constraints: single event-day, one secret link per person, duplicate scans rejected, and admin last-write-wins corrections.
+
+## Student-page design language
+- For `public/student/*`, treat mobile as the primary layout target before desktop refinement.
+- Keep the student flow visually simple and sequential from top to bottom: student identity, camera scanner, then same-day history.
+- Prefer lightweight edits to `public/student/index.html` and `public/student/styles.css`; keep `public/student/app.js`, `src/worker/routes/student.ts`, and `test/integration/student-api.test.ts` behavior stable unless the DOM contract must change.
+- Use restrained accent color: lightly vibrant green for positive guidance and bright orange for emphasis, while preserving a clean, readable interface.

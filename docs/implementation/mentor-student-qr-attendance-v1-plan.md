@@ -158,6 +158,34 @@ test/
 - support reassigning student or mentor
 - support CSV export
 
+## Mobile-first Student Page Simplification
+
+### Files to edit
+- `public/student/index.html`
+- `public/student/styles.css`
+- `public/student/app.js` only if the DOM contract must change; default to leaving it untouched
+
+### Intended visual hierarchy
+1. Student identity + live status at the top
+2. Scanner as the primary action block
+3. Today’s mentor history as the secondary block
+
+### Implementation shape
+- Convert the student page to a single-column, mobile-first stack with full-width cards.
+- Keep the scanner visually dominant, but reduce surrounding copy and spacing on small screens.
+- Keep the history list visible below the scanner as the supporting “today” recap.
+- Preserve the existing element IDs so the current student JS keeps working without behavior rewrites.
+
+### Behavior must stay unchanged
+- Do not change the student API contract in `src/worker/routes/student.ts`.
+- Keep duplicate-scan rejection, same-day filtering, and error states exactly as they work today.
+- Keep the existing student API coverage in `test/integration/student-api.test.ts` passing unchanged.
+
+### Verification steps
+- Run diagnostics on the edited files after the UI change.
+- Run `test/integration/student-api.test.ts` to confirm scan/history behavior is unchanged.
+- Manually check the page at a narrow mobile viewport and confirm: identity loads, scanner starts, duplicate rejection still appears, and today’s history still renders.
+
 ## Delivery Phases
 
 ### Phase 1 — Scaffolding and Foundations

@@ -1,0 +1,28 @@
+- main [ref=e2]:
+  - generic "Mentor attendance" [ref=e3]:
+    - generic [ref=e4]: Student secret link
+    - heading "Mentor attendance" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Your student identity loads first, then the camera scanner, then today’s history.
+  - generic [ref=e7]:
+    - article [ref=e8]:
+      - generic [ref=e9]: Student identity
+      - status [ref=e10]: Identity loaded. No mentor scans recorded for today yet.
+      - generic [ref=e11]:
+        - paragraph [ref=e12]: Student Local 01
+        - paragraph [ref=e13]: "Secret id: student-secret-001"
+    - article [ref=e14]:
+      - generic [ref=e15]: Camera scanner
+      - generic [ref=e16]:
+        - generic "Mentor QR camera preview" [ref=e17]
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Scanner stopped
+          - paragraph [ref=e20]: Scanner stopped. Tap Start scanner to read a mentor QR code.
+      - generic [ref=e21]:
+        - button "Start scanner" [ref=e22] [cursor=pointer]
+        - paragraph [ref=e23]: The rear camera is preferred. Camera access requires a secure context such as HTTPS or localhost.
+      - status [ref=e24]: Scanner stopped.
+    - article [ref=e25]:
+      - generic [ref=e26]: Today’s mentor history
+      - generic [ref=e28]:
+        - paragraph [ref=e29]: No mentor scans recorded for this event day yet.
+        - paragraph [ref=e30]: Once you scan a mentor QR code, the mentors you scanned today will appear here.
