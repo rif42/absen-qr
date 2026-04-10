@@ -2,7 +2,6 @@
 
 A lightweight QR-driven attendance system for mentoring events. Built on Cloudflare Workers + D1 for a simple, serverless architecture.
 
-**Live Demo:** https://absen-qr.phantast-check.workers.dev
 
 ## Overview
 
