@@ -35,7 +35,7 @@ const worker: ExportedHandler<Env> = {
       case "student":
         return handleStudentApi(request, env, routeMatch.secretToken);
       case "mentor":
-        return handleMentorApi(request, routeMatch.secretToken);
+        return handleMentorApi(request, env, routeMatch.secretToken);
       case "admin":
         return handleAdminApi(request, env, routeMatch.secretToken);
     }
