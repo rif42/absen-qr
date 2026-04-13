@@ -1,0 +1,11 @@
+- main [ref=e2]:
+  - generic "Admin records" [ref=e3]:
+    - heading "Admin records" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - status [ref=e6]: Loading records…
+    - region "Export" [ref=e7]:
+      - heading "Export" [level=2] [ref=e8]
+      - button "Export CSV" [ref=e9] [cursor=pointer]
+    - region "Records" [ref=e10]:
+      - heading "Records" [level=2] [ref=e11]
+      - generic [ref=e12]: Loading records…

@@ -12,6 +12,7 @@ describe("admin page DOM contract", () => {
     expect(adminPageHtml).toMatch(/<section[^>]*class="stack"[^>]*>/i);
     expect(adminPageHtml).toMatch(/<section[^>]*id="controls-card"[^>]*>/i);
     expect(adminPageHtml).toMatch(/<section[^>]*id="records-card"[^>]*>/i);
+    expect(adminPageHtml).toMatch(/<link[^>]*rel="stylesheet"[^>]*href="\.\/styles\.css"[^>]*>/i);
   });
 
   it("keeps the shell ordered as title, controls, then records", () => {
