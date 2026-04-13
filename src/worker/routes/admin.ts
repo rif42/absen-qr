@@ -1,9 +1,94 @@
+import { deleteAdminRecord, findAdminRecordById, getAdminRecordsPayload, listAdminExportRows, updateAdminRecord } from "../db/admin-records";
+import { findPersonById } from "../db/people";
+import { isDuplicateScanRecordError } from "../db/scan-records";
+import { getConfiguredEventDate } from "../services/event-day";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
-import { forbidden, methodNotAllowed, notImplemented } from "../services/http";
+import { badRequest, conflict, forbidden, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
+import { isValidNotes } from "../validation/scan-records";
 import type { Env } from "../types";
+
+type AdminRecordPatchPayload = {
+  notes?: string;
+  studentId?: string;
+  mentorId?: string;
+};
+
+const DUPLICATE_SCAN_ERROR_MESSAGE = "Duplicate mentor scan already recorded for this event day.";
 
 function isAuthorizedAdminSecret(secretToken: string, env: Env): boolean {
   return secretToken === env.ADMIN_SECRET;
+}
+
+function escapeCsvValue(value: string): string {
+  if (!/[",\n\r]/.test(value)) {
+    return value;
+  }
+
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function serializeAdminExportCsv(rows: Awaited<ReturnType<typeof listAdminExportRows>>): string {
+  const header = "student name,secret id,mentor scanned,date,notes";
+  const lines = rows.map((row) =>
+    [
+      escapeCsvValue(row.studentName),
+      escapeCsvValue(row.studentSecretId),
+      escapeCsvValue(row.mentorName),
+      escapeCsvValue(row.eventDate),
+      escapeCsvValue(row.notes)
+    ].join(",")
+  );
+
+  return [header, ...lines].join("\n");
+}
+
+function isPatchPayloadRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseAdminRecordPatchPayload(body: unknown): AdminRecordPatchPayload | Response {
+  if (!isPatchPayloadRecord(body)) {
+    return badRequest("Invalid admin record patch payload.");
+  }
+
+  const allowedKeys = new Set(["notes", "studentId", "mentorId"]);
+  const bodyKeys = Object.keys(body);
+
+  if (bodyKeys.some((key) => !allowedKeys.has(key))) {
+    return badRequest("Invalid admin record patch payload.");
+  }
+
+  if (bodyKeys.length === 0) {
+    return badRequest("PATCH body must include at least one of notes, studentId, or mentorId.");
+  }
+
+  const payload: AdminRecordPatchPayload = {};
+
+  if ("notes" in body) {
+    if (typeof body.notes !== "string" || !isValidNotes(body.notes)) {
+      return badRequest("Invalid admin record patch payload.");
+    }
+
+    payload.notes = body.notes;
+  }
+
+  if ("studentId" in body) {
+    if (typeof body.studentId !== "string") {
+      return badRequest("Invalid admin record patch payload.");
+    }
+
+    payload.studentId = body.studentId;
+  }
+
+  if ("mentorId" in body) {
+    if (typeof body.mentorId !== "string") {
+      return badRequest("Invalid admin record patch payload.");
+    }
+
+    payload.mentorId = body.mentorId;
+  }
+
+  return payload;
 }
 
 export function handleAdminPage(request: Request, env: Env, secretToken: string): Promise<Response> | Response {
@@ -14,7 +99,7 @@ export function handleAdminPage(request: Request, env: Env, secretToken: string)
   return fetchAssetWithRedirectFallback(request, env.ASSETS, getRolePageAssetPath("admin"));
 }
 
-export function handleAdminApi(request: Request, env: Env, secretToken: string): Response {
+export async function handleAdminApi(request: Request, env: Env, secretToken: string): Promise<Response> {
   if (!isAuthorizedAdminSecret(secretToken, env)) {
     return forbidden();
   }
@@ -27,7 +112,15 @@ export function handleAdminApi(request: Request, env: Env, secretToken: string):
       return methodNotAllowed(["GET"]);
     }
 
-    return notImplemented("GET /admin/:secret/api/records");
+    let currentEventDate: string;
+
+    try {
+      currentEventDate = getConfiguredEventDate(env);
+    } catch {
+      return internalServerError("Invalid EVENT_DATE configuration.");
+    }
+
+    return json(await getAdminRecordsPayload(env.DB, currentEventDate));
   }
 
   if (apiPath === "/export.csv") {
@@ -35,18 +128,107 @@ export function handleAdminApi(request: Request, env: Env, secretToken: string):
       return methodNotAllowed(["GET"]);
     }
 
-    return notImplemented("GET /admin/:secret/api/export.csv", {
-      csvColumns: ["student name", "secret id", "mentor scanned", "date", "notes"]
+    let currentEventDate: string;
+
+    try {
+      currentEventDate = getConfiguredEventDate(env);
+    } catch {
+      return internalServerError("Invalid EVENT_DATE configuration.");
+    }
+
+    const rows = await listAdminExportRows(env.DB, currentEventDate);
+    const headers = new Headers();
+    headers.set("content-type", "text/csv; charset=utf-8");
+    headers.set("content-disposition", `attachment; filename="attendance-${currentEventDate}.csv"`);
+
+    return new Response(serializeAdminExportCsv(rows), {
+      status: 200,
+      headers
     });
   }
 
   if (apiPath.startsWith("/records/")) {
     if (request.method === "PATCH") {
-      return notImplemented("PATCH /admin/:secret/api/records/:scanId", { apiPath });
+      const scanId = apiPath.slice("/records/".length);
+
+      if (!scanId) {
+        return notFound();
+      }
+
+      let requestBody: unknown;
+
+      try {
+        requestBody = await request.json();
+      } catch {
+        return badRequest("Invalid admin record patch body.");
+      }
+
+      const parsedPayload = parseAdminRecordPatchPayload(requestBody);
+
+      if (parsedPayload instanceof Response) {
+        return parsedPayload;
+      }
+
+      const existingRecord = await findAdminRecordById(env.DB, scanId);
+
+      if (!existingRecord) {
+        return notFound();
+      }
+
+      if (parsedPayload.studentId !== undefined) {
+        const student = await findPersonById(env.DB, "student", parsedPayload.studentId);
+
+        if (!student) {
+          return notFound();
+        }
+      }
+
+      if (parsedPayload.mentorId !== undefined) {
+        const mentor = await findPersonById(env.DB, "mentor", parsedPayload.mentorId);
+
+        if (!mentor) {
+          return notFound();
+        }
+      }
+
+      try {
+        const updatedRecord = await updateAdminRecord(env.DB, {
+          scanId,
+          notes: parsedPayload.notes,
+          studentId: parsedPayload.studentId,
+          mentorId: parsedPayload.mentorId,
+          updatedAt: new Date().toISOString()
+        });
+
+        if (!updatedRecord) {
+          return notFound();
+        }
+
+        return json(updatedRecord);
+      } catch (error) {
+        if (isDuplicateScanRecordError(error)) {
+          return conflict(DUPLICATE_SCAN_ERROR_MESSAGE);
+        }
+
+        throw error;
+      }
     }
 
     if (request.method === "DELETE") {
-      return notImplemented("DELETE /admin/:secret/api/records/:scanId", { apiPath });
+      const scanId = apiPath.slice("/records/".length);
+
+      if (!scanId) {
+        return notFound();
+      }
+
+      if (!(await deleteAdminRecord(env.DB, scanId))) {
+        return notFound();
+      }
+
+      return json({
+        deleted: true,
+        scanId
+      });
     }
 
     return methodNotAllowed(["PATCH", "DELETE"]);

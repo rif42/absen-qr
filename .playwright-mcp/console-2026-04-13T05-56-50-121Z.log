@@ -1,0 +1,2 @@
+[  320655ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8787/admin/local-admin-secret-token:0
+[  320681ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8787/favicon.ico:0

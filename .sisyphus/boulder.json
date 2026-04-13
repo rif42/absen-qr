@@ -1,0 +1,102 @@
+{
+  "active_plan": "D:\\work\\absen-qr\\.sisyphus\\plans\\admin-flow-aligned.md",
+  "started_at": "2026-04-11T06:27:53.832Z",
+  "session_ids": [
+    "ses_2851a7e04ffeKvNHFpIhP4ehD1",
+    "ses_27a86f956ffenwRnwDv13rEJpB",
+    "ses_27a86f94fffeDJY0cMlnSdvjpi",
+    "ses_27a869d39ffem7mjGANGrd7NJ7",
+    "ses_27a869c41ffeOq9ABObzKQvfUw"
+  ],
+  "plan_name": "admin-flow-aligned",
+  "session_origins": {
+    "ses_2851a7e04ffeKvNHFpIhP4ehD1": "direct",
+    "ses_27a86f956ffenwRnwDv13rEJpB": "appended",
+    "ses_27a86f94fffeDJY0cMlnSdvjpi": "appended",
+    "ses_27a869d39ffem7mjGANGrd7NJ7": "appended",
+    "ses_27a869c41ffeOq9ABObzKQvfUw": "appended"
+  },
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "Extend the admin test harness before touching production code",
+      "session_id": "ses_284c23f66ffe299GWmkTtj46XA",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-11T06:38:25.565Z"
+    },
+    "todo:3": {
+      "task_key": "todo:3",
+      "task_label": "3",
+      "task_title": "Add a dedicated admin data layer and shared response contract",
+      "session_id": "ses_284b982edffeeblNPUyadKjs17",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-11T06:46:08.175Z"
+    },
+    "todo:4": {
+      "task_key": "todo:4",
+      "task_label": "4",
+      "task_title": "Implement the admin records read API",
+      "session_id": "ses_284b3d81dffe4tONWAy8jiFsKX",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-11T06:50:22.254Z"
+    },
+    "todo:5": {
+      "task_key": "todo:5",
+      "task_label": "5",
+      "task_title": "Implement CSV export with exact v1 semantics",
+      "session_id": "ses_284a78421ffec4AQtj9TN0LZ2p",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-11T07:03:31.770Z"
+    },
+    "todo:6": {
+      "task_key": "todo:6",
+      "task_label": "6",
+      "task_title": "Implement PATCH correction semantics for notes and reassignment",
+      "session_id": "ses_284a11efcffeyUmRNq7Jk6vHzB",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-11T07:15:05.676Z"
+    },
+    "todo:7": {
+      "task_key": "todo:7",
+      "task_label": "7",
+      "task_title": "Implement hard deletion for admin records",
+      "session_id": "ses_2844fbf2fffeW8mUKMF14YoJfR",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-11T08:39:06.794Z"
+    },
+    "todo:8": {
+      "task_key": "todo:8",
+      "task_label": "8",
+      "task_title": "Wire the admin page to the completed admin APIs",
+      "session_id": "ses_27a9a4140ffeUL1aPkbbr5lGyZ",
+      "agent": "Sisyphus-Junior",
+      "category": "visual-engineering",
+      "updated_at": "2026-04-13T06:10:54.980Z"
+    },
+    "todo:9": {
+      "task_key": "todo:9",
+      "task_label": "9",
+      "task_title": "Add browser E2E harness and full admin-flow coverage",
+      "session_id": "ses_27a83042dffexIganofWOL7wa7",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-13T06:24:43.329Z"
+    },
+    "final-wave:f1": {
+      "task_key": "final-wave:f1",
+      "task_label": "F1",
+      "task_title": "Plan Compliance Audit — oracle",
+      "session_id": "ses_27a79cd42ffeL6uZ4pvxYuFpz1",
+      "agent": "Sisyphus-Junior",
+      "category": "deep",
+      "updated_at": "2026-04-13T06:29:32.189Z"
+    }
+  }
+}

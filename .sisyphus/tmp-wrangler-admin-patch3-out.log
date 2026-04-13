@@ -1,0 +1,12 @@
+
+ ⛅️ wrangler 4.81.0 (update available 4.81.1)
+─────────────────────────────────────────────
+Your Worker has access to the following bindings:
+Binding                                                      Resource                  Mode
+env.DB (956b2173-168d-455c-bd0d-9b08b1601262)                D1 Database               local
+env.ASSETS                                                   Assets                    local
+env.EVENT_DATE ("2026-01-15")                                Environment Variable      local
+env.ADMIN_SECRET ("(hidden)")                                Environment Variable      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8787

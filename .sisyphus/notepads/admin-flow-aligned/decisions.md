@@ -1,0 +1,14 @@
+# Decisions
+
+- 2026-04-11: The shared admin records payload is locked in the data layer as `{ eventDate, records, students, mentors }` so future route work can reuse one contract without re-shaping per handler.
+- 2026-04-11: Admin table rows are normalized to `{ scanId, studentId, studentName, studentSecretId, mentorId, mentorName, eventDate, scannedAt, notes, updatedAt }`, with list ordering fixed to `scanned_at DESC, scan_id DESC` and export ordering fixed to `scanned_at ASC, scan_id ASC`.
+- 2026-04-11: The admin records route should act as a thin adapter over `getAdminRecordsPayload`, preserving the locked response shape and keeping the mutation/export branches isolated from this read path.
+- 2026-04-11: The CSV export branch should be a thin route-level serializer over `listAdminExportRows`, not a new shared helper, so the route can set the exact CSV headers and preserve the locked column order without changing the data-layer contract.
+- 2026-04-11: Admin PATCH parsing is locked to the exact body keys `notes`, `studentId`, and `mentorId`; unknown keys return `400` instead of being ignored, and missing all three keys returns a dedicated `400` requirement error.
+- 2026-04-11: Record correction should keep the route focused on auth, payload validation, role lookups, and error mapping, while `src/worker/db/admin-records.ts` owns the in-place `UPDATE scan_records ... WHERE scan_id = ?n` plus post-update joined-row refresh.
+- 2026-04-11: Admin DELETE should stay route-thin as well: `src/worker/db/admin-records.ts` owns the existence check plus `DELETE FROM scan_records WHERE scan_id = ?1`, and the route maps success to `200` with `{ deleted: true, scanId }` and missing rows to `404`.
+- 2026-04-13: `public/admin/app.js` should remain a plain IIFE that keeps all page state in local closures, uses the locked admin payload to render editable table rows, and delegates save/delete/export actions straight to the admin API endpoints.
+- 2026-04-13: `#export-csv-button` should navigate directly to `/admin/:secret/api/export.csv` so CSV export stays server-owned and the client never serializes attendance rows.
+- 2026-04-13: Task 9 uses Playwright `projects` with a dedicated `setup` dependency instead of `globalSetup`, so deterministic D1 seeding stays visible in test output and runs in the same toolchain as the browser spec.
+- 2026-04-13: The browser harness should isolate its local D1 state under `.wrangler/state/e2e` and start Wrangler on `http://127.0.0.1:4173` via `npm run dev:e2e`, keeping browser data/setup separate from normal local dev state.
+- 2026-04-13: TypeScript typecheck for the new E2E files is handled by adding `@types/node` plus `"node"` to `tsconfig.json` types, rather than weakening the tests or moving Node-backed setup code out of `test/**/*.ts`.

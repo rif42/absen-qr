@@ -5,13 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "dev:e2e": "wrangler dev --ip 127.0.0.1 --port 4173 --persist-to .wrangler/state/e2e --var ADMIN_SECRET:local-admin-secret-token --var EVENT_DATE:2026-04-11",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e:admin": "playwright test test/e2e/admin-flow.spec.ts",
     "d1:migrate:local": "wrangler d1 migrations apply DB --local",
     "seed:local": "wrangler d1 execute DB --local --file ./seed/dev.sql"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.0.0",
     "@cloudflare/workers-types": "^4.20260405.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.1",

@@ -3,13 +3,38 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Placeholder</title>
+    <title>Admin records</title>
+    <meta
+      name="description"
+      content="Admin secret-link page for the single event-day QR attendance pilot."
+    />
   </head>
   <body>
-    <main>
-      <h1>Admin role placeholder</h1>
-      <p>This static page is the phase 1 scaffold for the admin secret-link flow.</p>
-      <p>Planned next: records table, last-write-wins correction tools, and CSV export.</p>
+    <main class="shell">
+      <header class="page-header" aria-labelledby="page-title">
+        <h1 id="page-title">Admin records</h1>
+      </header>
+
+      <section class="stack">
+        <div id="status-banner" class="status" role="status" aria-live="polite">
+          Review, export, and correct the event-day records.
+        </div>
+
+        <section id="controls-card" class="card" aria-labelledby="controls-card-title">
+          <h2 id="controls-card-title">Export</h2>
+          <button type="button" id="export-csv-button">Export CSV</button>
+        </section>
+
+        <section id="records-card" class="card" aria-labelledby="records-card-title">
+          <h2 id="records-card-title">Records</h2>
+          <div id="records-loading">Loading records…</div>
+          <p id="records-empty-state">No records available yet.</p>
+          <table id="records-table">
+            <tbody id="records-table-body"></tbody>
+          </table>
+        </section>
+      </section>
     </main>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>

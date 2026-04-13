@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "types": ["@cloudflare/workers-types", "vitest/globals", "vite/client"]
+    "types": ["@cloudflare/workers-types", "node", "vitest/globals", "vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "test/**/*.ts", "vitest.config.ts"]
 }
