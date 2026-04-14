@@ -1,6 +1,11 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
-import { createScanRecord, isDuplicateScanRecordError, listStudentHistory } from "../db/scan-records";
-import { getConfiguredEventDate } from "../services/event-day";
+import {
+  createScanRecord,
+  findStudentMentorScanRecordByEventDate,
+  isDuplicateScanRecordError,
+  listStudentHistory
+} from "../db/scan-records";
+import { getConfiguredEventDate, getCurrentUtcDate } from "../services/event-day";
 import { badRequest, conflict, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { parseMentorQrPayload } from "../services/mentor-qr";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
@@ -82,9 +87,14 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return badRequest("Invalid mentor QR payload.");
     }
 
-    const existingHistory = await listStudentHistory(env.DB, student.person_id, currentEventDate);
+    const existingScan = await findStudentMentorScanRecordByEventDate(
+      env.DB,
+      student.person_id,
+      mentor.person_id,
+      currentEventDate
+    );
 
-    if (existingHistory.some((scanRecord) => scanRecord.mentor_id === mentor.person_id)) {
+    if (existingScan) {
       return conflict("Duplicate mentor scan already recorded for this event day.");
     }
 
@@ -130,12 +140,12 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return methodNotAllowed(["GET"]);
     }
 
-    let currentEventDate: string;
+    let currentUtcDate: string;
 
     try {
-      currentEventDate = getConfiguredEventDate(env);
+      currentUtcDate = getCurrentUtcDate();
     } catch {
-      return internalServerError("Invalid EVENT_DATE configuration.");
+      return internalServerError("Invalid current date configuration.");
     }
 
     const student = await findPersonBySecretToken(env.DB, "student", secretToken);
@@ -144,7 +154,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return notFound();
     }
 
-    const history = await listStudentHistory(env.DB, student.person_id, currentEventDate);
+    const history = await listStudentHistory(env.DB, student.person_id, currentUtcDate);
     const historyEntries = await Promise.all(
       history.map(async (scanRecord) => {
         const mentor = await findPersonById(env.DB, "mentor", scanRecord.mentor_id);

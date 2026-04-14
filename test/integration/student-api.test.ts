@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import worker from "../../src/worker/index";
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
@@ -19,18 +19,18 @@ function createAssetFetcher(): Fetcher {
   };
 }
 
-function createEnv(database = createMockD1Database()): WorkerEnv {
+const configuredEventDate = "2026-01-15";
+
+function createEnv(database = createMockD1Database(), eventDate = configuredEventDate): WorkerEnv {
   return {
     ADMIN_SECRET: "local-admin-secret-token",
-    EVENT_DATE: "2026-01-15",
+    EVENT_DATE: eventDate,
     ASSETS: createAssetFetcher(),
     DB: database
   } as WorkerEnv;
 }
 
 describe("student API", () => {
-  const configuredEventDate = "2026-01-15";
-
   it("returns the student identity for a valid student secret token", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
@@ -187,72 +187,169 @@ describe("student API", () => {
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
   });
 
-  it("returns only the current student's mentor history for the current event day", async () => {
+  it("rejects a duplicate mentor scan when the existing record was scanned on a different runtime day", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
+
     const database = createMockD1Database({
       scanRecords: [
         {
-          scan_id: "scan-history-1",
+          scan_id: "scan-duplicate-existing-runtime-mismatch",
           student_id: "student-001",
           mentor_id: "mentor-001",
-          event_date: configuredEventDate,
-          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
-          notes: "First mentor",
-          updated_at: `${configuredEventDate}T08:00:00.000Z`
-        },
-        {
-          scan_id: "scan-history-2",
-          student_id: "student-001",
-          mentor_id: "mentor-002",
-          event_date: configuredEventDate,
-          scanned_at: `${configuredEventDate}T09:00:00.000Z`,
-          notes: "Second mentor",
-          updated_at: `${configuredEventDate}T09:00:00.000Z`
-        },
-        {
-          scan_id: "scan-other-student",
-          student_id: "student-002",
-          mentor_id: "mentor-001",
-          event_date: configuredEventDate,
-          scanned_at: `${configuredEventDate}T10:00:00.000Z`,
-          notes: "Other student",
-          updated_at: `${configuredEventDate}T10:00:00.000Z`
-        },
-        {
-          scan_id: "scan-other-day",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
-          event_date: "2099-01-01",
-          scanned_at: "2099-01-01T11:00:00.000Z",
-          notes: "Other day",
-          updated_at: "2099-01-01T11:00:00.000Z"
+          event_date: "2026-01-14",
+          scanned_at: "2026-01-13T08:00:00.000Z",
+          notes: "Existing event-day duplicate",
+          updated_at: "2026-01-13T08:00:00.000Z"
         }
       ]
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
-      createEnv(database),
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database, "2026-01-14"),
       {} as WorkerContext
     );
 
-    expect(response.status).toBe(200);
+    vi.useRealTimers();
+
+    expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
-      history: [
-        {
-          scanId: "scan-history-2",
-          mentorId: "mentor-002",
-          mentorName: "Mentor Local 02",
-          scannedAt: `${configuredEventDate}T09:00:00.000Z`,
-          notes: "Second mentor"
-        },
-        {
-          scanId: "scan-history-1",
-          mentorId: "mentor-001",
-          mentorName: "Mentor Local 01",
-          scannedAt: `${configuredEventDate}T08:00:00.000Z`,
-          notes: "First mentor"
-        }
-      ]
+      error: "Duplicate mentor scan already recorded for this event day."
+    });
+    expect(readMockD1State(database).scanRecords).toHaveLength(1);
+  });
+
+  describe("history", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("returns only the current student's mentor history for the current runtime UTC day", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-history-1",
+            student_id: "student-001",
+            mentor_id: "mentor-001",
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            notes: "First mentor",
+            updated_at: `${configuredEventDate}T08:00:00.000Z`
+          },
+          {
+            scan_id: "scan-history-2",
+            student_id: "student-001",
+            mentor_id: "mentor-002",
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+            notes: "Second mentor",
+            updated_at: `${configuredEventDate}T09:00:00.000Z`
+          },
+          {
+            scan_id: "scan-other-student",
+            student_id: "student-002",
+            mentor_id: "mentor-001",
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T10:00:00.000Z`,
+            notes: "Other student",
+            updated_at: `${configuredEventDate}T10:00:00.000Z`
+          },
+          {
+            scan_id: "scan-other-day",
+            student_id: "student-001",
+            mentor_id: "mentor-001",
+            event_date: "2099-01-01",
+            scanned_at: "2099-01-01T11:00:00.000Z",
+            notes: "Other day",
+            updated_at: "2099-01-01T11:00:00.000Z"
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
+        createEnv(database, "2026-01-14"),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({
+        history: [
+          {
+            scanId: "scan-history-2",
+            mentorId: "mentor-002",
+            mentorName: "Mentor Local 02",
+            scannedAt: `${configuredEventDate}T09:00:00.000Z`,
+            notes: "Second mentor"
+          },
+          {
+            scanId: "scan-history-1",
+            mentorId: "mentor-001",
+            mentorName: "Mentor Local 01",
+            scannedAt: `${configuredEventDate}T08:00:00.000Z`,
+            notes: "First mentor"
+          }
+        ]
+      });
+    });
+
+    it("returns an empty history when the student only has non-today scans", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-old-1",
+            student_id: "student-001",
+            mentor_id: "mentor-001",
+            event_date: "2026-01-14",
+            scanned_at: "2026-01-14T08:00:00.000Z",
+            notes: "Old mentor 1",
+            updated_at: "2026-01-14T08:00:00.000Z"
+          },
+          {
+            scan_id: "scan-old-2",
+            student_id: "student-001",
+            mentor_id: "mentor-002",
+            event_date: "2026-01-13",
+            scanned_at: "2026-01-13T09:00:00.000Z",
+            notes: "Old mentor 2",
+            updated_at: "2026-01-13T09:00:00.000Z"
+          },
+          {
+            scan_id: "scan-other-student-today",
+            student_id: "student-002",
+            mentor_id: "mentor-001",
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T10:00:00.000Z`,
+            notes: "Other student today",
+            updated_at: `${configuredEventDate}T10:00:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
+        createEnv(database, "2026-01-14"),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({
+        history: []
+      });
     });
   });
 });

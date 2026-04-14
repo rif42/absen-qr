@@ -8,3 +8,13 @@ export function getConfiguredEventDate(env: Env): string {
 
   throw new Error("Invalid EVENT_DATE configuration.");
 }
+
+export function getCurrentUtcDate(now: Date = new Date()): string {
+  const utcDate = now.toISOString().slice(0, 10);
+
+  if (isEventDate(utcDate)) {
+    return utcDate;
+  }
+
+  throw new Error("Invalid current UTC date.");
+}

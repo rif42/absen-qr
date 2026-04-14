@@ -171,7 +171,6 @@
 
     for (const record of records) {
       const row = createRecordRow(record);
-      state.rowsByScanId.set(record.scanId, { record, row });
       elements.body.appendChild(row);
     }
   }
@@ -179,6 +178,11 @@
   function createRecordRow(record) {
     const row = document.createElement("tr");
     row.dataset.scanId = record.scanId;
+    const rowState = {
+      record,
+      row,
+      isLocked: true,
+    };
 
     const studentCell = document.createElement("td");
     const studentSelect = document.createElement("select");
@@ -195,6 +199,12 @@
     notesTextarea.value = record.notes;
     notesCell.appendChild(notesTextarea);
 
+    const editCell = document.createElement("td");
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+    editCell.appendChild(editButton);
+
     const saveCell = document.createElement("td");
     const saveButton = document.createElement("button");
     saveButton.type = "button";
@@ -207,6 +217,10 @@
     deleteButton.textContent = "Delete";
     deleteCell.appendChild(deleteButton);
 
+    editButton.addEventListener("click", () => {
+      setRowLockedState(rowState, false);
+    });
+
     saveButton.addEventListener("click", () => {
       void saveRecord(record.scanId, studentSelect.value, mentorSelect.value, notesTextarea.value);
     });
@@ -215,16 +229,33 @@
       void deleteRecord(record.scanId, row);
     });
 
-    row.append(studentCell, mentorCell, notesCell, saveCell, deleteCell);
+    row.append(studentCell, mentorCell, notesCell, editCell, saveCell, deleteCell);
     row._refs = {
       studentSelect,
       mentorSelect,
       notesTextarea,
+      editButton,
       saveButton,
       deleteButton,
     };
 
+    rowState.refs = row._refs;
+    setRowLockedState(rowState, true);
+    state.rowsByScanId.set(record.scanId, rowState);
+
     return row;
+  }
+
+  function setRowLockedState(rowState, isLocked) {
+    rowState.isLocked = isLocked;
+    rowState.row.dataset.rowState = isLocked ? "locked" : "editing";
+    rowState.row.classList.toggle("row-locked", isLocked);
+    rowState.row.classList.toggle("row-editing", !isLocked);
+    rowState.row.setAttribute("aria-readonly", String(isLocked));
+    rowState.refs.studentSelect.disabled = isLocked;
+    rowState.refs.mentorSelect.disabled = isLocked;
+    rowState.refs.notesTextarea.disabled = isLocked;
+    rowState.refs.saveButton.disabled = isLocked;
   }
 
   function populateSelect(select, people, selectedId, selectedName) {
@@ -258,6 +289,10 @@
       return;
     }
 
+    if (rowState.isLocked) {
+      return;
+    }
+
     const payload = buildPatchPayload(rowState.record, {
       studentId,
       mentorId,
@@ -266,6 +301,7 @@
 
     if (Object.keys(payload).length === 0) {
       setStatus("neutral", "No changes to save.");
+      setRowLockedState(rowState, true);
       return;
     }
 
@@ -297,11 +333,12 @@
         rowState.row._refs.notesTextarea.value = updatedRecord.notes;
       }
 
+      setRowLockedState(rowState, true);
       setStatus("success", `Saved ${scanId}.`);
     } catch (error) {
       setStatus("error", error instanceof Error ? error.message : "Save failed.");
     } finally {
-      rowState.row._refs.saveButton.disabled = false;
+      rowState.row._refs.saveButton.disabled = rowState.isLocked;
       rowState.row._refs.deleteButton.disabled = false;
     }
   }
@@ -347,6 +384,8 @@
       setStatus("success", `Deleted ${scanId}.`);
     } catch (error) {
       setStatus("error", error instanceof Error ? error.message : "Delete failed.");
+      setRowLockedState(rowState, rowState.isLocked);
+      rowState.row._refs.deleteButton.disabled = false;
     }
   }
 

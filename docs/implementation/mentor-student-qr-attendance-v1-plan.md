@@ -31,10 +31,12 @@ Locked product constraints:
 1. Student opens their secret URL and scans a mentor QR code.
 2. Worker validates the scan against seeded identities and duplicate-scan rules.
 3. Worker persists the scan transaction.
-4. Student page refreshes same-day history.
-5. Mentor page receives live update for the new student interaction.
+4. Student page refreshes same-day history for the runtime UTC day derived from `scanned_at`.
+5. Mentor page receives live update for the new student interaction on the runtime UTC day.
 6. Mentor enters notes tied to that scan record.
 7. Admin views, corrects, and exports final records.
+
+These read-only history views use runtime-day visibility only; scan creation, duplicate prevention, and admin correction remain on existing event-day semantics.
 
 ### Real-Time Update Strategy
 The highest-risk requirement is the mentor page updating live after a student scan. For v1, implementation should prefer the simplest reliable mechanism that works on Workers:
@@ -114,15 +116,17 @@ test/
   - validates identity, duplicate rule, and event-day scope
   - creates scan record
 - `GET /api/student/history`
-  - returns current event-day mentor scan history for the current student
+  - returns current runtime UTC-day mentor scan history for the current student, filtered by `scanned_at`
 
 ### Mentor APIs
 - `GET /api/mentor/me`
   - returns mentor identity and QR payload information
 - `GET /api/mentor/recent-scans`
-  - returns recent scan records for that mentor for live note-entry updates
+  - returns recent scan records for that mentor for live note-entry updates, filtered by the runtime UTC day via `scanned_at`
 - `POST /api/mentor/notes/:scanId`
   - writes or updates notes for a scan record
+
+Student history and mentor recent-scan visibility are runtime-day reads only; event-day writes, admin records, and correction semantics stay unchanged.
 
 ### Admin APIs
 - `GET /api/admin/records`
@@ -141,14 +145,14 @@ test/
 - open camera scanner
 - submit scan results
 - show deterministic success/error states
-- render same-day mentor history
+- render same-day mentor history for the runtime UTC day
 - explain duplicate-scan rejection clearly
 
 ### Mentor Page
 - resolve mentor identity from secret link
 - display mentor QR code persistently
 - poll for new scan activity
-- surface the newest student interaction immediately
+- surface the newest student interaction immediately for the runtime UTC day
 - allow note entry and save state feedback
 
 ### Admin Page

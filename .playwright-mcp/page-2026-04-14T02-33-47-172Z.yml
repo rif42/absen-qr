@@ -1,0 +1,24 @@
+- main [ref=e2]:
+  - generic "Student Attendance" [ref=e3]:
+    - heading "Student Attendance" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - article [ref=e6]:
+      - heading "Student identity" [level=2] [ref=e7]
+      - status [ref=e8]: Identity loaded. Loading today’s mentor history...
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: Student Local 01
+        - paragraph [ref=e11]: "Secret id: student-secret-001"
+    - article [ref=e12]:
+      - heading "Camera scanner" [level=2] [ref=e13]
+      - generic [ref=e14]:
+        - generic "Mentor QR camera preview" [ref=e15]
+        - generic [ref=e16]:
+          - paragraph [ref=e17]: Preparing scanner…
+          - paragraph [ref=e18]: Your student identity must load before the camera can start.
+      - generic [ref=e19]:
+        - button "Start scanner" [disabled] [ref=e20]
+        - paragraph [ref=e21]: Scan your mentor's QR code
+      - status [ref=e22]: Preparing scanner…
+    - article [ref=e23]:
+      - heading "History" [level=2] [ref=e24]
+      - generic [ref=e25]: Waiting for identity to resolve…

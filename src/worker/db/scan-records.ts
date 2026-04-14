@@ -61,38 +61,59 @@ export function isDuplicateScanRecordError(error: unknown): boolean {
 export async function listStudentHistory(
   db: D1Database,
   studentId: string,
-  eventDate: string
+  utcDate: string
 ): Promise<ScanRecord[]> {
   const result = await db
     .prepare(
       `
         SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
         FROM scan_records
-        WHERE student_id = ?1 AND event_date = ?2
+        WHERE student_id = ?1 AND substr(scanned_at, 1, 10) = ?2
         ORDER BY scanned_at DESC
       `
     )
-    .bind(studentId, eventDate)
+    .bind(studentId, utcDate)
     .all<ScanRecord>();
 
   return result.results;
 }
 
+export async function findStudentMentorScanRecordByEventDate(
+  db: D1Database,
+  studentId: string,
+  mentorId: string,
+  eventDate: string
+): Promise<ScanRecord | null> {
+  const result = await db
+    .prepare(
+      `
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        FROM scan_records
+        WHERE student_id = ?1 AND mentor_id = ?2 AND event_date = ?3
+        LIMIT 1
+      `
+    )
+    .bind(studentId, mentorId, eventDate)
+    .first<ScanRecord>();
+
+  return result ?? null;
+}
+
 export async function listMentorRecentScans(
   db: D1Database,
   mentorId: string,
-  eventDate: string
+  utcDate: string
 ): Promise<ScanRecord[]> {
   const result = await db
     .prepare(
       `
         SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
         FROM scan_records
-        WHERE mentor_id = ?1 AND event_date = ?2
+        WHERE mentor_id = ?1 AND substr(scanned_at, 1, 10) = ?2
         ORDER BY scanned_at DESC
       `
     )
-    .bind(mentorId, eventDate)
+    .bind(mentorId, utcDate)
     .all<ScanRecord>();
 
   return result.results;

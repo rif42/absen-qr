@@ -1,7 +1,7 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
 import { findMentorScanRecordById, listMentorRecentScans, updateScanRecordNotes } from "../db/scan-records";
-import { getConfiguredEventDate } from "../services/event-day";
-import { badRequest, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
+import { getCurrentUtcDate } from "../services/event-day";
+import { badRequest, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { renderMentorQrSvg } from "../services/mentor-qr-svg";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { isValidNotes } from "../validation/scan-records";
@@ -44,13 +44,7 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
       return methodNotAllowed(["GET"]);
     }
 
-    let currentEventDate: string;
-
-    try {
-      currentEventDate = getConfiguredEventDate(env);
-    } catch {
-      return internalServerError("Invalid EVENT_DATE configuration.");
-    }
+    const currentUtcDate = getCurrentUtcDate();
 
     const mentor = await findPersonBySecretToken(env.DB, "mentor", secretToken);
 
@@ -58,7 +52,7 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
       return notFound();
     }
 
-    const recentScans = await listMentorRecentScans(env.DB, mentor.person_id, currentEventDate);
+    const recentScans = await listMentorRecentScans(env.DB, mentor.person_id, currentUtcDate);
     const recentScanEntries = await Promise.all(
       recentScans.map(async (scanRecord) => {
         const student = await findPersonById(env.DB, "student", scanRecord.student_id);

@@ -273,6 +273,21 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return scanRecord as T;
           }
 
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and event_date = ?3")
+          ) {
+            const [studentId, mentorId, eventDate] = params as [string, string, string];
+            const scanRecord = state.scanRecords.find(
+              (candidate) =>
+                candidate.student_id === studentId &&
+                candidate.mentor_id === mentorId &&
+                candidate.event_date === eventDate
+            );
+
+            return (scanRecord ?? null) as T | null;
+          }
+
           if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where scan_id = ?1")) {
             const [scanId] = params as [string];
             const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
@@ -298,11 +313,11 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where student_id = ?1 and event_date = ?2")
+            normalizedSql.includes("where student_id = ?1 and substr(scanned_at, 1, 10) = ?2")
           ) {
-            const [studentId, eventDate] = params as [string, string];
+            const [studentId, utcDate] = params as [string, string];
             const results = state.scanRecords
-              .filter((scanRecord) => scanRecord.student_id === studentId && scanRecord.event_date === eventDate)
+              .filter((scanRecord) => scanRecord.student_id === studentId && scanRecord.scanned_at.slice(0, 10) === utcDate)
               .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
 
             return createQueryResult(results as T[]);
@@ -310,11 +325,11 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where mentor_id = ?1 and event_date = ?2")
+            normalizedSql.includes("where mentor_id = ?1 and substr(scanned_at, 1, 10) = ?2")
           ) {
-            const [mentorId, eventDate] = params as [string, string];
+            const [mentorId, utcDate] = params as [string, string];
             const results = state.scanRecords
-              .filter((scanRecord) => scanRecord.mentor_id === mentorId && scanRecord.event_date === eventDate)
+              .filter((scanRecord) => scanRecord.mentor_id === mentorId && scanRecord.scanned_at.slice(0, 10) === utcDate)
               .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
 
             return createQueryResult(results as T[]);

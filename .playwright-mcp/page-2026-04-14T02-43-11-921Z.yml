@@ -1,0 +1,17 @@
+- main [ref=e2]:
+  - generic "Mentor attendance" [ref=e3]:
+    - heading "Mentor attendance" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - article [ref=e6]:
+      - heading "Mentor identity" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - paragraph [ref=e9]: Mentor Local 03
+        - paragraph [ref=e10]: "Secret id: mentor-secret-003 · Person id: mentor-003"
+    - article [ref=e11]:
+      - heading "Mentor QR code" [level=2] [ref=e12]
+      - img "Mentor QR code" [ref=e13]:
+        - img [ref=e14]
+      - button "Copy QR payload" [ref=e17] [cursor=pointer]
+    - article [ref=e18]:
+      - heading "Recent scans and notes" [level=2] [ref=e19]
+      - generic [ref=e20]: Loading recent scans…

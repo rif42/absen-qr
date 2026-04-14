@@ -41,5 +41,8 @@ describe("admin page DOM contract", () => {
     for (const id of requiredIds) {
       expect(countMatches(adminPageHtml, new RegExp(`id=\\"${id}\\"`, "g"))).toBe(1);
     }
+
+    expect(adminPageHtml).toMatch(/<table[^>]*id="records-table"[^>]*>\s*<tbody[^>]*id="records-table-body"[^>]*><\/tbody>\s*<\/table>/i);
+    expect(countMatches(adminPageHtml, /<tr\b/gi)).toBe(0);
   });
 });

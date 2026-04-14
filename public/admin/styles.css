@@ -200,6 +200,27 @@ button:disabled {
   line-height: 1.5;
 }
 
+#records-table tbody tr.row-locked {
+  background: rgba(71, 85, 105, 0.04);
+}
+
+#records-table tbody tr.row-editing {
+  background: rgba(22, 163, 74, 0.06);
+}
+
+#records-table tbody tr.row-locked select,
+#records-table tbody tr.row-locked textarea {
+  background: #f8fafc;
+  color: var(--muted);
+}
+
+#records-table tbody tr.row-editing select,
+#records-table tbody tr.row-editing textarea {
+  background: #fff;
+  border-color: rgba(22, 163, 74, 0.28);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.08);
+}
+
 #records-table select:focus,
 #records-table textarea:focus,
 button:focus {
@@ -208,17 +229,24 @@ button:focus {
 }
 
 #records-table tbody td:nth-child(4) button,
-#records-table tbody td:nth-child(5) button {
+#records-table tbody td:nth-child(5) button,
+#records-table tbody td:nth-child(6) button {
   width: 100%;
   padding: 9px 12px;
 }
 
 #records-table tbody td:nth-child(4) button {
+  background: #fff;
+  border-color: rgba(148, 163, 184, 0.38);
+  color: var(--text);
+}
+
+#records-table tbody td:nth-child(5) button {
   background: var(--accent);
   color: #fff;
 }
 
-#records-table tbody td:nth-child(5) button {
+#records-table tbody td:nth-child(6) button {
   background: #fff;
   border-color: rgba(180, 35, 24, 0.18);
   color: #8a3a2c;
