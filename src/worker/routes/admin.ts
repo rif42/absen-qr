@@ -13,7 +13,7 @@ type AdminRecordPatchPayload = {
   mentorId?: string;
 };
 
-const DUPLICATE_SCAN_ERROR_MESSAGE = "Duplicate mentor scan already recorded for this event day.";
+const DUPLICATE_SCAN_ERROR_MESSAGE = "Duplicate mentor scan already recorded for this calendar day.";
 
 function isAuthorizedAdminSecret(secretToken: string, env: Env): boolean {
   return secretToken === env.ADMIN_SECRET;

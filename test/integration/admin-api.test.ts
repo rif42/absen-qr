@@ -1080,7 +1080,7 @@ describe("admin API", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
-      error: "Duplicate mentor scan already recorded for this event day."
+      error: "Duplicate mentor scan already recorded for this calendar day."
     });
     expect(readMockD1State(database).scanRecords).toEqual([
       {
@@ -1099,6 +1099,73 @@ describe("admin API", () => {
         event_date: configuredEventDate,
         scanned_at: `${configuredEventDate}T09:10:00.000Z`,
         notes: "Existing row",
+        updated_at: `${configuredEventDate}T09:15:00.000Z`
+      }
+    ]);
+  });
+
+  it("rejects reassignment that would create a duplicate student-mentor-day key", async () => {
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-reassign-source",
+          student_id: "student-001",
+          mentor_id: "mentor-002",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+          notes: "Source row",
+          updated_at: `${configuredEventDate}T09:05:00.000Z`
+        },
+        {
+          scan_id: "scan-reassign-target",
+          student_id: "student-002",
+          mentor_id: "mentor-002",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T09:10:00.000Z`,
+          notes: "Target row",
+          updated_at: `${configuredEventDate}T09:15:00.000Z`
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    // PATCH source's studentId to match target's → (student-002, mentor-002) collision
+    const response = await fetchAdminApi(
+      "/records/scan-reassign-source",
+      {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          studentId: "student-002"
+        })
+      },
+      env
+    );
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error: "Duplicate mentor scan already recorded for this calendar day."
+    });
+    // Verify no records were mutated
+    expect(readMockD1State(database).scanRecords).toEqual([
+      {
+        scan_id: "scan-reassign-source",
+        student_id: "student-001",
+        mentor_id: "mentor-002",
+        event_date: configuredEventDate,
+        scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+        notes: "Source row",
+        updated_at: `${configuredEventDate}T09:05:00.000Z`
+      },
+      {
+        scan_id: "scan-reassign-target",
+        student_id: "student-002",
+        mentor_id: "mentor-002",
+        event_date: configuredEventDate,
+        scanned_at: `${configuredEventDate}T09:10:00.000Z`,
+        notes: "Target row",
         updated_at: `${configuredEventDate}T09:15:00.000Z`
       }
     ]);

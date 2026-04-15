@@ -132,7 +132,7 @@ describe("student API", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
-      error: "Duplicate mentor scan already recorded for this event day."
+      error: "Duplicate mentor scan already recorded for this calendar day."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(0);
   });
@@ -197,7 +197,7 @@ describe("student API", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
-      error: "Duplicate mentor scan already recorded for this event day."
+      error: "Duplicate mentor scan already recorded for this calendar day."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
   });
@@ -237,6 +237,53 @@ describe("student API", () => {
     vi.useRealTimers();
 
     expect(response.status).toBe(201);
+    expect(readMockD1State(database).scanRecords).toHaveLength(2);
+  });
+
+  it("allows a scan across the UTC midnight boundary", async () => {
+    const fetchHandler = worker.fetch as FetchHandler;
+    const database = createMockD1Database();
+
+    // First scan at 2026-01-14T23:59:59Z
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-14T23:59:59.000Z"));
+
+    const firstResponse = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database, "2026-01-14"),
+      {} as WorkerContext
+    );
+
+    expect(firstResponse.status).toBe(201);
+
+    // Second scan at 2026-01-15T00:00:01Z — new calendar day
+    vi.setSystemTime(new Date("2026-01-15T00:00:01.000Z"));
+
+    const secondResponse = await fetchHandler(
+      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          qrPayload: "absenqr:v1:mentor:mentor-001"
+        })
+      }) as WorkerRequest,
+      createEnv(database, "2026-01-15"),
+      {} as WorkerContext
+    );
+
+    vi.useRealTimers();
+
+    expect(secondResponse.status).toBe(201);
     expect(readMockD1State(database).scanRecords).toHaveLength(2);
   });
 

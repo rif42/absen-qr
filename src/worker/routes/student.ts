@@ -90,7 +90,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     );
 
     if (existingScan) {
-      return conflict("Duplicate mentor scan already recorded for this event day.");
+      return conflict("Duplicate mentor scan already recorded for this calendar day.");
     }
 
     let scan;
@@ -105,7 +105,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       });
     } catch (error) {
       if (isDuplicateScanRecordError(error)) {
-        return conflict("Duplicate mentor scan already recorded for this event day.");
+        return conflict("Duplicate mentor scan already recorded for this calendar day.");
       }
 
       return internalServerError("Could not create scan record.");
