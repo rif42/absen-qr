@@ -1103,4 +1103,175 @@ describe("admin API", () => {
       }
     ]);
   });
+
+  it("defaults to the runtime UTC day for /records when no query params are given, not the configured EVENT_DATE", async () => {
+    const frozenUtcDay = "2026-01-20";
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-utc-day-record",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: frozenUtcDay,
+          scanned_at: `${frozenUtcDay}T10:00:00.000Z`,
+          notes: "On frozen UTC day",
+          updated_at: `${frozenUtcDay}T10:05:00.000Z`
+        },
+        {
+          scan_id: "scan-configured-day-record",
+          student_id: "student-002",
+          mentor_id: "mentor-002",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+          notes: "On configured EVENT_DATE",
+          updated_at: `${configuredEventDate}T08:05:00.000Z`
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    await withFrozenTime(`${frozenUtcDay}T12:00:00.000Z`, async () => {
+      const response = await fetchAdminApi("/records", undefined, env);
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        dateFilter: {
+          startDate: frozenUtcDay,
+          endDate: frozenUtcDay
+        },
+        records: [
+          {
+            scanId: "scan-utc-day-record",
+            studentId: "student-001",
+            studentName: "Student Local 01",
+            studentSecretId: "student-secret-001",
+            mentorId: "mentor-001",
+            mentorName: "Mentor Local 01",
+            eventDate: frozenUtcDay,
+            scannedAt: `${frozenUtcDay}T10:00:00.000Z`,
+            notes: "On frozen UTC day",
+            updatedAt: `${frozenUtcDay}T10:05:00.000Z`
+          }
+        ]
+      });
+    });
+  });
+
+  it("defaults to the runtime UTC day for /export.csv when no query params are given, not the configured EVENT_DATE", async () => {
+    const frozenUtcDay = "2026-01-20";
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-export-utc-day",
+          student_id: "student-003",
+          mentor_id: "mentor-003",
+          event_date: frozenUtcDay,
+          scanned_at: `${frozenUtcDay}T11:00:00.000Z`,
+          notes: "Export UTC day",
+          updated_at: `${frozenUtcDay}T11:05:00.000Z`
+        },
+        {
+          scan_id: "scan-export-configured-day",
+          student_id: "student-004",
+          mentor_id: "mentor-004",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T14:00:00.000Z`,
+          notes: "Export configured day",
+          updated_at: `${configuredEventDate}T14:05:00.000Z`
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    await withFrozenTime(`${frozenUtcDay}T12:00:00.000Z`, async () => {
+      const response = await fetchAdminApi("/export.csv", undefined, env);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-disposition")).toBe(
+        `attachment; filename="attendance-${frozenUtcDay}.csv"`
+      );
+      await expect(response.text()).resolves.toBe(
+        [
+          "student name,secret id,mentor scanned,date,notes",
+          "Student Local 03,student-secret-003,Mentor Local 03,2026-01-20,Export UTC day"
+        ].join("\n")
+      );
+    });
+  });
+
+  it("uses explicit startDate/endDate params that differ from both the frozen UTC day and EVENT_DATE", async () => {
+    const frozenUtcDay = "2026-01-20";
+    const explicitStart = "2026-01-14";
+    const explicitEnd = "2026-01-16";
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-explicit-in-range",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+          notes: "In explicit range",
+          updated_at: `${configuredEventDate}T08:05:00.000Z`
+        },
+        {
+          scan_id: "scan-explicit-on-frozen-day",
+          student_id: "student-002",
+          mentor_id: "mentor-002",
+          event_date: frozenUtcDay,
+          scanned_at: `${frozenUtcDay}T10:00:00.000Z`,
+          notes: "On frozen day but outside explicit range",
+          updated_at: `${frozenUtcDay}T10:05:00.000Z`
+        },
+        {
+          scan_id: "scan-explicit-before-range",
+          student_id: "student-003",
+          mentor_id: "mentor-003",
+          event_date: "2026-01-13",
+          scanned_at: "2026-01-13T10:00:00.000Z",
+          notes: "Before range",
+          updated_at: "2026-01-13T10:05:00.000Z"
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    await withFrozenTime(`${frozenUtcDay}T12:00:00.000Z`, async () => {
+      const recordsResponse = await fetchAdminApi(
+        `/records?startDate=${explicitStart}&endDate=${explicitEnd}`,
+        undefined,
+        env
+      );
+
+      expect(recordsResponse.status).toBe(200);
+      await expect(recordsResponse.json()).resolves.toMatchObject({
+        dateFilter: {
+          startDate: explicitStart,
+          endDate: explicitEnd
+        },
+        records: [
+          {
+            scanId: "scan-explicit-in-range",
+            studentId: "student-001",
+            eventDate: configuredEventDate,
+            notes: "In explicit range"
+          }
+        ]
+      });
+
+      const exportResponse = await fetchAdminApi(
+        `/export.csv?startDate=${explicitStart}&endDate=${explicitEnd}`,
+        undefined,
+        env
+      );
+
+      expect(exportResponse.status).toBe(200);
+      await expect(exportResponse.text()).resolves.toBe(
+        [
+          "student name,secret id,mentor scanned,date,notes",
+          "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,In explicit range"
+        ].join("\n")
+      );
+    });
+  });
 });
