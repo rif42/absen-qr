@@ -9,9 +9,7 @@
     "html_handling": "force-trailing-slash",
     "not_found_handling": "404-page"
   },
-  "vars": {
-    "EVENT_DATE": "2026-01-15"
-  },
+  "vars": {},
   "d1_databases": [
     {
       "binding": "DB",

@@ -17,7 +17,7 @@ Minimum required reading:
 - If code behavior conflicts with `docs/`, update the code or explicitly call out the mismatch.
 - Do not invent extra scope beyond the v1 documents without user approval.
 - Keep CSV export order exactly as documented.
-- Preserve the locked v1 constraints: single event-day, one secret link per person, duplicate scans rejected, and admin last-write-wins corrections.
+- Preserve the locked v1 constraints: single UTC calendar-day, one secret link per person, duplicate scans rejected, and admin last-write-wins corrections.
 
 ## Student-page design language
 - For `public/student/*`, treat mobile as the primary layout target before desktop refinement.
