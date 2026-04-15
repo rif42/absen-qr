@@ -57,6 +57,7 @@ class FakeElement {
   parent: FakeElement | null = null;
   textContent = "";
   innerHTML = "";
+  className = "";
   value = "";
   disabled = false;
   type = "";
@@ -169,6 +170,9 @@ function createAdminDom() {
     table: new FakeElement("table", "records-table"),
     body: new FakeElement("tbody", "records-table-body"),
     exportButton: new FakeElement("button", "export-csv-button"),
+    startDate: new FakeElement("input", "startDate"),
+    endDate: new FakeElement("input", "endDate"),
+    applyButton: new FakeElement("button", "apply-filters-button"),
   };
 
   elements.table.appendChild(elements.body);
@@ -180,6 +184,9 @@ function createAdminDom() {
     "records-table": elements.table,
     "records-table-body": elements.body,
     "export-csv-button": elements.exportButton,
+    startDate: elements.startDate,
+    endDate: elements.endDate,
+    "apply-filters-button": elements.applyButton,
   });
 
   return { elements, document };
@@ -214,7 +221,11 @@ function mockResponse(body: unknown, init?: { status?: number; headers?: Record<
   };
 }
 
-async function loadAdminPageApp(pathname: string, responses: Array<ReturnType<typeof mockResponse>>) {
+async function loadAdminPageApp(
+  pathname: string,
+  responses: Array<ReturnType<typeof mockResponse>>,
+  search = ""
+) {
   vi.resetModules();
   const { elements, document } = createAdminDom();
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -229,12 +240,14 @@ async function loadAdminPageApp(pathname: string, responses: Array<ReturnType<ty
 
   vi.stubGlobal("document", document);
   vi.stubGlobal("fetch", fetchMock);
+  const replaceState = vi.fn();
   vi.stubGlobal("window", {
-    location: { pathname },
+    location: { pathname, search },
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     locationAssign: vi.fn(),
     open: vi.fn(),
+    history: { replaceState },
     setTimeout,
     clearTimeout,
   });
@@ -243,6 +256,7 @@ async function loadAdminPageApp(pathname: string, responses: Array<ReturnType<ty
     window: {
       location: { pathname: string; assign?: ReturnType<typeof vi.fn> };
       open: ReturnType<typeof vi.fn>;
+      history: { replaceState: ReturnType<typeof vi.fn> };
     };
   }).window;
 
@@ -250,7 +264,7 @@ async function loadAdminPageApp(pathname: string, responses: Array<ReturnType<ty
 
   await import("../../public/admin/app.js");
 
-  return { elements, fetchMock, exportAssign: browserWindow.location.assign };
+  return { elements, fetchMock, exportAssign: browserWindow.location.assign, replaceState };
 }
 
 beforeEach(() => {
@@ -263,6 +277,203 @@ afterEach(() => {
 });
 
 describe("admin page app", () => {
+  it("renders each record as four compact cells and swaps controls in edit mode", async () => {
+    const payload = {
+      records: [
+        {
+          scanId: "scan-001",
+          studentId: "student-001",
+          studentName: "Student Local 01",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          notes: "Initial notes",
+          eventDate: "2026-04-11",
+          scannedAt: "2026-04-11T08:00:00.000Z",
+          updatedAt: "2026-04-11T08:00:00.000Z",
+        },
+      ],
+      students: [
+        { personId: "student-001", displayName: "Student Local 01" },
+        { personId: "student-002", displayName: "Student Local 02" },
+      ],
+      mentors: [
+        { personId: "mentor-001", displayName: "Mentor Local 01" },
+        { personId: "mentor-002", displayName: "Mentor Local 02" },
+      ],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements } = await loadAdminPageApp("/admin/admin-secret-token/", [mockResponse(payload)]);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const row = elements.body.children[0];
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
+    expect(elements.body.children).toHaveLength(1);
+    expect(row.children).toHaveLength(4);
+    expect(row.dataset.rowState).toBe("locked");
+    expect(refs.studentText.textContent).toContain("Student Local 01");
+    expect(refs.mentorText.textContent).toContain("Mentor Local 01");
+    expect(refs.notesText.textContent).toContain("Initial notes");
+    expect(collectByTag(row, "select")).toHaveLength(0);
+    expect(collectByTag(row, "textarea")).toHaveLength(0);
+    expect(collectByTag(row, "button")).toHaveLength(2);
+    expect(refs.actionCell.children).toHaveLength(1);
+    expect(refs.actionCell.children[0].className).toBe("record-actions");
+    expect(collectByTag(row, "button")[0].textContent).toBe("Edit");
+    expect(collectByTag(row, "button")[1].textContent).toBe("Delete");
+
+    await refs.editButton.click();
+
+    expect(row.dataset.rowState).toBe("editing");
+    expect(collectByTag(row, "select")).toHaveLength(2);
+    expect(collectByTag(row, "textarea")).toHaveLength(1);
+    expect(collectByTag(row, "button")).toHaveLength(2);
+    expect(refs.actionCell.children).toHaveLength(1);
+    expect(refs.actionCell.children[0].className).toBe("record-actions");
+    expect(collectByTag(row, "button")[0].textContent).toBe("Save");
+    expect(collectByTag(row, "button")[1].textContent).toBe("Delete");
+  });
+
+  it("loads the active date range from the URL and keeps export aligned", async () => {
+    const payload = {
+      records: [],
+      students: [],
+      mentors: [],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements, fetchMock, exportAssign } = await loadAdminPageApp(
+      "/admin/admin-secret-token/",
+      
+      [mockResponse(payload), mockResponse("student name,secret id,mentor scanned,date,notes\n", {
+        headers: { "content-type": "text/csv; charset=utf-8" },
+      })],
+      "?startDate=2026-04-11&endDate=2026-04-11"
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/admin/admin-secret-token/api/records?startDate=2026-04-11&endDate=2026-04-11",
+      expect.any(Object)
+    );
+    expect(elements.startDate.value).toBe("2026-04-11");
+    expect(elements.endDate.value).toBe("2026-04-11");
+
+    await elements.exportButton.click();
+
+    expect(exportAssign).toHaveBeenCalledWith(
+      "/admin/admin-secret-token/api/export.csv?startDate=2026-04-11&endDate=2026-04-11"
+    );
+  });
+
+  it("uses server dateFilter for the default range and normalizes the URL", async () => {
+    const payload = {
+      records: [],
+      students: [],
+      mentors: [],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements, fetchMock, replaceState } = await loadAdminPageApp(
+      "/admin/admin-secret-token/",
+      [mockResponse(payload)]
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalledWith("/admin/admin-secret-token/api/records", expect.any(Object));
+    expect(elements.startDate.value).toBe("2026-04-11");
+    expect(elements.endDate.value).toBe("2026-04-11");
+    expect(replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "/admin/admin-secret-token/?startDate=2026-04-11&endDate=2026-04-11"
+    );
+  });
+
+  it("blocks invalid apply attempts before issuing a fetch", async () => {
+    const payload = {
+      records: [
+        {
+          scanId: "scan-1",
+          studentId: "student-1",
+          studentName: "Ada Lovelace",
+          studentSecretId: "student-secret-1",
+          mentorId: "mentor-1",
+          mentorName: "Grace Hopper",
+          eventDate: "2026-04-11",
+          scannedAt: "2026-04-11T08:00:00.000Z",
+          notes: "Initial notes",
+          updatedAt: "2026-04-11T08:00:00.000Z",
+        },
+      ],
+      students: [{ personId: "student-1", displayName: "Ada Lovelace" }],
+      mentors: [{ personId: "mentor-1", displayName: "Grace Hopper" }],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements, fetchMock } = await loadAdminPageApp(
+      "/admin/admin-secret-token/",
+      [mockResponse(payload)]
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    elements.startDate.value = "2026-04-12";
+    elements.endDate.value = "2026-04-11";
+    await elements.applyButton.click();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(elements.status.textContent).toContain("Start date must be on or before end date.");
+    expect(elements.body.children).toHaveLength(1);
+    expect(elements.body.children[0].dataset.rowState).toBe("locked");
+  });
+
+  it("blocks empty apply attempts before issuing a fetch", async () => {
+    const payload = {
+      records: [
+        {
+          scanId: "scan-1",
+          studentId: "student-1",
+          studentName: "Ada Lovelace",
+          studentSecretId: "student-secret-1",
+          mentorId: "mentor-1",
+          mentorName: "Grace Hopper",
+          eventDate: "2026-04-11",
+          scannedAt: "2026-04-11T08:00:00.000Z",
+          notes: "Initial notes",
+          updatedAt: "2026-04-11T08:00:00.000Z",
+        },
+      ],
+      students: [{ personId: "student-1", displayName: "Ada Lovelace" }],
+      mentors: [{ personId: "mentor-1", displayName: "Grace Hopper" }],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements, fetchMock } = await loadAdminPageApp(
+      "/admin/admin-secret-token/",
+      [mockResponse(payload)]
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    elements.startDate.value = "";
+    elements.endDate.value = "2026-04-11";
+    await elements.applyButton.click();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(elements.status.textContent).toContain("Start and end dates are required.");
+    expect(elements.body.children).toHaveLength(1);
+    expect(elements.body.children[0].dataset.rowState).toBe("locked");
+  });
+
   it("loads records, renders rows, and exports through the server endpoint", async () => {
     const payload = {
       eventDate: "2026-04-11",
@@ -343,45 +554,40 @@ describe("admin page app", () => {
     expect(elements.status.textContent).toBe("Records loaded and ready.");
 
     const row = elements.body.children[0];
-    const selects = collectByTag(row, "select");
-    const textarea = collectByTag(row, "textarea")[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    expect(selects).toHaveLength(2);
-    expect(textarea).toBeTruthy();
-    expect(buttons).toHaveLength(3);
+    expect(collectByTag(row, "select")).toHaveLength(0);
+    expect(collectByTag(row, "textarea")).toHaveLength(0);
+    expect(collectByTag(row, "button")).toHaveLength(2);
     expect(row.dataset.rowState).toBe("locked");
     expect(row.classList.contains("row-locked")).toBe(true);
     expect(row.classList.contains("row-editing")).toBe(false);
-    expect(selects[0].disabled).toBe(true);
-    expect(selects[1].disabled).toBe(true);
-    expect(textarea.disabled).toBe(true);
-    expect(buttons[0].textContent).toBe("Edit");
-    expect(buttons[1].textContent).toBe("Save");
-    expect(buttons[2].textContent).toBe("Delete");
-    expect(buttons[1].disabled).toBe(true);
+    expect(refs.editButton.textContent).toBe("Edit");
+    expect(refs.deleteButton.textContent).toBe("Delete");
+    expect(refs.editButton.disabled).toBe(false);
+    expect(refs.deleteButton.disabled).toBe(false);
 
-    await buttons[0].click();
+    await refs.editButton.click();
 
     expect(row.dataset.rowState).toBe("editing");
     expect(row.classList.contains("row-locked")).toBe(false);
     expect(row.classList.contains("row-editing")).toBe(true);
-    expect(selects[0].disabled).toBe(false);
-    expect(selects[1].disabled).toBe(false);
-    expect(textarea.disabled).toBe(false);
-    expect(buttons[1].disabled).toBe(false);
+    expect(collectByTag(row, "select")).toHaveLength(2);
+    expect(collectByTag(row, "textarea")).toHaveLength(1);
+    expect(refs.studentSelect.disabled).toBe(false);
+    expect(refs.mentorSelect.disabled).toBe(false);
+    expect(refs.notesTextarea.disabled).toBe(false);
+    expect(refs.saveButton.disabled).toBe(false);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(elements.body.children[1]).toBeTruthy();
     const secondRow = elements.body.children[1];
-    const secondRowSelects = collectByTag(secondRow, "select");
-    const secondRowTextarea = collectByTag(secondRow, "textarea")[0];
-    const secondRowButtons = collectByTag(secondRow, "button");
+    const secondRefs = (secondRow as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    expect(secondRowSelects[0].disabled).toBe(true);
-    expect(secondRowSelects[1].disabled).toBe(true);
-    expect(secondRowTextarea.disabled).toBe(true);
-    expect(secondRowButtons[1].disabled).toBe(true);
+    expect(collectByTag(secondRow, "select")).toHaveLength(0);
+    expect(collectByTag(secondRow, "textarea")).toHaveLength(0);
+    expect(secondRefs.editButton.disabled).toBe(false);
+    expect(secondRefs.deleteButton.disabled).toBe(false);
     expect(secondRow.dataset.rowState).toBe("locked");
     expect(secondRow.classList.contains("row-locked")).toBe(true);
     expect(secondRow.classList.contains("row-editing")).toBe(false);
@@ -417,9 +623,9 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const row = elements.body.children[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await buttons[1].click();
+    await refs.saveButton.click();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(elements.status.textContent).toBe("Records loaded and ready.");
@@ -474,13 +680,11 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const row = elements.body.children[0];
-    const selects = collectByTag(row, "select");
-    const textarea = collectByTag(row, "textarea")[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await buttons[0].click();
-    textarea.value = "Updated by admin";
-    await buttons[1].click();
+    await refs.editButton.click();
+    refs.notesTextarea.value = "Updated by admin";
+    await refs.saveButton.click();
     await Promise.resolve();
     await Promise.resolve();
 
@@ -493,11 +697,11 @@ describe("admin page app", () => {
         body: JSON.stringify({ notes: "Updated by admin" }),
       })
     );
-    expect(textarea.value).toBe("Updated by admin");
-    expect(selects[0].disabled).toBe(true);
-    expect(selects[1].disabled).toBe(true);
-    expect(textarea.disabled).toBe(true);
-    expect(buttons[1].disabled).toBe(true);
+    expect(refs.notesText.textContent).toBe("Updated by admin");
+    expect(refs.studentSelect.disabled).toBe(true);
+    expect(refs.mentorSelect.disabled).toBe(true);
+    expect(refs.notesTextarea.disabled).toBe(true);
+    expect(refs.saveButton.disabled).toBe(true);
     expect(elements.status.textContent).toContain("Saved scan-1.");
   });
 
@@ -531,16 +735,15 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const row = elements.body.children[0];
-    const textarea = collectByTag(row, "textarea")[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await buttons[0].click();
-    await buttons[1].click();
+    await refs.editButton.click();
+    await refs.saveButton.click();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(elements.status.textContent).toBe("No changes to save.");
-    expect(textarea.disabled).toBe(true);
-    expect(buttons[1].disabled).toBe(true);
+    expect(refs.notesTextarea.disabled).toBe(true);
+    expect(refs.saveButton.disabled).toBe(true);
   });
 
   it("keeps attempted values editable after a failed save", async () => {
@@ -573,20 +776,19 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const row = elements.body.children[0];
-    const textarea = collectByTag(row, "textarea")[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await buttons[0].click();
-    textarea.value = "Attempted note";
-    await buttons[1].click();
+    await refs.editButton.click();
+    refs.notesTextarea.value = "Attempted note";
+    await refs.saveButton.click();
     await Promise.resolve();
     await Promise.resolve();
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(elements.status.textContent).toContain("Save blocked");
-    expect(textarea.disabled).toBe(false);
-    expect(textarea.value).toBe("Attempted note");
-    expect(buttons[1].disabled).toBe(false);
+    expect(refs.notesTextarea.disabled).toBe(false);
+    expect(refs.notesTextarea.value).toBe("Attempted note");
+    expect(refs.saveButton.disabled).toBe(false);
   });
 
   it("deletes rows and reports failures deterministically", async () => {
@@ -619,9 +821,9 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const row = elements.body.children[0];
-    const buttons = collectByTag(row, "button");
+    const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await buttons[2].click();
+    await refs.deleteButton.click();
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/admin/admin-secret-token/api/records/scan-1",
@@ -639,19 +841,18 @@ describe("admin page app", () => {
     await Promise.resolve();
 
     const failedRow = failedDeleteMount.elements.body.children[0];
-    const failedButtons = collectByTag(failedRow, "button");
+    const failedRefs = (failedRow as unknown as { _refs: Record<string, FakeElement> })._refs;
 
-    await failedButtons[2].click();
+    await failedRefs.deleteButton.click();
     await Promise.resolve();
     await Promise.resolve();
 
     expect(failedDeleteMount.elements.body.children).toHaveLength(1);
     expect(failedDeleteMount.elements.status.textContent).toContain("Delete blocked");
     expect(failedRow.dataset.rowState).toBe("locked");
-    expect(collectByTag(failedRow, "select")[0].disabled).toBe(true);
-    expect(collectByTag(failedRow, "select")[1].disabled).toBe(true);
-    expect(collectByTag(failedRow, "textarea")[0].disabled).toBe(true);
-    expect(failedButtons[1].disabled).toBe(true);
-    expect(failedButtons[2].disabled).toBe(false);
+    expect(collectByTag(failedRow, "select")).toHaveLength(0);
+    expect(collectByTag(failedRow, "textarea")).toHaveLength(0);
+    expect(failedRefs.editButton.disabled).toBe(false);
+    expect(failedRefs.deleteButton.disabled).toBe(false);
   });
 });

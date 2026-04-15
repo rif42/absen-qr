@@ -12,3 +12,4 @@
 - 2026-04-13: Task 9 uses Playwright `projects` with a dedicated `setup` dependency instead of `globalSetup`, so deterministic D1 seeding stays visible in test output and runs in the same toolchain as the browser spec.
 - 2026-04-13: The browser harness should isolate its local D1 state under `.wrangler/state/e2e` and start Wrangler on `http://127.0.0.1:4173` via `npm run dev:e2e`, keeping browser data/setup separate from normal local dev state.
 - 2026-04-13: TypeScript typecheck for the new E2E files is handled by adding `@types/node` plus `"node"` to `tsconfig.json` types, rather than weakening the tests or moving Node-backed setup code out of `test/**/*.ts`.
+- 2026-04-15: The admin action column keeps a permanent `.record-actions` wrapper; `setRowLockedState()` only swaps the wrapper's children so the compact table CSS stays applied in both locked and editing modes.

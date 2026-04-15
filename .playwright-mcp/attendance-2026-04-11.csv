@@ -1,1 +1,3 @@
 student name,secret id,mentor scanned,date,notes
+Student Local 02,student-secret-002,Mentor Local 02,2026-04-10,Range QA lower bound
+Student Local 01,student-secret-001,Mentor Local 01,2026-04-11,Seeded admin note

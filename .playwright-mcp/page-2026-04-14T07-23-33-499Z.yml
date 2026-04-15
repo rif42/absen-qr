@@ -1,0 +1,88 @@
+- main [ref=e2]:
+  - generic "Admin records" [ref=e3]:
+    - heading "Admin records" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - status [ref=e6]: Records loaded and ready.
+    - region "Export" [ref=e7]:
+      - heading "Export" [level=2] [ref=e8]
+      - generic [ref=e9]:
+        - text: Start date
+        - textbox "Start date" [ref=e10]: 2026-04-10
+      - generic [ref=e11]:
+        - text: End date
+        - textbox "End date" [ref=e12]: 2026-04-12
+      - button "Apply" [active] [ref=e13] [cursor=pointer]
+      - button "Export CSV" [ref=e14] [cursor=pointer]
+    - region "Records" [ref=e15]:
+      - heading "Records" [level=2] [ref=e16]
+      - table [ref=e17]:
+        - rowgroup [ref=e18]:
+          - row "Student Local 03 Mentor Local 03 Range QA upper bound Edit Save Delete" [ref=e32]:
+            - cell "Student Local 03" [ref=e33]:
+              - combobox [disabled] [ref=e34]:
+                - option "Student Local 01"
+                - option "Student Local 02"
+                - option "Student Local 03" [selected]
+                - option "Student Local 04"
+                - option "Student Local 05"
+            - cell "Mentor Local 03" [ref=e35]:
+              - combobox [disabled] [ref=e36]:
+                - option "Mentor Local 01"
+                - option "Mentor Local 02"
+                - option "Mentor Local 03" [selected]
+                - option "Mentor Local 04"
+                - option "Mentor Local 05"
+            - cell "Range QA upper bound" [ref=e37]:
+              - textbox [disabled] [ref=e38]: Range QA upper bound
+            - cell "Edit" [ref=e39]:
+              - button "Edit" [ref=e40] [cursor=pointer]
+            - cell "Save" [ref=e41]:
+              - button "Save" [disabled] [ref=e42]
+            - cell "Delete" [ref=e43]:
+              - button "Delete" [ref=e44] [cursor=pointer]
+          - row "Student Local 01 Mentor Local 01 Seeded admin note Edit Save Delete" [ref=e45]:
+            - cell "Student Local 01" [ref=e46]:
+              - combobox [disabled] [ref=e47]:
+                - option "Student Local 01" [selected]
+                - option "Student Local 02"
+                - option "Student Local 03"
+                - option "Student Local 04"
+                - option "Student Local 05"
+            - cell "Mentor Local 01" [ref=e48]:
+              - combobox [disabled] [ref=e49]:
+                - option "Mentor Local 01" [selected]
+                - option "Mentor Local 02"
+                - option "Mentor Local 03"
+                - option "Mentor Local 04"
+                - option "Mentor Local 05"
+            - cell "Seeded admin note" [ref=e50]:
+              - textbox [disabled] [ref=e51]: Seeded admin note
+            - cell "Edit" [ref=e52]:
+              - button "Edit" [ref=e53] [cursor=pointer]
+            - cell "Save" [ref=e54]:
+              - button "Save" [disabled] [ref=e55]
+            - cell "Delete" [ref=e56]:
+              - button "Delete" [ref=e57] [cursor=pointer]
+          - row "Student Local 02 Mentor Local 02 Range QA lower bound Edit Save Delete" [ref=e58]:
+            - cell "Student Local 02" [ref=e59]:
+              - combobox [disabled] [ref=e60]:
+                - option "Student Local 01"
+                - option "Student Local 02" [selected]
+                - option "Student Local 03"
+                - option "Student Local 04"
+                - option "Student Local 05"
+            - cell "Mentor Local 02" [ref=e61]:
+              - combobox [disabled] [ref=e62]:
+                - option "Mentor Local 01"
+                - option "Mentor Local 02" [selected]
+                - option "Mentor Local 03"
+                - option "Mentor Local 04"
+                - option "Mentor Local 05"
+            - cell "Range QA lower bound" [ref=e63]:
+              - textbox [disabled] [ref=e64]: Range QA lower bound
+            - cell "Edit" [ref=e65]:
+              - button "Edit" [ref=e66] [cursor=pointer]
+            - cell "Save" [ref=e67]:
+              - button "Save" [disabled] [ref=e68]
+            - cell "Delete" [ref=e69]:
+              - button "Delete" [ref=e70] [cursor=pointer]

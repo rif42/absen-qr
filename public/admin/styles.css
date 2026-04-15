@@ -110,6 +110,22 @@ body {
   letter-spacing: 0.08em;
 }
 
+.buttons-filter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  width: 50%;
+  align-self: center;
+}
+
+.filter-card {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+}
+
 #controls-card,
 #records-card {
   display: flex;
@@ -156,8 +172,19 @@ button:disabled {
 
 #records-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0 10px;
+}
+
+#records-table thead th {
+  padding: 0 12px 2px;
+  text-align: left;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
 #records-table tbody tr {
@@ -170,6 +197,7 @@ button:disabled {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   vertical-align: top;
+  word-break: break-word;
 }
 
 #records-table tbody td:first-child {
@@ -194,10 +222,39 @@ button:disabled {
   color: var(--text);
 }
 
+.record-text {
+  display: block;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 #records-table textarea {
   min-height: 92px;
   resize: vertical;
   line-height: 1.5;
+}
+
+.record-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-actions button {
+  width: 100%;
+  padding: 9px 12px;
+}
+
+.record-actions .action-secondary {
+  background: #fff;
+  border-color: rgba(148, 163, 184, 0.38);
+  color: var(--text);
+}
+
+.record-actions .action-danger {
+  background: #fff;
+  border-color: rgba(180, 35, 24, 0.18);
+  color: #8a3a2c;
 }
 
 #records-table tbody tr.row-locked {
@@ -226,30 +283,6 @@ button:disabled {
 button:focus {
   outline: 2px solid rgba(22, 163, 74, 0.22);
   outline-offset: 1px;
-}
-
-#records-table tbody td:nth-child(4) button,
-#records-table tbody td:nth-child(5) button,
-#records-table tbody td:nth-child(6) button {
-  width: 100%;
-  padding: 9px 12px;
-}
-
-#records-table tbody td:nth-child(4) button {
-  background: #fff;
-  border-color: rgba(148, 163, 184, 0.38);
-  color: var(--text);
-}
-
-#records-table tbody td:nth-child(5) button {
-  background: var(--accent);
-  color: #fff;
-}
-
-#records-table tbody td:nth-child(6) button {
-  background: #fff;
-  border-color: rgba(180, 35, 24, 0.18);
-  color: #8a3a2c;
 }
 
 .hidden {
@@ -281,17 +314,23 @@ button:focus {
     text-align: center;
   }
 
-  #export-csv-button {
-    width: 100%;
-  }
-
   #records-table {
     display: block;
     overflow-x: auto;
     padding-bottom: 4px;
   }
 
+  #records-table thead th,
   #records-table tbody td {
     min-width: 150px;
+  }
+
+  #records-table thead th:nth-child(3),
+  #records-table tbody td:nth-child(3) {
+    min-width: 210px;
+  }
+
+  .record-actions {
+    min-width: 124px;
   }
 }

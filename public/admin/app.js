@@ -6,11 +6,17 @@
     table: document.getElementById("records-table"),
     body: document.getElementById("records-table-body"),
     exportButton: document.getElementById("export-csv-button"),
+    startDate: document.getElementById("startDate"),
+    endDate: document.getElementById("endDate"),
+    applyButton: document.getElementById("apply-filters-button"),
   };
 
   const adminPath = getAdminPath();
   const state = {
-    eventDate: "",
+    filter: {
+      startDate: "",
+      endDate: "",
+    },
     records: [],
     students: [],
     mentors: [],
@@ -25,6 +31,7 @@
   }
 
   elements.exportButton.addEventListener("click", handleExport);
+  elements.applyButton.addEventListener("click", handleApplyFilters);
   void loadRecords();
 
   function getAdminPath() {
@@ -56,14 +63,17 @@
     elements.status.textContent = message;
   }
 
-  async function loadRecords() {
+  async function loadRecords(requestedFilter = readUrlDateFilter(), syncUrl = false) {
+    const requestFilter = isValidDateRange(requestedFilter.startDate, requestedFilter.endDate) ? requestedFilter : null;
+    const requestUrl = buildRecordsUrl(requestFilter);
+
     setLoading(true);
     setEmptyState(false);
     setTableVisible(false);
     setStatus("loading", "Loading records…");
 
     try {
-      const response = await fetch(`${adminPath}/api/records`, {
+      const response = await fetch(requestUrl, {
         headers: {
           Accept: "application/json",
         },
@@ -75,11 +85,18 @@
 
       const payload = await response.json();
       const normalized = normalizePayload(payload);
+      const activeFilter = normalized.dateFilter || requestFilter || state.filter;
 
-      state.eventDate = normalized.eventDate;
+      state.filter = activeFilter;
       state.records = normalized.records;
       state.students = normalized.students;
       state.mentors = normalized.mentors;
+      syncDateFilterInputs(activeFilter);
+
+      if (syncUrl || !requestFilter) {
+        replaceUrlForDateFilter(activeFilter);
+      }
+
       renderRecords(normalized.records);
 
       setLoading(false);
@@ -102,16 +119,41 @@
     }
   }
 
+  async function handleApplyFilters(event) {
+    if (event && typeof event.preventDefault === "function") {
+      event.preventDefault();
+    }
+
+    const nextFilter = {
+      startDate: normalizeString(elements.startDate.value),
+      endDate: normalizeString(elements.endDate.value),
+    };
+
+    if (!nextFilter.startDate || !nextFilter.endDate) {
+      setStatus("error", "Start and end dates are required.");
+      return;
+    }
+
+    if (!isValidDateRange(nextFilter.startDate, nextFilter.endDate)) {
+      setStatus("error", "Start date must be on or before end date.");
+      return;
+    }
+
+    await loadRecords(nextFilter, true);
+  }
+
   async function handleExport() {
     setStatus("loading", "Opening CSV export…");
 
+    const exportUrl = buildExportUrl(state.filter);
+
     if (typeof window.location.assign === "function") {
-      window.location.assign(`${adminPath}/api/export.csv`);
+      window.location.assign(exportUrl);
       return;
     }
 
     if (typeof window.open === "function") {
-      window.open(`${adminPath}/api/export.csv`);
+      window.open(exportUrl);
       return;
     }
 
@@ -123,8 +165,92 @@
       eventDate: typeof payload?.eventDate === "string" ? payload.eventDate : "",
       students: normalizePeople(payload?.students),
       mentors: normalizePeople(payload?.mentors),
+      dateFilter: normalizeDateFilter(payload?.dateFilter),
       records: Array.isArray(payload?.records) ? payload.records.map((record) => normalizeRecord(record)).filter(Boolean) : [],
     };
+  }
+
+  function readUrlDateFilter() {
+    const searchParams = new URLSearchParams(window.location.search || "");
+
+    return {
+      startDate: normalizeString(searchParams.get("startDate")),
+      endDate: normalizeString(searchParams.get("endDate")),
+    };
+  }
+
+  function normalizeDateFilter(filter) {
+    if (!filter || typeof filter !== "object") {
+      return null;
+    }
+
+    const startDate = normalizeString(filter.startDate ?? filter.start_date ?? filter.start);
+    const endDate = normalizeString(filter.endDate ?? filter.end_date ?? filter.end);
+
+    if (!isValidDateRange(startDate, endDate)) {
+      return null;
+    }
+
+    return {
+      startDate,
+      endDate,
+    };
+  }
+
+  function isValidDateRange(startDate, endDate) {
+    return isEventDate(startDate) && isEventDate(endDate) && startDate <= endDate;
+  }
+
+  function isEventDate(value) {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return false;
+    }
+
+    const date = new Date(`${value}T00:00:00.000Z`);
+
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }
+
+  function buildDateRangeSearch(filter) {
+    if (!isValidDateRange(filter.startDate, filter.endDate)) {
+      return "";
+    }
+
+    const searchParams = new URLSearchParams();
+    searchParams.set("startDate", filter.startDate);
+    searchParams.set("endDate", filter.endDate);
+    return searchParams.toString();
+  }
+
+  function buildRecordsUrl(filter) {
+    const search = filter ? buildDateRangeSearch(filter) : "";
+
+    return search ? `${adminPath}/api/records?${search}` : `${adminPath}/api/records`;
+  }
+
+  function buildExportUrl(filter) {
+    const search = filter ? buildDateRangeSearch(filter) : "";
+
+    return search ? `${adminPath}/api/export.csv?${search}` : `${adminPath}/api/export.csv`;
+  }
+
+  function syncDateFilterInputs(filter) {
+    elements.startDate.value = filter.startDate;
+    elements.endDate.value = filter.endDate;
+  }
+
+  function replaceUrlForDateFilter(filter) {
+    if (!window.history || typeof window.history.replaceState !== "function") {
+      return;
+    }
+
+    const search = buildDateRangeSearch(filter);
+
+    if (!search) {
+      return;
+    }
+
+    window.history.replaceState(null, "", `${window.location.pathname}?${search}`);
   }
 
   function normalizePeople(source) {
@@ -185,37 +311,45 @@
     };
 
     const studentCell = document.createElement("td");
+    const studentText = document.createElement("span");
+    studentText.className = "record-text";
     const studentSelect = document.createElement("select");
-    populateSelect(studentSelect, state.students, record.studentId, record.studentName);
-    studentCell.appendChild(studentSelect);
+    studentCell.append(studentText);
 
     const mentorCell = document.createElement("td");
+    const mentorText = document.createElement("span");
+    mentorText.className = "record-text";
     const mentorSelect = document.createElement("select");
-    populateSelect(mentorSelect, state.mentors, record.mentorId, record.mentorName);
-    mentorCell.appendChild(mentorSelect);
+    mentorCell.append(mentorText);
 
     const notesCell = document.createElement("td");
+    const notesText = document.createElement("span");
+    notesText.className = "record-text";
     const notesTextarea = document.createElement("textarea");
     notesTextarea.value = record.notes;
-    notesCell.appendChild(notesTextarea);
+    notesCell.append(notesText);
 
-    const editCell = document.createElement("td");
+    const actionCell = document.createElement("td");
+    const actionWrap = document.createElement("div");
+    actionWrap.className = "record-actions";
+    actionWrap.style.display = "flex";
+    actionWrap.style.flexDirection = "row";
     const editButton = document.createElement("button");
     editButton.type = "button";
-    editButton.textContent = "Edit";
-    editCell.appendChild(editButton);
+    editButton.textContent = "✏️";
+    editButton.className = "action-secondary";
 
-    const saveCell = document.createElement("td");
     const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.textContent = "Save";
-    saveCell.appendChild(saveButton);
+    saveButton.textContent = "💾";
+    saveButton.className = "action-primary";
 
-    const deleteCell = document.createElement("td");
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.textContent = "Delete";
-    deleteCell.appendChild(deleteButton);
+    deleteButton.textContent = "❌";
+    deleteButton.className = "action-danger";
+    actionWrap.append(editButton, deleteButton);
+    actionCell.appendChild(actionWrap);
 
     editButton.addEventListener("click", () => {
       setRowLockedState(rowState, false);
@@ -229,11 +363,19 @@
       void deleteRecord(record.scanId, row);
     });
 
-    row.append(studentCell, mentorCell, notesCell, editCell, saveCell, deleteCell);
+    row.append(studentCell, mentorCell, notesCell, actionCell);
     row._refs = {
+      studentCell,
+      mentorCell,
+      notesCell,
+      actionCell,
+      studentText,
+      mentorText,
+      notesText,
       studentSelect,
       mentorSelect,
       notesTextarea,
+      actionWrap,
       editButton,
       saveButton,
       deleteButton,
@@ -252,14 +394,41 @@
     rowState.row.classList.toggle("row-locked", isLocked);
     rowState.row.classList.toggle("row-editing", !isLocked);
     rowState.row.setAttribute("aria-readonly", String(isLocked));
+
+    rowState.refs.studentText.textContent = rowState.record.studentName || rowState.record.studentId;
+    rowState.refs.mentorText.textContent = rowState.record.mentorName || rowState.record.mentorId;
+    rowState.refs.notesText.textContent = rowState.record.notes || "";
+
+    populateSelect(rowState.refs.studentSelect, state.students, rowState.record.studentId, rowState.record.studentName);
+    populateSelect(rowState.refs.mentorSelect, state.mentors, rowState.record.mentorId, rowState.record.mentorName);
+    rowState.refs.notesTextarea.value = rowState.record.notes;
+
     rowState.refs.studentSelect.disabled = isLocked;
     rowState.refs.mentorSelect.disabled = isLocked;
     rowState.refs.notesTextarea.disabled = isLocked;
+
     rowState.refs.saveButton.disabled = isLocked;
+    rowState.refs.editButton.disabled = !isLocked;
+    rowState.refs.deleteButton.disabled = false;
+
+    if (isLocked) {
+      rowState.refs.studentCell.replaceChildren(rowState.refs.studentText);
+      rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorText);
+      rowState.refs.notesCell.replaceChildren(rowState.refs.notesText);
+      rowState.refs.actionWrap.replaceChildren(rowState.refs.editButton, rowState.refs.deleteButton);
+      return;
+    }
+
+    rowState.refs.studentCell.replaceChildren(rowState.refs.studentSelect);
+    rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorSelect);
+    rowState.refs.notesCell.replaceChildren(rowState.refs.notesTextarea);
+    rowState.refs.actionWrap.replaceChildren(rowState.refs.saveButton, rowState.refs.deleteButton);
   }
 
   function populateSelect(select, people, selectedId, selectedName) {
     const options = new Map();
+
+    select.replaceChildren();
 
     for (const person of people) {
       options.set(person.personId, person.displayName);

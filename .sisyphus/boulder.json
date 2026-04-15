@@ -1,53 +1,58 @@
 {
-  "active_plan": "D:\\work\\absen-qr\\.sisyphus\\plans\\current-day-history-filter.md",
-  "started_at": "2026-04-14T09:10:14.3153641+07:00",
+  "active_plan": "D:\\work\\absen-qr\\.sisyphus\\plans\\admin-date-range-filter.md",
+  "started_at": "2026-04-14T09:39:00+07:00",
   "session_ids": [
-    "ses_2764f09d5ffeWNMP7eBWWvLz5h",
-    "ses_2763a52eeffeoNBiyBkZiMT70N",
-    "ses_2763a529effehjg6lrwgr4LjR9"
+    "ses_2764f09d5ffeWNMP7eBWWvLz5h"
   ],
-  "plan_name": "current-day-history-filter",
+  "plan_name": "admin-date-range-filter",
   "session_origins": {
-    "ses_2764f09d5ffeWNMP7eBWWvLz5h": "direct",
-    "ses_2763a52eeffeoNBiyBkZiMT70N": "appended",
-    "ses_2763a529effehjg6lrwgr4LjR9": "appended"
+    "ses_2764f09d5ffeWNMP7eBWWvLz5h": "direct"
   },
   "task_sessions": {
     "todo:1": {
       "task_key": "todo:1",
       "task_label": "1",
-      "task_title": "Introduce the runtime UTC-day history filter foundation",
-      "session_id": "ses_2763d6bf7ffeZjBRMX0OsXgVOp",
+      "task_title": "Add inclusive admin `event_date` range queries and mock support",
+      "session_id": "ses_275786ef9ffeSpqezGjYAvk45u",
       "agent": "Sisyphus-Junior",
       "category": "quick",
-      "updated_at": "2026-04-14T02:13:48.821Z"
+      "updated_at": "2026-04-14T05:49:18.850Z"
     },
     "todo:2": {
       "task_key": "todo:2",
       "task_label": "2",
-      "task_title": "Switch student history to runtime current UTC day",
-      "session_id": "ses_27638881cffeN4aq9opG5D3sfp",
+      "task_title": "Add shared admin route contract for `startDate` + `endDate`",
+      "session_id": "ses_2753b6e81ffeSs5XjFSbe88qjR",
       "agent": "Sisyphus-Junior",
       "category": "quick",
-      "updated_at": "2026-04-14T02:19:28.353Z"
+      "updated_at": "2026-04-14T06:56:49.184Z"
     },
     "todo:4": {
       "task_key": "todo:4",
       "task_label": "4",
-      "task_title": "Align the technical plan note and run the consolidated regressions",
-      "session_id": "ses_27633745bffeQIQiIGKymAmlkw",
+      "task_title": "Wire admin app state, URL sync, apply validation, and export parity",
+      "session_id": "ses_275315d75ffeyQsxQ4smwIG3QG",
       "agent": "Sisyphus-Junior",
-      "category": "writing",
-      "updated_at": "2026-04-14T02:24:20.934Z"
+      "category": "unspecified-high",
+      "updated_at": "2026-04-14T07:10:58.538Z"
+    },
+    "todo:6": {
+      "task_key": "todo:6",
+      "task_label": "6",
+      "task_title": "Run the consolidated admin regression sweep and prepare the branch for review",
+      "session_id": "ses_2752a759dffeii6Mles7sZmN3E",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-low",
+      "updated_at": "2026-04-14T07:12:58.427Z"
     },
     "final-wave:f1": {
       "task_key": "final-wave:f1",
       "task_label": "F1",
       "task_title": "Plan Compliance Audit — oracle",
-      "session_id": "ses_276274015ffeZsMwqMWyV8PGId",
-      "agent": "Sisyphus-Junior",
-      "category": "quick",
-      "updated_at": "2026-04-14T02:38:40.319Z"
+      "session_id": "ses_275260df7ffehQ7NaZbOjisj0X",
+      "agent": "oracle",
+      "category": "",
+      "updated_at": "2026-04-14T07:19:34.269Z"
     }
   }
 }

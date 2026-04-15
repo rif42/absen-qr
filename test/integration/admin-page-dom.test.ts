@@ -30,6 +30,9 @@ describe("admin page DOM contract", () => {
       "page-title",
       "status-banner",
       "controls-card",
+      "startDate",
+      "endDate",
+      "apply-filters-button",
       "export-csv-button",
       "records-card",
       "records-loading",
@@ -42,7 +45,23 @@ describe("admin page DOM contract", () => {
       expect(countMatches(adminPageHtml, new RegExp(`id=\\"${id}\\"`, "g"))).toBe(1);
     }
 
-    expect(adminPageHtml).toMatch(/<table[^>]*id="records-table"[^>]*>\s*<tbody[^>]*id="records-table-body"[^>]*><\/tbody>\s*<\/table>/i);
-    expect(countMatches(adminPageHtml, /<tr\b/gi)).toBe(0);
+    expect(adminPageHtml).toMatch(/<table[^>]*id="records-table"[^>]*>[\s\S]*<thead>[\s\S]*<tbody[^>]*id="records-table-body"[^>]*><\/tbody>[\s\S]*<\/table>/i);
+    expect(adminPageHtml).toMatch(/<table[^>]*id="records-table"[^>]*>[\s\S]*<thead>[\s\S]*<th[^>]*>\s*Student name\s*<\/th>[\s\S]*<th[^>]*>\s*Mentor name\s*<\/th>[\s\S]*<th[^>]*>\s*Notes\s*<\/th>[\s\S]*<th[^>]*>\s*Action\s*<\/th>[\s\S]*<\/thead>[\s\S]*<tbody[^>]*id="records-table-body"[^>]*><\/tbody>[\s\S]*<\/table>/i);
+    expect(countMatches(adminPageHtml, /<th\b/gi)).toBe(4);
+    expect(countMatches(adminPageHtml, /<tr\b/gi)).toBe(1);
+  });
+
+  it("exposes exactly two date inputs and one apply action inside controls", () => {
+    const controlsCardMatch = adminPageHtml.match(/<section[^>]*id="controls-card"[\s\S]*?<\/section>/i);
+
+    expect(controlsCardMatch).not.toBeNull();
+
+    const controlsCard = controlsCardMatch?.[0] ?? "";
+
+    expect(controlsCard).toMatch(/id="export-csv-button"/i);
+    expect(controlsCard).toMatch(/id="startDate"[^>]*type="date"|type="date"[^>]*id="startDate"/i);
+    expect(controlsCard).toMatch(/id="endDate"[^>]*type="date"|type="date"[^>]*id="endDate"/i);
+    expect(countMatches(controlsCard, /type="date"/gi)).toBe(2);
+    expect(countMatches(controlsCard, /id="apply-filters-button"/gi)).toBe(1);
   });
 });

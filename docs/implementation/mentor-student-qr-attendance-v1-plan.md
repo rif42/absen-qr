@@ -11,7 +11,7 @@ This document translates the approved PRD into an implementation-ready engineeri
 The system must support three web roles for a single event-day:
 - **Student:** scan a mentor QR code and view same-day mentor scan history.
 - **Mentor:** display a stable QR code and receive immediate live note-entry state after student scans.
-- **Admin:** inspect all records, export CSV, and manually edit, delete, or reassign records.
+- **Admin:** inspect records with visible start/end date controls over stored `event_date`, export CSV, and manually edit, delete, or reassign records.
 
 Locked product constraints:
 - single event-day only
@@ -19,6 +19,8 @@ Locked product constraints:
 - stable unique IDs for all students and mentors
 - duplicate student→mentor scans are rejected
 - admin correction behavior is last-write-wins
+- admin records and CSV export share one inclusive `startDate` / `endDate` contract over stored `event_date`
+- invalid, missing, or reversed admin date params fall back to the configured event-day only
 - CSV export column order is `student name, secret id, mentor scanned, date, notes`
 
 ## Architecture Overview
@@ -34,9 +36,9 @@ Locked product constraints:
 4. Student page refreshes same-day history for the runtime UTC day derived from `scanned_at`.
 5. Mentor page receives live update for the new student interaction on the runtime UTC day.
 6. Mentor enters notes tied to that scan record.
-7. Admin views, corrects, and exports final records.
+7. Admin views, corrects, and exports final records using the shared inclusive `event_date` range contract.
 
-These read-only history views use runtime-day visibility only; scan creation, duplicate prevention, and admin correction remain on existing event-day semantics.
+These read-only history views use runtime-day visibility only; scan creation, duplicate prevention, and admin correction remain on existing event-day semantics. Admin table and CSV reporting use a shared inclusive `event_date` range contract with `startDate` / `endDate`, and invalid or partial input falls back to the configured event-day only.
 
 ### Real-Time Update Strategy
 The highest-risk requirement is the mentor page updating live after a student scan. For v1, implementation should prefer the simplest reliable mechanism that works on Workers:
@@ -131,12 +133,15 @@ Student history and mentor recent-scan visibility are runtime-day reads only; ev
 ### Admin APIs
 - `GET /api/admin/records`
   - returns event-day records for admin table view
+  - accepts optional `startDate` and `endDate` query params for an inclusive stored `event_date` range
+  - exposes the resolved range in `dateFilter`
 - `PATCH /api/admin/records/:scanId`
   - edits notes or reassigns student or mentor
 - `DELETE /api/admin/records/:scanId`
   - deletes an erroneous record
 - `GET /api/admin/export.csv`
   - exports CSV in exact required column order
+  - uses the same inclusive `startDate` / `endDate` range contract as the records table
 
 ## UI Responsibilities
 
@@ -157,6 +162,7 @@ Student history and mentor recent-scan visibility are runtime-day reads only; ev
 
 ### Admin Page
 - show all event-day records in table form
+- surface visible start/end date controls with an apply action for reporting
 - support note edits
 - support record deletion
 - support reassigning student or mentor
@@ -280,14 +286,15 @@ Phase 2 should be split into smaller sub-phases so each step has a clean manual 
 
 ### Phase 4 — Admin Flow
 - implement admin secret-link page
-- build records table view
+- build records table view with start/end date filtering
 - build edit/delete/reassign actions
 - implement CSV export with exact column order
 
 **Exit criteria**
-- admin can view all current event-day records
+- admin can view current records for the configured event-day or a supplied inclusive stored `event_date` range
 - admin changes persist and overwrite current state
 - CSV export matches required column order exactly
+- invalid or partial admin date input falls back to the configured event-day only
 
 ### Phase 5 — Hardening and QA
 - validate error states and malformed QR handling
@@ -312,6 +319,7 @@ Phase 2 should be split into smaller sub-phases so each step has a clean manual 
 - duplicate route attempt is rejected
 - mentor notes write to correct scan record
 - admin edit/delete/reassign routes persist changes
+- admin records/export honor the inclusive `startDate` / `endDate` range contract and event-day fallback
 - CSV export returns required columns in required order
 
 ### End-to-End Tests

@@ -1,0 +1,42 @@
+- main [ref=e2]:
+  - generic "Admin records" [ref=e3]:
+    - heading "Admin records" [level=1] [ref=e4]
+  - generic [ref=e5]:
+    - status [ref=e6]: Records loaded and ready.
+    - region "Export" [ref=e7]:
+      - heading "Export" [level=2] [ref=e8]
+      - generic [ref=e9]:
+        - text: Start date
+        - textbox "Start date" [ref=e10]: 2026-04-11
+      - generic [ref=e11]:
+        - text: End date
+        - textbox "End date" [ref=e12]: 2026-04-11
+      - button "Apply" [ref=e13] [cursor=pointer]
+      - button "Export CSV" [ref=e14] [cursor=pointer]
+    - region "Records" [ref=e15]:
+      - heading "Records" [level=2] [ref=e16]
+      - table [ref=e17]:
+        - rowgroup [ref=e18]:
+          - row "Student Local 01 Mentor Local 01 Seeded admin note Edit Save Delete" [ref=e19]:
+            - cell "Student Local 01" [ref=e20]:
+              - combobox [disabled] [ref=e21]:
+                - option "Student Local 01" [selected]
+                - option "Student Local 02"
+                - option "Student Local 03"
+                - option "Student Local 04"
+                - option "Student Local 05"
+            - cell "Mentor Local 01" [ref=e22]:
+              - combobox [disabled] [ref=e23]:
+                - option "Mentor Local 01" [selected]
+                - option "Mentor Local 02"
+                - option "Mentor Local 03"
+                - option "Mentor Local 04"
+                - option "Mentor Local 05"
+            - cell "Seeded admin note" [ref=e24]:
+              - textbox [disabled] [ref=e25]: Seeded admin note
+            - cell "Edit" [ref=e26]:
+              - button "Edit" [ref=e27] [cursor=pointer]
+            - cell "Save" [ref=e28]:
+              - button "Save" [disabled] [ref=e29]
+            - cell "Delete" [ref=e30]:
+              - button "Delete" [ref=e31] [cursor=pointer]

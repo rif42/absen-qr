@@ -337,13 +337,14 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("event_date = ?1") &&
-            !normalizedSql.includes("where student_id = ?1 and event_date = ?2") &&
-            !normalizedSql.includes("where mentor_id = ?1 and event_date = ?2")
+            normalizedSql.includes("event_date >= ?1") &&
+            normalizedSql.includes("event_date <= ?2") &&
+            normalizedSql.includes("join people as student") &&
+            normalizedSql.includes("join people as mentor")
           ) {
-            const [eventDate] = params as [string];
+            const [startDate, endDate] = params as [string, string];
             const records = state.scanRecords
-              .filter((scanRecord) => scanRecord.event_date === eventDate)
+              .filter((scanRecord) => scanRecord.event_date >= startDate && scanRecord.event_date <= endDate)
               .sort((left, right) => {
                 if (normalizedSql.includes("order by scan_records.scanned_at asc, scan_records.scan_id asc")) {
                   return compareScanRecords(left, right, "asc");
@@ -352,11 +353,7 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
                 return compareScanRecords(left, right, "desc");
               });
 
-            if (normalizedSql.includes("join people as student") && normalizedSql.includes("join people as mentor")) {
-              return createQueryResult(records.map((record) => buildAdminJoinedRow(state, record)).filter(Boolean) as T[]);
-            }
-
-            return createQueryResult(records as T[]);
+            return createQueryResult(records.map((record) => buildAdminJoinedRow(state, record)).filter(Boolean) as T[]);
           }
 
           return createQueryResult([]);

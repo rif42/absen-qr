@@ -27,7 +27,8 @@ type AdminExportRow = {
 };
 
 type AdminRecordsPayload = {
-  eventDate: string;
+  startDate: string;
+  endDate: string;
   records: AdminRecord[];
   students: AdminPersonOption[];
   mentors: AdminPersonOption[];
@@ -104,7 +105,11 @@ export async function listAdminMentorOptions(db: D1Database): Promise<AdminPerso
   return mentors.map(mapAdminPersonOption);
 }
 
-export async function listAdminRecords(db: D1Database, eventDate: string): Promise<AdminRecord[]> {
+export async function listAdminRecords(
+  db: D1Database,
+  startDate: string,
+  endDate = startDate
+): Promise<AdminRecord[]> {
   const result = await db
     .prepare(
       `
@@ -126,11 +131,12 @@ export async function listAdminRecords(db: D1Database, eventDate: string): Promi
         JOIN people AS mentor
           ON mentor.person_id = scan_records.mentor_id
          AND mentor.role = 'mentor'
-        WHERE scan_records.event_date = ?1
+        WHERE scan_records.event_date >= ?1
+          AND scan_records.event_date <= ?2
         ORDER BY scan_records.scanned_at DESC, scan_records.scan_id DESC
       `
     )
-    .bind(eventDate)
+    .bind(startDate, endDate)
     .all<AdminRecordRow>();
 
   return result.results.map(mapAdminRecord);
@@ -232,7 +238,11 @@ export async function deleteAdminRecord(db: D1Database, scanId: string): Promise
   return true;
 }
 
-export async function listAdminExportRows(db: D1Database, eventDate: string): Promise<AdminExportRow[]> {
+export async function listAdminExportRows(
+  db: D1Database,
+  startDate: string,
+  endDate = startDate
+): Promise<AdminExportRow[]> {
   const result = await db
     .prepare(
       `
@@ -249,11 +259,12 @@ export async function listAdminExportRows(db: D1Database, eventDate: string): Pr
         JOIN people AS mentor
           ON mentor.person_id = scan_records.mentor_id
          AND mentor.role = 'mentor'
-        WHERE scan_records.event_date = ?1
+        WHERE scan_records.event_date >= ?1
+          AND scan_records.event_date <= ?2
         ORDER BY scan_records.scanned_at ASC, scan_records.scan_id ASC
       `
     )
-    .bind(eventDate)
+    .bind(startDate, endDate)
     .all<AdminExportRowRecord>();
 
   return result.results.map(mapAdminExportRow);
@@ -261,16 +272,18 @@ export async function listAdminExportRows(db: D1Database, eventDate: string): Pr
 
 export async function getAdminRecordsPayload(
   db: D1Database,
-  eventDate: string
+  startDate: string,
+  endDate = startDate
 ): Promise<AdminRecordsPayload> {
   const [records, students, mentors] = await Promise.all([
-    listAdminRecords(db, eventDate),
+    listAdminRecords(db, startDate, endDate),
     listAdminStudentOptions(db),
     listAdminMentorOptions(db)
   ]);
 
   return {
-    eventDate,
+    startDate,
+    endDate,
     records,
     students,
     mentors

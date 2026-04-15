@@ -4,7 +4,7 @@ import { isDuplicateScanRecordError } from "../db/scan-records";
 import { getConfiguredEventDate } from "../services/event-day";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { badRequest, conflict, forbidden, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
-import { isValidNotes } from "../validation/scan-records";
+import { isEventDate, isValidNotes } from "../validation/scan-records";
 import type { Env } from "../types";
 
 type AdminRecordPatchPayload = {
@@ -17,6 +17,29 @@ const DUPLICATE_SCAN_ERROR_MESSAGE = "Duplicate mentor scan already recorded for
 
 function isAuthorizedAdminSecret(secretToken: string, env: Env): boolean {
   return secretToken === env.ADMIN_SECRET;
+}
+
+function resolveAdminDateRange(request: Request, configuredEventDate: string): { startDate: string; endDate: string } {
+  const fallbackRange = {
+    startDate: configuredEventDate,
+    endDate: configuredEventDate
+  };
+  const searchParams = new URL(request.url).searchParams;
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+
+  if (startDate === null || endDate === null) {
+    return fallbackRange;
+  }
+
+  if (!isEventDate(startDate) || !isEventDate(endDate) || startDate > endDate) {
+    return fallbackRange;
+  }
+
+  return {
+    startDate,
+    endDate
+  };
 }
 
 function escapeCsvValue(value: string): string {
@@ -120,7 +143,18 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
       return internalServerError("Invalid EVENT_DATE configuration.");
     }
 
-    return json(await getAdminRecordsPayload(env.DB, currentEventDate));
+    const { startDate, endDate } = resolveAdminDateRange(request, currentEventDate);
+    const recordsPayload = await getAdminRecordsPayload(env.DB, startDate, endDate);
+
+    return json({
+      records: recordsPayload.records,
+      students: recordsPayload.students,
+      mentors: recordsPayload.mentors,
+      dateFilter: {
+        startDate,
+        endDate
+      }
+    });
   }
 
   if (apiPath === "/export.csv") {
@@ -136,7 +170,9 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
       return internalServerError("Invalid EVENT_DATE configuration.");
     }
 
-    const rows = await listAdminExportRows(env.DB, currentEventDate);
+    const { startDate, endDate } = resolveAdminDateRange(request, currentEventDate);
+
+    const rows = await listAdminExportRows(env.DB, startDate, endDate);
     const headers = new Headers();
     headers.set("content-type", "text/csv; charset=utf-8");
     headers.set("content-disposition", `attachment; filename="attendance-${currentEventDate}.csv"`);

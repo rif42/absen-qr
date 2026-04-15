@@ -5,7 +5,7 @@
 **Recommended stack:** Cloudflare Workers + D1
 
 ## Summary
-This product supports a QR-driven mentoring attendance workflow with three roles: student, mentor, and admin. Students scan mentor QR codes and see their same-day mentor history, mentors keep a live QR page open and enter notes immediately after each student scan, and admins inspect, correct, and export the final event-day records.
+This product supports a QR-driven mentoring attendance workflow with three roles: student, mentor, and admin. Students scan mentor QR codes and see their same-day mentor history, mentors keep a live QR page open and enter notes immediately after each student scan, and admins inspect, correct, and export the final event-day records using an inclusive stored `event_date` range with visible start/end controls.
 
 This PRD defines the final v1 scope for the pilot and is intended to replace the earlier attendee/admin-only MVP framing.
 
@@ -18,7 +18,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - Support a complete single event-day workflow for 5 mentors and 5 students using stable QR-linked identities.
 - Let students scan mentor QR codes and immediately see an accurate same-day history of mentors scanned.
 - Let mentors keep a QR page open and receive live note-entry state as soon as a student scan is recorded.
-- Give admins a secure secret-link interface to view, export, edit, delete, and reassign records.
+- Give admins a secure secret-link interface to view, filter, export, edit, delete, and reassign records for the configured event-day or an inclusive stored `event_date` range.
 - Keep the v1 architecture simple enough to ship on Cloudflare Workers + D1.
 
 ## Non-Goals
@@ -27,6 +27,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - No native mobile app. All flows are web-based.
 - No PDF reporting in v1. CSV export is the required report format.
 - No advanced analytics, notifications, or scoring logic in v1.
+- No multi-event reporting or analytics dashboards in v1; admin date-range controls are only a reporting filter.
 
 ## Personas
 
@@ -45,6 +46,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 ### Admin
 - Opens a private secret link.
 - Needs visibility into all scan and note transactions.
+- Needs start/end date controls for bounded reporting over stored `event_date` values.
 - Needs CSV export.
 - Needs manual correction controls.
 
@@ -62,6 +64,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 
 ### Admin
 - As an admin, I want to inspect the full transaction log so that I can audit what happened during the event.
+- As an admin, I want to choose a start and end event date so that I can inspect a bounded report and export it consistently.
 - As an admin, I want to export the event data as CSV so that I can use it in downstream reporting.
 - As an admin, I want to correct bad records so that wrong notes or wrong pairings do not damage the final report.
 
@@ -107,20 +110,24 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - [ ] Given the mentor enters notes, when the note is saved, then it is linked to the correct student, mentor, and scan record.
 
 #### 5. Admin transaction log
-- Admin can view all records for the event-day.
+- Admin can view all records for the configured event-day or an inclusive stored `event_date` range when supplied through the admin filters.
 - Records include student, mentor, date, and mentor notes.
 
 **Acceptance criteria**
 - [ ] Admin view lists all scan transactions for the event-day.
 - [ ] Admin can inspect the latest state of successful and corrected records.
+- [ ] Admin table honors visible start/end date controls mapped to shared `startDate` and `endDate` semantics.
+- [ ] Missing, malformed, or reversed admin date params fall back to the configured event-day only.
 
 #### 6. Admin CSV export
-- Admin can export the event-day records as CSV.
+- Admin can export the configured event-day records or an inclusive stored `event_date` range as CSV.
 - CSV column order is fixed for v1.
 
 **Acceptance criteria**
 - [ ] Export columns appear in this exact order: student name, secret id, mentor scanned, date, notes.
 - [ ] Export reflects the latest corrected state of the data.
+- [ ] Export uses the same `startDate` / `endDate` range contract as the admin table.
+- [ ] Missing, malformed, or reversed admin date params fall back to the configured event-day only.
 
 #### 7. Admin manual correction
 - Admin can edit notes, delete incorrect records, and reassign a record to the correct student or mentor.
@@ -180,6 +187,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - Mentor note entry happens on the mentor page via live update, not by handing the student device to the mentor.
 - Duplicate student→mentor scans on the same day are rejected.
 - Admin correction behavior is last-write-wins.
+- Admin table and CSV export share one inclusive stored `event_date` range contract with event-day fallback.
 - CSV is the only required export format in v1.
 
 ## Timeline Considerations

@@ -88,7 +88,10 @@ async function expectRecordsAndExportToReflectLatestValues(
   const recordsResponse = await fetchAdminApi("/records", undefined, env);
   expect(recordsResponse.status).toBe(200);
   await expect(recordsResponse.json()).resolves.toMatchObject({
-    eventDate: expectedRecord.eventDate,
+    dateFilter: {
+      startDate: expectedRecord.eventDate,
+      endDate: expectedRecord.eventDate
+    },
     records: [expectedRecord]
   });
 
@@ -101,7 +104,10 @@ async function expectRecordsAndExportToBeEmpty(env: WorkerEnv, eventDate: string
   const recordsResponse = await fetchAdminApi("/records", undefined, env);
   expect(recordsResponse.status).toBe(200);
   await expect(recordsResponse.json()).resolves.toMatchObject({
-    eventDate,
+    dateFilter: {
+      startDate: eventDate,
+      endDate: eventDate
+    },
     records: []
   });
 
@@ -154,7 +160,10 @@ describe("admin API", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      eventDate: configuredEventDate,
+      dateFilter: {
+        startDate: configuredEventDate,
+        endDate: configuredEventDate
+      },
       records: [
         {
           scanId: "scan-admin-new",
@@ -196,6 +205,170 @@ describe("admin API", () => {
         { personId: "mentor-005", displayName: "Mentor Local 05" }
       ]
     });
+  });
+
+  it("returns ranged admin records and export rows for the same start/end dates", async () => {
+    const startDate = "2026-01-14";
+    const endDate = configuredEventDate;
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-range-late",
+          student_id: "student-002",
+          mentor_id: "mentor-002",
+          event_date: endDate,
+          scanned_at: `${endDate}T09:00:00.000Z`,
+          notes: "End range record",
+          updated_at: `${endDate}T09:05:00.000Z`
+        },
+        {
+          scan_id: "scan-range-early",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: startDate,
+          scanned_at: `${startDate}T08:00:00.000Z`,
+          notes: "Start range record",
+          updated_at: `${startDate}T08:05:00.000Z`
+        },
+        {
+          scan_id: "scan-range-outside",
+          student_id: "student-003",
+          mentor_id: "mentor-003",
+          event_date: "2026-01-13",
+          scanned_at: "2026-01-13T10:00:00.000Z",
+          notes: "Outside range",
+          updated_at: "2026-01-13T10:05:00.000Z"
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    const recordsResponse = await fetchAdminApi(`/records?startDate=${startDate}&endDate=${endDate}`, undefined, env);
+
+    expect(recordsResponse.status).toBe(200);
+    await expect(recordsResponse.json()).resolves.toEqual({
+      dateFilter: {
+        startDate,
+        endDate
+      },
+      records: [
+        {
+          scanId: "scan-range-late",
+          studentId: "student-002",
+          studentName: "Student Local 02",
+          studentSecretId: "student-secret-002",
+          mentorId: "mentor-002",
+          mentorName: "Mentor Local 02",
+          eventDate: endDate,
+          scannedAt: `${endDate}T09:00:00.000Z`,
+          notes: "End range record",
+          updatedAt: `${endDate}T09:05:00.000Z`
+        },
+        {
+          scanId: "scan-range-early",
+          studentId: "student-001",
+          studentName: "Student Local 01",
+          studentSecretId: "student-secret-001",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          eventDate: startDate,
+          scannedAt: `${startDate}T08:00:00.000Z`,
+          notes: "Start range record",
+          updatedAt: `${startDate}T08:05:00.000Z`
+        }
+      ],
+      students: [
+        { personId: "student-001", displayName: "Student Local 01" },
+        { personId: "student-002", displayName: "Student Local 02" },
+        { personId: "student-003", displayName: "Student Local 03" },
+        { personId: "student-004", displayName: "Student Local 04" },
+        { personId: "student-005", displayName: "Student Local 05" }
+      ],
+      mentors: [
+        { personId: "mentor-001", displayName: "Mentor Local 01" },
+        { personId: "mentor-002", displayName: "Mentor Local 02" },
+        { personId: "mentor-003", displayName: "Mentor Local 03" },
+        { personId: "mentor-004", displayName: "Mentor Local 04" },
+        { personId: "mentor-005", displayName: "Mentor Local 05" }
+      ]
+    });
+
+    const exportResponse = await fetchAdminApi(`/export.csv?startDate=${startDate}&endDate=${endDate}`, undefined, env);
+
+    expect(exportResponse.status).toBe(200);
+    await expect(exportResponse.text()).resolves.toBe(
+      [
+        "student name,secret id,mentor scanned,date,notes",
+        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-14,Start range record",
+        "Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,End range record"
+      ].join("\n")
+    );
+  });
+
+  it("falls back to the configured event day when the admin range is partial, malformed, or reversed", async () => {
+    const database = createMockD1Database({
+      scanRecords: [
+        {
+          scan_id: "scan-fallback-configured",
+          student_id: "student-001",
+          mentor_id: "mentor-001",
+          event_date: configuredEventDate,
+          scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+          notes: "Configured day record",
+          updated_at: `${configuredEventDate}T08:05:00.000Z`
+        },
+        {
+          scan_id: "scan-fallback-outside",
+          student_id: "student-002",
+          mentor_id: "mentor-002",
+          event_date: "2026-01-14",
+          scanned_at: "2026-01-14T09:00:00.000Z",
+          notes: "Outside fallback day",
+          updated_at: "2026-01-14T09:05:00.000Z"
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    for (const path of [
+      "/records?startDate=2026-01-14",
+      "/records?startDate=bad-date&endDate=2026-01-15",
+      "/records?startDate=2026-01-16&endDate=2026-01-15"
+    ]) {
+      const response = await fetchAdminApi(path, undefined, env);
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        dateFilter: {
+          startDate: configuredEventDate,
+          endDate: configuredEventDate
+        },
+        records: [
+          {
+            scanId: "scan-fallback-configured",
+            studentId: "student-001",
+            studentName: "Student Local 01",
+            studentSecretId: "student-secret-001",
+            mentorId: "mentor-001",
+            mentorName: "Mentor Local 01",
+            eventDate: configuredEventDate,
+            scannedAt: `${configuredEventDate}T08:00:00.000Z`,
+            notes: "Configured day record",
+            updatedAt: `${configuredEventDate}T08:05:00.000Z`
+          }
+        ]
+      });
+    }
+
+    const exportResponse = await fetchAdminApi("/export.csv?startDate=2026-01-16&endDate=2026-01-15", undefined, env);
+
+    expect(exportResponse.status).toBe(200);
+    await expect(exportResponse.text()).resolves.toBe(
+      [
+        "student name,secret id,mentor scanned,date,notes",
+        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Configured day record"
+      ].join("\n")
+    );
   });
 
   it("rejects a bad admin secret with forbidden", async () => {

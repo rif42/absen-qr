@@ -1,41 +1,59 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin records</title>
-    <meta
-      name="description"
-      content="Admin secret-link page for the single event-day QR attendance pilot."
-    />
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <main class="shell">
-      <header class="page-header" aria-labelledby="page-title">
-        <h1 id="page-title">Admin records</h1>
-      </header>
 
-      <section class="stack">
-        <div id="status-banner" class="status" role="status" aria-live="polite">
-          Review, export, and correct the event-day records.
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin records</title>
+  <meta name="description" content="Admin secret-link page for the single event-day QR attendance pilot." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <main class="shell">
+    <header class="page-header" aria-labelledby="page-title">
+      <h1 id="page-title">Admin records</h1>
+    </header>
+
+    <section class="stack">
+      <div id="status-banner" class="status" role="status" aria-live="polite">
+        Review, export, and correct the event-day records.
+      </div>
+
+      <section id="controls-card" class="card" aria-labelledby="controls-card-title">
+        <h2 id="controls-card-title">Filter</h2>
+        <div class="filter-card">
+          <label for="startDate">Start date</label>
+          <input id="startDate" name="startDate" type="date" />
+          <label for="endDate">End date</label>
+          <input id="endDate" name="endDate" type="date" />
+        </div>
+        <div class="buttons-filter">
+          <button type="button">Apply</button>
+          <button type="button">Export CSV</button>
         </div>
 
-        <section id="controls-card" class="card" aria-labelledby="controls-card-title">
-          <h2 id="controls-card-title">Export</h2>
-          <button type="button" id="export-csv-button">Export CSV</button>
-        </section>
-
-        <section id="records-card" class="card" aria-labelledby="records-card-title">
-          <h2 id="records-card-title">Records</h2>
-          <div id="records-loading">Loading records…</div>
-          <p id="records-empty-state">No records available yet.</p>
-          <table id="records-table">
-            <tbody id="records-table-body"></tbody>
-          </table>
-        </section>
       </section>
-    </main>
-    <script type="module" src="./app.js"></script>
-  </body>
+
+      <section id="records-card" class="card" aria-labelledby="records-card-title">
+        <h2 id="records-card-title">Records</h2>
+        <div id="records-loading">Loading records…</div>
+        <p id="records-empty-state">No records available yet.</p>
+        <table id="records-table">
+          <thead>
+            <tr>
+              <th scope="col">Student name</th>
+              <th scope="col">Mentor name</th>
+              <th scope="col">Notes</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody id="records-table-body"></tbody>
+        </table>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+
 </html>

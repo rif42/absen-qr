@@ -8,27 +8,38 @@ import {
 import { createMockD1Database } from "../support/mock-d1";
 
 const configuredEventDate = "2026-01-15";
+const rangeStartDate = "2026-01-14";
+const rangeEndDate = "2026-01-15";
 
 function createAdminMockDatabase(): D1Database {
   return createMockD1Database({
     scanRecords: [
       {
+        scan_id: "scan-admin-early",
+        student_id: "student-003",
+        mentor_id: "mentor-003",
+        event_date: rangeStartDate,
+        scanned_at: `${rangeStartDate}T08:00:00.000Z`,
+        notes: "Early note",
+        updated_at: `${rangeStartDate}T08:05:00.000Z`
+      },
+      {
         scan_id: "scan-admin-alpha",
         student_id: "student-001",
         mentor_id: "mentor-001",
-        event_date: configuredEventDate,
-        scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+        event_date: rangeEndDate,
+        scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Alpha note",
-        updated_at: `${configuredEventDate}T09:05:00.000Z`
+        updated_at: `${rangeEndDate}T09:05:00.000Z`
       },
       {
         scan_id: "scan-admin-zeta",
         student_id: "student-002",
         mentor_id: "mentor-002",
-        event_date: configuredEventDate,
-        scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+        event_date: rangeEndDate,
+        scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Zeta note",
-        updated_at: `${configuredEventDate}T09:10:00.000Z`
+        updated_at: `${rangeEndDate}T09:10:00.000Z`
       },
       {
         scan_id: "scan-admin-other-day",
@@ -45,10 +56,11 @@ function createAdminMockDatabase(): D1Database {
 
 describe("admin records data layer", () => {
   it("returns the locked admin payload contract without secret tokens", async () => {
-    const payload = await getAdminRecordsPayload(createAdminMockDatabase(), configuredEventDate);
+    const payload = await getAdminRecordsPayload(createAdminMockDatabase(), rangeStartDate, rangeEndDate);
 
     expect(payload).toEqual({
-      eventDate: configuredEventDate,
+      startDate: rangeStartDate,
+      endDate: rangeEndDate,
       records: [
         {
           scanId: "scan-admin-zeta",
@@ -57,10 +69,10 @@ describe("admin records data layer", () => {
           studentSecretId: "student-secret-002",
           mentorId: "mentor-002",
           mentorName: "Mentor Local 02",
-          eventDate: configuredEventDate,
-          scannedAt: `${configuredEventDate}T09:00:00.000Z`,
+          eventDate: rangeEndDate,
+          scannedAt: `${rangeEndDate}T09:00:00.000Z`,
           notes: "Zeta note",
-          updatedAt: `${configuredEventDate}T09:10:00.000Z`
+          updatedAt: `${rangeEndDate}T09:10:00.000Z`
         },
         {
           scanId: "scan-admin-alpha",
@@ -69,10 +81,22 @@ describe("admin records data layer", () => {
           studentSecretId: "student-secret-001",
           mentorId: "mentor-001",
           mentorName: "Mentor Local 01",
-          eventDate: configuredEventDate,
-          scannedAt: `${configuredEventDate}T09:00:00.000Z`,
+          eventDate: rangeEndDate,
+          scannedAt: `${rangeEndDate}T09:00:00.000Z`,
           notes: "Alpha note",
-          updatedAt: `${configuredEventDate}T09:05:00.000Z`
+          updatedAt: `${rangeEndDate}T09:05:00.000Z`
+        },
+        {
+          scanId: "scan-admin-early",
+          studentId: "student-003",
+          studentName: "Student Local 03",
+          studentSecretId: "student-secret-003",
+          mentorId: "mentor-003",
+          mentorName: "Mentor Local 03",
+          eventDate: rangeStartDate,
+          scannedAt: `${rangeStartDate}T08:00:00.000Z`,
+          notes: "Early note",
+          updatedAt: `${rangeStartDate}T08:05:00.000Z`
         }
       ],
       students: [
@@ -116,21 +140,28 @@ describe("admin records data layer", () => {
   });
 
   it("returns export rows in chronological order with the fixed field set", async () => {
-    const rows = await listAdminExportRows(createAdminMockDatabase(), configuredEventDate);
+    const rows = await listAdminExportRows(createAdminMockDatabase(), rangeStartDate, rangeEndDate);
 
     expect(rows).toEqual([
+      {
+        studentName: "Student Local 03",
+        studentSecretId: "student-secret-003",
+        mentorName: "Mentor Local 03",
+        eventDate: rangeStartDate,
+        notes: "Early note"
+      },
       {
         studentName: "Student Local 01",
         studentSecretId: "student-secret-001",
         mentorName: "Mentor Local 01",
-        eventDate: configuredEventDate,
+        eventDate: rangeEndDate,
         notes: "Alpha note"
       },
       {
         studentName: "Student Local 02",
         studentSecretId: "student-secret-002",
         mentorName: "Mentor Local 02",
-        eventDate: configuredEventDate,
+        eventDate: rangeEndDate,
         notes: "Zeta note"
       }
     ]);
