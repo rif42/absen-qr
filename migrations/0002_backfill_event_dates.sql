@@ -1,0 +1,25 @@
+-- Safe backfill reference for reconciling stale event_date values.
+--
+-- IMPORTANT: Run the TypeScript backfill utility (auditAndBackfillEventDates in
+-- src/worker/db/scan-records.ts) instead of running this SQL blindly. The utility
+-- detects collisions where multiple rows would collapse onto the same
+-- (student_id, mentor_id, event_date) key and aborts with explicit remediation
+-- instructions instead of deleting or merging records.
+--
+-- Step 1: Audit mismatched rows
+-- SELECT scan_id, student_id, mentor_id, scanned_at, event_date
+-- FROM scan_records
+-- WHERE event_date != substr(scanned_at, 1, 10);
+--
+-- Step 2: Check for collisions before updating (example for one row)
+-- SELECT scan_id
+-- FROM scan_records
+-- WHERE student_id = :student_id
+--   AND mentor_id = :mentor_id
+--   AND event_date = substr(scanned_at, 1, 10)
+--   AND scan_id != :scan_id;
+--
+-- Step 3: If no collisions exist, apply the backfill
+-- UPDATE scan_records
+-- SET event_date = substr(scanned_at, 1, 10)
+-- WHERE event_date != substr(scanned_at, 1, 10);

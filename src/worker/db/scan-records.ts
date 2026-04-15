@@ -169,3 +169,98 @@ export async function updateScanRecordNotes(
     updated_at: updatedAt
   };
 }
+
+export type BackfillCollision = {
+  scanId: string;
+  studentId: string;
+  mentorId: string;
+  scannedAt: string;
+  currentEventDate: string;
+  derivedDay: string;
+  collidingScanId: string;
+};
+
+export type BackfillResult = {
+  mismatchedRows: number;
+  updatedRows: number;
+  collisions: BackfillCollision[];
+};
+
+export async function auditAndBackfillEventDates(db: D1Database): Promise<BackfillResult> {
+  const auditResult = await db
+    .prepare(
+      `
+        SELECT scan_id, student_id, mentor_id, scanned_at, event_date
+        FROM scan_records
+        WHERE event_date != substr(scanned_at, 1, 10)
+      `
+    )
+    .bind()
+    .all<{ scan_id: string; student_id: string; mentor_id: string; scanned_at: string; event_date: string }>();
+
+  const mismatchedRows = auditResult.results;
+  const collisions: BackfillCollision[] = [];
+
+  for (const row of mismatchedRows) {
+    const derivedDay = row.scanned_at.substring(0, 10);
+
+    const collisionCheck = await db
+      .prepare(
+        `
+          SELECT scan_id
+          FROM scan_records
+          WHERE student_id = ?1
+            AND mentor_id = ?2
+            AND event_date = ?3
+            AND scan_id != ?4
+          LIMIT 1
+        `
+      )
+      .bind(row.student_id, row.mentor_id, derivedDay, row.scan_id)
+      .first<{ scan_id: string }>();
+
+    if (collisionCheck) {
+      collisions.push({
+        scanId: row.scan_id,
+        studentId: row.student_id,
+        mentorId: row.mentor_id,
+        scannedAt: row.scanned_at,
+        currentEventDate: row.event_date,
+        derivedDay,
+        collidingScanId: collisionCheck.scan_id
+      });
+    }
+  }
+
+  if (collisions.length > 0) {
+    const details = collisions
+      .map(
+        (c) =>
+          `scan_id=${c.scanId} (student=${c.studentId}, mentor=${c.mentorId}) would collide with scan_id=${c.collidingScanId} on derived day ${c.derivedDay}`
+      )
+      .join("; ");
+    throw new Error(
+      `Backfill aborted: ${collisions.length} row(s) would violate the unique (student_id, mentor_id, event_date) constraint. Resolve manually before retrying. Collisions: ${details}`
+    );
+  }
+
+  for (const row of mismatchedRows) {
+    const derivedDay = row.scanned_at.substring(0, 10);
+    await db
+      .prepare(
+        `
+          UPDATE scan_records
+          SET event_date = ?1
+          WHERE scan_id = ?2
+        `
+      )
+      .bind(derivedDay, row.scan_id)
+      .run();
+  }
+
+  return {
+    mismatchedRows: mismatchedRows.length,
+    updatedRows: mismatchedRows.length,
+    collisions
+  };
+}

@@ -310,6 +310,22 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return (scanRecord ?? null) as T | null;
           }
 
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and event_date = ?3 and scan_id != ?4")
+          ) {
+            const [studentId, mentorId, eventDate, scanId] = params as [string, string, string, string];
+            const scanRecord = state.scanRecords.find(
+              (candidate) =>
+                candidate.student_id === studentId &&
+                candidate.mentor_id === mentorId &&
+                candidate.event_date === eventDate &&
+                candidate.scan_id !== scanId
+            );
+
+            return (scanRecord ?? null) as T | null;
+          }
+
           throw new Error(`Unsupported first() SQL in mock D1: ${sql}`);
         },
         async all<T>(): Promise<QueryResult<T>> {
@@ -371,6 +387,16 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return createQueryResult(records.map((record) => buildAdminJoinedRow(state, record)).filter(Boolean) as T[]);
           }
 
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where event_date != substr(scanned_at, 1, 10)")
+          ) {
+            const results = state.scanRecords.filter(
+              (scanRecord) => scanRecord.event_date !== scanRecord.scanned_at.slice(0, 10)
+            );
+            return createQueryResult(results as T[]);
+          }
+
           return createQueryResult([]);
         },
         async run(): Promise<{ success: true; meta: Record<string, unknown> }> {
@@ -416,6 +442,14 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (normalizedSql.startsWith("update scan_records set") && normalizedSql.includes("where scan_id =")) {
             applyAdminScanRecordUpdate(state, normalizedSql, params);
+          }
+
+          if (normalizedSql.startsWith("update scan_records set event_date = ?1 where scan_id = ?2")) {
+            const [eventDate, scanId] = params as [string, string];
+            const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
+            if (scanRecord) {
+              scanRecord.event_date = eventDate;
+            }
           }
 
           if (normalizedSql.startsWith("delete from scan_records") && normalizedSql.includes("where scan_id = ?1")) {
