@@ -288,6 +288,21 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return (scanRecord ?? null) as T | null;
           }
 
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and substr(scanned_at, 1, 10) = ?3")
+          ) {
+            const [studentId, mentorId, utcDate] = params as [string, string, string];
+            const scanRecord = state.scanRecords.find(
+              (candidate) =>
+                candidate.student_id === studentId &&
+                candidate.mentor_id === mentorId &&
+                candidate.scanned_at.slice(0, 10) === utcDate
+            );
+
+            return (scanRecord ?? null) as T | null;
+          }
+
           if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where scan_id = ?1")) {
             const [scanId] = params as [string];
             const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);

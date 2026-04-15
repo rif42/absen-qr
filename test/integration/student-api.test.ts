@@ -62,6 +62,9 @@ describe("student API", () => {
   });
 
   it("creates a scan record from a valid mentor QR payload", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${configuredEventDate}T12:00:00.000Z`));
+
     const database = createMockD1Database();
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
@@ -77,6 +80,8 @@ describe("student API", () => {
       createEnv(database),
       {} as WorkerContext
     );
+
+    vi.useRealTimers();
 
     expect(response.status).toBe(201);
 
@@ -101,6 +106,9 @@ describe("student API", () => {
   });
 
   it("maps a database uniqueness conflict to the duplicate scan response", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${configuredEventDate}T12:00:00.000Z`));
+
     const database = createMockD1Database({
       insertScanRecordErrorMessage:
         "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
@@ -119,6 +127,8 @@ describe("student API", () => {
       createEnv(database),
       {} as WorkerContext
     );
+
+    vi.useRealTimers();
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
@@ -152,6 +162,9 @@ describe("student API", () => {
   });
 
   it("rejects a duplicate mentor scan for the same event day", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(`${configuredEventDate}T12:00:00.000Z`));
+
     const database = createMockD1Database({
       scanRecords: [
         {
@@ -180,6 +193,8 @@ describe("student API", () => {
       {} as WorkerContext
     );
 
+    vi.useRealTimers();
+
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
       error: "Duplicate mentor scan already recorded for this event day."
@@ -187,7 +202,7 @@ describe("student API", () => {
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
   });
 
-  it("rejects a duplicate mentor scan when the existing record was scanned on a different runtime day", async () => {
+  it("allows a scan when the existing record was scanned on a different UTC day", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
 
@@ -221,11 +236,8 @@ describe("student API", () => {
 
     vi.useRealTimers();
 
-    expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toEqual({
-      error: "Duplicate mentor scan already recorded for this event day."
-    });
-    expect(readMockD1State(database).scanRecords).toHaveLength(1);
+    expect(response.status).toBe(201);
+    expect(readMockD1State(database).scanRecords).toHaveLength(2);
   });
 
   describe("history", () => {

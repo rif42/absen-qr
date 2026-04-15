@@ -1,7 +1,7 @@
 import { deleteAdminRecord, findAdminRecordById, getAdminRecordsPayload, listAdminExportRows, updateAdminRecord } from "../db/admin-records";
 import { findPersonById } from "../db/people";
 import { isDuplicateScanRecordError } from "../db/scan-records";
-import { getConfiguredEventDate } from "../services/event-day";
+import { getCurrentUtcDate } from "../services/event-day";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { badRequest, conflict, forbidden, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { isEventDate, isValidNotes } from "../validation/scan-records";
@@ -135,15 +135,15 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
       return methodNotAllowed(["GET"]);
     }
 
-    let currentEventDate: string;
+    let currentUtcDate: string;
 
     try {
-      currentEventDate = getConfiguredEventDate(env);
+      currentUtcDate = getCurrentUtcDate();
     } catch {
-      return internalServerError("Invalid EVENT_DATE configuration.");
+      return internalServerError("Invalid current date configuration.");
     }
 
-    const { startDate, endDate } = resolveAdminDateRange(request, currentEventDate);
+    const { startDate, endDate } = resolveAdminDateRange(request, currentUtcDate);
     const recordsPayload = await getAdminRecordsPayload(env.DB, startDate, endDate);
 
     return json({
@@ -162,20 +162,20 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
       return methodNotAllowed(["GET"]);
     }
 
-    let currentEventDate: string;
+    let currentUtcDate: string;
 
     try {
-      currentEventDate = getConfiguredEventDate(env);
+      currentUtcDate = getCurrentUtcDate();
     } catch {
-      return internalServerError("Invalid EVENT_DATE configuration.");
+      return internalServerError("Invalid current date configuration.");
     }
 
-    const { startDate, endDate } = resolveAdminDateRange(request, currentEventDate);
+    const { startDate, endDate } = resolveAdminDateRange(request, currentUtcDate);
 
     const rows = await listAdminExportRows(env.DB, startDate, endDate);
     const headers = new Headers();
     headers.set("content-type", "text/csv; charset=utf-8");
-    headers.set("content-disposition", `attachment; filename="attendance-${currentEventDate}.csv"`);
+    headers.set("content-disposition", `attachment; filename="attendance-${currentUtcDate}.csv"`);
 
     return new Response(serializeAdminExportCsv(rows), {
       status: 200,

@@ -82,18 +82,18 @@ export async function findStudentMentorScanRecordByEventDate(
   db: D1Database,
   studentId: string,
   mentorId: string,
-  eventDate: string
+  utcDate: string
 ): Promise<ScanRecord | null> {
   const result = await db
     .prepare(
       `
         SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
         FROM scan_records
-        WHERE student_id = ?1 AND mentor_id = ?2 AND event_date = ?3
+        WHERE student_id = ?1 AND mentor_id = ?2 AND substr(scanned_at, 1, 10) = ?3
         LIMIT 1
       `
     )
-    .bind(studentId, mentorId, eventDate)
+    .bind(studentId, mentorId, utcDate)
     .first<ScanRecord>();
 
   return result ?? null;

@@ -5,7 +5,7 @@ import {
   isDuplicateScanRecordError,
   listStudentHistory
 } from "../db/scan-records";
-import { getConfiguredEventDate, getCurrentUtcDate } from "../services/event-day";
+import { getCurrentUtcDate, getUtcDayKey } from "../services/event-day";
 import { badRequest, conflict, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { parseMentorQrPayload } from "../services/mentor-qr";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
@@ -44,14 +44,6 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return methodNotAllowed(["POST"]);
     }
 
-    let currentEventDate: string;
-
-    try {
-      currentEventDate = getConfiguredEventDate(env);
-    } catch {
-      return internalServerError("Invalid EVENT_DATE configuration.");
-    }
-
     const student = await findPersonBySecretToken(env.DB, "student", secretToken);
 
     if (!student) {
@@ -87,18 +79,20 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return badRequest("Invalid mentor QR payload.");
     }
 
+    const scannedAt = new Date().toISOString();
+    const eventDate = getUtcDayKey(scannedAt);
+
     const existingScan = await findStudentMentorScanRecordByEventDate(
       env.DB,
       student.person_id,
       mentor.person_id,
-      currentEventDate
+      eventDate
     );
 
     if (existingScan) {
       return conflict("Duplicate mentor scan already recorded for this event day.");
     }
 
-    const scannedAt = new Date().toISOString();
     let scan;
 
     try {
@@ -106,7 +100,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
         scanId: crypto.randomUUID(),
         studentId: student.person_id,
         mentorId: mentor.person_id,
-        eventDate: currentEventDate,
+        eventDate,
         scannedAt
       });
     } catch (error) {
@@ -143,7 +137,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     let currentUtcDate: string;
 
     try {
-      currentUtcDate = getCurrentUtcDate();
+      currentUtcDate = getUtcDayKey(new Date());
     } catch {
       return internalServerError("Invalid current date configuration.");
     }

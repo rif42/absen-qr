@@ -42,7 +42,7 @@ async function fetchAdminApi(
   );
 }
 
-async function withFrozenTime<T>(isoTimestamp: string, run: () => Promise<T>): Promise<T> {
+async function withFrozenTime<T>(isoTimestamp: string, run: () => T | Promise<T>): Promise<T> {
   vi.useFakeTimers();
   vi.setSystemTime(new Date(isoTimestamp));
 
@@ -152,10 +152,12 @@ describe("admin API", () => {
       ]
     });
     const fetchHandler = worker.fetch as FetchHandler;
-    const response = await fetchHandler(
-      new Request("https://example.com/admin/local-admin-secret-token/api/records") as WorkerRequest,
-      createEnv(database),
-      {} as WorkerContext
+    const response = await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+      fetchHandler(
+        new Request("https://example.com/admin/local-admin-secret-token/api/records") as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      )
     );
 
     expect(response.status).toBe(200);
@@ -305,7 +307,7 @@ describe("admin API", () => {
     );
   });
 
-  it("falls back to the configured event day when the admin range is partial, malformed, or reversed", async () => {
+  it("falls back to the current UTC day when the admin range is partial, malformed, or reversed", async () => {
     const database = createMockD1Database({
       scanRecords: [
         {
@@ -330,45 +332,47 @@ describe("admin API", () => {
     });
     const env = createEnv(database);
 
-    for (const path of [
-      "/records?startDate=2026-01-14",
-      "/records?startDate=bad-date&endDate=2026-01-15",
-      "/records?startDate=2026-01-16&endDate=2026-01-15"
-    ]) {
-      const response = await fetchAdminApi(path, undefined, env);
+    await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, async () => {
+      for (const path of [
+        "/records?startDate=2026-01-14",
+        "/records?startDate=bad-date&endDate=2026-01-15",
+        "/records?startDate=2026-01-16&endDate=2026-01-15"
+      ]) {
+        const response = await fetchAdminApi(path, undefined, env);
 
-      expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toMatchObject({
-        dateFilter: {
-          startDate: configuredEventDate,
-          endDate: configuredEventDate
-        },
-        records: [
-          {
-            scanId: "scan-fallback-configured",
-            studentId: "student-001",
-            studentName: "Student Local 01",
-            studentSecretId: "student-secret-001",
-            mentorId: "mentor-001",
-            mentorName: "Mentor Local 01",
-            eventDate: configuredEventDate,
-            scannedAt: `${configuredEventDate}T08:00:00.000Z`,
-            notes: "Configured day record",
-            updatedAt: `${configuredEventDate}T08:05:00.000Z`
-          }
-        ]
-      });
-    }
+        expect(response.status).toBe(200);
+        await expect(response.json()).resolves.toMatchObject({
+          dateFilter: {
+            startDate: configuredEventDate,
+            endDate: configuredEventDate
+          },
+          records: [
+            {
+              scanId: "scan-fallback-configured",
+              studentId: "student-001",
+              studentName: "Student Local 01",
+              studentSecretId: "student-secret-001",
+              mentorId: "mentor-001",
+              mentorName: "Mentor Local 01",
+              eventDate: configuredEventDate,
+              scannedAt: `${configuredEventDate}T08:00:00.000Z`,
+              notes: "Configured day record",
+              updatedAt: `${configuredEventDate}T08:05:00.000Z`
+            }
+          ]
+        });
+      }
 
-    const exportResponse = await fetchAdminApi("/export.csv?startDate=2026-01-16&endDate=2026-01-15", undefined, env);
+      const exportResponse = await fetchAdminApi("/export.csv?startDate=2026-01-16&endDate=2026-01-15", undefined, env);
 
-    expect(exportResponse.status).toBe(200);
-    await expect(exportResponse.text()).resolves.toBe(
-      [
-        "student name,secret id,mentor scanned,date,notes",
-        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Configured day record"
-      ].join("\n")
-    );
+      expect(exportResponse.status).toBe(200);
+      await expect(exportResponse.text()).resolves.toBe(
+        [
+          "student name,secret id,mentor scanned,date,notes",
+          "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Configured day record"
+        ].join("\n")
+      );
+    });
   });
 
   it("rejects a bad admin secret with forbidden", async () => {
@@ -434,10 +438,12 @@ describe("admin API", () => {
       ]
     });
     const fetchHandler = worker.fetch as FetchHandler;
-    const response = await fetchHandler(
-      new Request("https://example.com/admin/local-admin-secret-token/api/export.csv") as WorkerRequest,
-      createEnv(database),
-      {} as WorkerContext
+    const response = await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+      fetchHandler(
+        new Request("https://example.com/admin/local-admin-secret-token/api/export.csv") as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      )
     );
 
     expect(response.status).toBe(200);
@@ -472,12 +478,14 @@ describe("admin API", () => {
     });
     const env = createEnv(database);
 
-    const response = await fetchAdminApi(
-      "/records/scan-delete-success",
-      {
-        method: "DELETE"
-      },
-      env
+    const response = await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+      fetchAdminApi(
+        "/records/scan-delete-success",
+        {
+          method: "DELETE"
+        },
+        env
+      )
     );
 
     expect(response.status).toBe(200);
@@ -486,7 +494,9 @@ describe("admin API", () => {
       scanId: "scan-delete-success"
     });
 
-    await expectRecordsAndExportToBeEmpty(env, configuredEventDate);
+    await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+      expectRecordsAndExportToBeEmpty(env, configuredEventDate)
+    );
   });
 
   it("returns not found when deleting a missing admin record", async () => {
@@ -574,21 +584,23 @@ describe("admin API", () => {
       updatedAt
     });
 
-    await expectRecordsAndExportToReflectLatestValues(
-      env,
-      {
-        scanId: "scan-patch-notes",
-        studentId: "student-001",
-        studentName: "Student Local 01",
-        studentSecretId: "student-secret-001",
-        mentorId: "mentor-001",
-        mentorName: "Mentor Local 01",
-        eventDate: configuredEventDate,
-        scannedAt: `${configuredEventDate}T08:00:00.000Z`,
-        notes: "Corrected admin note",
-        updatedAt
-      },
-      "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Corrected admin note"
+    await withFrozenTime(updatedAt, () =>
+      expectRecordsAndExportToReflectLatestValues(
+        env,
+        {
+          scanId: "scan-patch-notes",
+          studentId: "student-001",
+          studentName: "Student Local 01",
+          studentSecretId: "student-secret-001",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          eventDate: configuredEventDate,
+          scannedAt: `${configuredEventDate}T08:00:00.000Z`,
+          notes: "Corrected admin note",
+          updatedAt
+        },
+        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Corrected admin note"
+      )
     );
   });
 
@@ -638,21 +650,23 @@ describe("admin API", () => {
       updatedAt
     });
 
-    await expectRecordsAndExportToReflectLatestValues(
-      env,
-      {
-        scanId: "scan-patch-student",
-        studentId: "student-003",
-        studentName: "Student Local 03",
-        studentSecretId: "student-secret-003",
-        mentorId: "mentor-001",
-        mentorName: "Mentor Local 01",
-        eventDate: configuredEventDate,
-        scannedAt: `${configuredEventDate}T08:10:00.000Z`,
-        notes: "Keep notes",
-        updatedAt
-      },
-      "Student Local 03,student-secret-003,Mentor Local 01,2026-01-15,Keep notes"
+    await withFrozenTime(updatedAt, () =>
+      expectRecordsAndExportToReflectLatestValues(
+        env,
+        {
+          scanId: "scan-patch-student",
+          studentId: "student-003",
+          studentName: "Student Local 03",
+          studentSecretId: "student-secret-003",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          eventDate: configuredEventDate,
+          scannedAt: `${configuredEventDate}T08:10:00.000Z`,
+          notes: "Keep notes",
+          updatedAt
+        },
+        "Student Local 03,student-secret-003,Mentor Local 01,2026-01-15,Keep notes"
+      )
     );
   });
 
@@ -702,21 +716,23 @@ describe("admin API", () => {
       updatedAt
     });
 
-    await expectRecordsAndExportToReflectLatestValues(
-      env,
-      {
-        scanId: "scan-patch-mentor",
-        studentId: "student-001",
-        studentName: "Student Local 01",
-        studentSecretId: "student-secret-001",
-        mentorId: "mentor-004",
-        mentorName: "Mentor Local 04",
-        eventDate: configuredEventDate,
-        scannedAt: `${configuredEventDate}T08:20:00.000Z`,
-        notes: "Keep this note",
-        updatedAt
-      },
-      "Student Local 01,student-secret-001,Mentor Local 04,2026-01-15,Keep this note"
+    await withFrozenTime(updatedAt, () =>
+      expectRecordsAndExportToReflectLatestValues(
+        env,
+        {
+          scanId: "scan-patch-mentor",
+          studentId: "student-001",
+          studentName: "Student Local 01",
+          studentSecretId: "student-secret-001",
+          mentorId: "mentor-004",
+          mentorName: "Mentor Local 04",
+          eventDate: configuredEventDate,
+          scannedAt: `${configuredEventDate}T08:20:00.000Z`,
+          notes: "Keep this note",
+          updatedAt
+        },
+        "Student Local 01,student-secret-001,Mentor Local 04,2026-01-15,Keep this note"
+      )
     );
   });
 
@@ -768,21 +784,23 @@ describe("admin API", () => {
       updatedAt
     });
 
-    await expectRecordsAndExportToReflectLatestValues(
-      env,
-      {
-        scanId: "scan-patch-combined",
-        studentId: "student-004",
-        studentName: "Student Local 04",
-        studentSecretId: "student-secret-004",
-        mentorId: "mentor-005",
-        mentorName: "Mentor Local 05",
-        eventDate: configuredEventDate,
-        scannedAt: `${configuredEventDate}T08:30:00.000Z`,
-        notes: "Final admin correction",
-        updatedAt
-      },
-      "Student Local 04,student-secret-004,Mentor Local 05,2026-01-15,Final admin correction"
+    await withFrozenTime(updatedAt, () =>
+      expectRecordsAndExportToReflectLatestValues(
+        env,
+        {
+          scanId: "scan-patch-combined",
+          studentId: "student-004",
+          studentName: "Student Local 04",
+          studentSecretId: "student-secret-004",
+          mentorId: "mentor-005",
+          mentorName: "Mentor Local 05",
+          eventDate: configuredEventDate,
+          scannedAt: `${configuredEventDate}T08:30:00.000Z`,
+          notes: "Final admin correction",
+          updatedAt
+        },
+        "Student Local 04,student-secret-004,Mentor Local 05,2026-01-15,Final admin correction"
+      )
     );
   });
 
@@ -832,21 +850,23 @@ describe("admin API", () => {
       updatedAt
     });
 
-    await expectRecordsAndExportToReflectLatestValues(
-      env,
-      {
-        scanId: "scan-patch-clear-notes",
-        studentId: "student-002",
-        studentName: "Student Local 02",
-        studentSecretId: "student-secret-002",
-        mentorId: "mentor-002",
-        mentorName: "Mentor Local 02",
-        eventDate: configuredEventDate,
-        scannedAt: `${configuredEventDate}T08:40:00.000Z`,
-        notes: "",
-        updatedAt
-      },
-      "Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,"
+    await withFrozenTime(updatedAt, () =>
+      expectRecordsAndExportToReflectLatestValues(
+        env,
+        {
+          scanId: "scan-patch-clear-notes",
+          studentId: "student-002",
+          studentName: "Student Local 02",
+          studentSecretId: "student-secret-002",
+          mentorId: "mentor-002",
+          mentorName: "Mentor Local 02",
+          eventDate: configuredEventDate,
+          scannedAt: `${configuredEventDate}T08:40:00.000Z`,
+          notes: "",
+          updatedAt
+        },
+        "Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,"
+      )
     );
   });
 
