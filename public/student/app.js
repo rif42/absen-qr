@@ -3,8 +3,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 (function () {
   const elements = {
     status: document.getElementById('status-banner'),
-    identityLoading: document.getElementById('identity-loading'),
-    identitySuccess: document.getElementById('identity-success'),
+identitySuccess: document.getElementById('identity-success'),
     identityError: document.getElementById('identity-error'),
     studentName: document.getElementById('student-name'),
     studentMeta: document.getElementById('student-meta'),
@@ -14,13 +13,11 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     scannerPlaceholder: document.getElementById('scanner-placeholder'),
     scannerPlaceholderTitle: document.getElementById('scanner-placeholder-title'),
     scannerPlaceholderCopy: document.getElementById('scanner-placeholder-copy'),
-    scannerStatus: document.getElementById('scanner-status'),
-    scannerFeedback: document.getElementById('scanner-feedback'),
+scannerFeedback: document.getElementById('scanner-feedback'),
     scannerFeedbackTitle: document.getElementById('scanner-feedback-title'),
     scannerFeedbackCopy: document.getElementById('scanner-feedback-copy'),
     scannerToggleButton: document.getElementById('scanner-toggle-button'),
-    historyLoading: document.getElementById('history-loading'),
-    historyError: document.getElementById('history-error'),
+historyError: document.getElementById('history-error'),
     historyErrorMessage: document.getElementById('history-error-message'),
     historyEmpty: document.getElementById('history-empty'),
     historyList: document.getElementById('history-list'),
@@ -96,8 +93,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   async function loadHistory() {
-    elements.historyLoading.classList.remove('hidden');
-    elements.historyError.classList.add('hidden');
+elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
 
@@ -157,11 +153,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   function renderIdentitySuccess(student) {
-    elements.identityLoading.classList.add('hidden');
-    elements.identityError.classList.add('hidden');
+elements.identityError.classList.add('hidden');
     elements.identitySuccess.classList.remove('hidden');
-    elements.historyLoading.classList.remove('hidden');
-    elements.historyError.classList.add('hidden');
+elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
@@ -174,14 +168,13 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   function renderHistorySuccess(history) {
-    elements.historyLoading.classList.add('hidden');
-    elements.historyError.classList.add('hidden');
+elements.historyError.classList.add('hidden');
 
     if (history.length === 0) {
       elements.historyEmpty.classList.remove('hidden');
       elements.historyList.classList.add('hidden');
       elements.historyList.replaceChildren();
-      elements.status.textContent = 'Identity loaded. No mentor scans recorded for today yet.';
+      elements.status.textContent = 'Identity loaded. No scans yet.';
       elements.status.className = 'status status-success';
       return;
     }
@@ -205,7 +198,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
         return item;
       })
     );
-    elements.status.textContent = 'Identity and mentor history loaded.';
+    elements.status.textContent = 'Identity and history loaded.';
     elements.status.className = 'status status-success';
   }
 
@@ -214,8 +207,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     elements.errorMessage.textContent = message;
     elements.status.textContent = 'Identity load failed.';
     elements.status.className = 'status status-error';
-    elements.historyLoading.classList.add('hidden');
-    elements.historyError.classList.add('hidden');
+elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
@@ -223,8 +215,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   function showHistoryError(message) {
-    elements.historyLoading.classList.add('hidden');
-    elements.historyEmpty.classList.add('hidden');
+elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
     elements.historyErrorMessage.textContent = message;
@@ -234,11 +225,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   function setState(state) {
-    elements.identityLoading.classList.toggle('hidden', state !== 'loading');
-    elements.identitySuccess.classList.add('hidden');
+elements.identitySuccess.classList.add('hidden');
     elements.identityError.classList.toggle('hidden', state !== 'error');
-    elements.historyLoading.classList.toggle('hidden', state !== 'loading');
-    if (state === 'loading') {
+if (state === 'loading') {
       elements.historyError.classList.add('hidden');
       elements.historyEmpty.classList.add('hidden');
       elements.historyList.classList.add('hidden');
@@ -488,8 +477,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('loading', title);
-    setScannerButton('Starting camera…', true, disableButton);
+setScannerButton('Starting camera…', true, disableButton);
   }
 
   function setScannerStarting(title, copy, disableButton) {
@@ -497,32 +485,28 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('loading', title);
-    setScannerButton('Opening camera…', true, disableButton);
+setScannerButton('Opening camera…', true, disableButton);
   }
 
   function setScannerScanning(title, copy, disableButton) {
     updateScannerStage(true);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('loading', title);
-    setScannerButton('Stop scanner', false, disableButton);
+setScannerButton('Stop scanner', false, disableButton);
   }
 
   function setScannerProcessing(title, copy, disableButton) {
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('loading', title);
-    setScannerButton('Scanner paused', true, disableButton);
+setScannerButton('Scanner paused', true, disableButton);
   }
 
   function setScannerStopped(copy, buttonText, disableButton) {
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Scanner stopped';
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('neutral', 'Scanner stopped.');
-    setScannerButton(buttonText, true, disableButton);
+setScannerButton(buttonText, true, disableButton);
   }
 
   function setScannerUnavailable(copy, disableButton) {
@@ -530,8 +514,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Camera unavailable';
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('error', 'Camera unavailable.');
-    setPageStatus('error', 'Camera unavailable.');
+setPageStatus('error', 'Camera unavailable.');
     setScannerButton('Start scanner', true, disableButton);
   }
 
@@ -540,8 +523,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Camera permission denied';
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('error', 'Permission denied.');
-    setPageStatus('error', 'Camera permission denied.');
+setPageStatus('error', 'Camera permission denied.');
     setScannerButton('Start scanner', false, disableButton);
   }
 
@@ -550,8 +532,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill('error', title);
-    setPageStatus('error', title);
+setPageStatus('error', title);
     setScannerButton('Start scanner', false, disableButton);
   }
 
@@ -560,8 +541,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-    setScannerPill(tone, title);
-    setScannerButton('Start scanner', true, true);
+setScannerButton('Start scanner', true, true);
   }
 
   function setScannerPill(tone, text) {
@@ -692,3 +672,4 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     }).format(date);
   }
 })();
+

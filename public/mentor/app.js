@@ -1,20 +1,18 @@
-const POLL_INTERVAL_MS = 10_000;
+﻿const POLL_INTERVAL_MS = 10_000;
 const COPY_RESET_MS = 1_500;
 
 (function () {
   const elements = {
-    mentorLoading: document.getElementById("mentor-loading"),
-    mentorSuccess: document.getElementById("mentor-success"),
+    status: document.getElementById("status-banner"),
+mentorSuccess: document.getElementById("mentor-success"),
     mentorError: document.getElementById("mentor-error"),
     mentorName: document.getElementById("mentor-name"),
     mentorMeta: document.getElementById("mentor-meta"),
     mentorErrorMessage: document.getElementById("mentor-error-message"),
     retryButton: document.getElementById("retry-button"),
-    qrLoading: document.getElementById("qr-loading"),
-    qrDisplay: document.getElementById("qr-display"),
+qrDisplay: document.getElementById("qr-display"),
     qrCopy: document.getElementById("qr-copy"),
-    recentScansLoading: document.getElementById("recent-scans-loading"),
-    recentScansEmpty: document.getElementById("recent-scans-empty"),
+recentScansEmpty: document.getElementById("recent-scans-empty"),
     recentScansError: document.getElementById("recent-scans-error"),
     recentScansErrorMessage: document.getElementById("recent-scans-error-message"),
     recentScansList: document.getElementById("recent-scans-list"),
@@ -78,19 +76,20 @@ const COPY_RESET_MS = 1_500;
   }
 
   function resetPageState() {
-    elements.mentorLoading.classList.remove("hidden");
-    elements.mentorSuccess.classList.add("hidden");
+    elements.status.textContent = "Loading mentor identity…";
+    elements.status.className = "status status-loading";
+elements.mentorSuccess.classList.add("hidden");
     elements.mentorError.classList.add("hidden");
 
-    elements.qrLoading.classList.remove("hidden");
-    elements.qrDisplay.classList.add("hidden");
+elements.qrDisplay.classList.add("hidden");
     elements.qrDisplay.replaceChildren();
     elements.qrCopy.classList.add("hidden");
     elements.qrCopy.disabled = true;
     elements.qrCopy.textContent = "Copy QR payload";
 
-    elements.recentScansLoading.classList.remove("hidden");
-    elements.recentScansEmpty.classList.add("hidden");
+elements.recentScansEmpty.classList.add("hidden");
+    elements.status.textContent = "Identity loaded. Polling for scans…";
+    elements.status.className = "status status-success";
     elements.recentScansError.classList.add("hidden");
     elements.recentScansList.classList.add("hidden");
     elements.recentScansList.replaceChildren();
@@ -145,9 +144,12 @@ const COPY_RESET_MS = 1_500;
     state.recentScansFetchId = fetchId;
 
     if (showLoading && !state.recentScansLoaded) {
-      elements.recentScansLoading.classList.remove("hidden");
-      elements.recentScansError.classList.add("hidden");
-      elements.recentScansEmpty.classList.add("hidden");
+      elements.status.textContent = "Loading recent scans…";
+      elements.status.className = "status status-loading";
+elements.recentScansError.classList.add("hidden");
+      elements.status.textContent = "Failed to load recent scans.";
+    elements.status.className = "status status-error";
+    elements.recentScansEmpty.classList.add("hidden");
       elements.recentScansList.classList.add("hidden");
     }
 
@@ -237,8 +239,7 @@ const COPY_RESET_MS = 1_500;
   }
 
   function renderMentorIdentity(mentor) {
-    elements.mentorLoading.classList.add("hidden");
-    elements.mentorError.classList.add("hidden");
+elements.mentorError.classList.add("hidden");
     elements.mentorSuccess.classList.remove("hidden");
     elements.mentorName.textContent = mentor.displayName;
     elements.mentorMeta.textContent = `Secret id: ${mentor.secretId} · Person id: ${mentor.personId}`;
@@ -246,8 +247,7 @@ const COPY_RESET_MS = 1_500;
   }
 
   function renderQrCode(mentor) {
-    elements.qrLoading.classList.add("hidden");
-    elements.qrDisplay.innerHTML = mentor.qrSvg;
+elements.qrDisplay.innerHTML = mentor.qrSvg;
     elements.qrDisplay.classList.remove("hidden");
     elements.qrCopy.classList.remove("hidden");
     elements.qrCopy.disabled = !mentor.qrPayload;
@@ -277,8 +277,7 @@ const COPY_RESET_MS = 1_500;
   }
 
   function renderRecentScans(scans) {
-    elements.recentScansLoading.classList.add("hidden");
-    elements.recentScansError.classList.add("hidden");
+elements.recentScansError.classList.add("hidden");
 
     if (scans.length === 0) {
       elements.recentScansList.classList.add("hidden");
@@ -287,6 +286,8 @@ const COPY_RESET_MS = 1_500;
       return;
     }
 
+    elements.status.textContent = "Failed to load recent scans.";
+    elements.status.className = "status status-error";
     elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansList.classList.remove("hidden");
 
@@ -487,26 +488,24 @@ const COPY_RESET_MS = 1_500;
   }
 
   function showIdentityError(message) {
-    elements.mentorLoading.classList.add("hidden");
-    elements.mentorSuccess.classList.add("hidden");
+elements.mentorSuccess.classList.add("hidden");
     elements.mentorError.classList.remove("hidden");
     elements.mentorErrorMessage.textContent = message;
 
-    elements.qrLoading.classList.add("hidden");
-    elements.qrDisplay.classList.add("hidden");
+elements.qrDisplay.classList.add("hidden");
     elements.qrDisplay.replaceChildren();
     elements.qrCopy.classList.add("hidden");
 
-    elements.recentScansLoading.classList.add("hidden");
-    elements.recentScansEmpty.classList.add("hidden");
+elements.recentScansEmpty.classList.add("hidden");
+    elements.status.textContent = "Identity loaded. Polling for scans…";
+    elements.status.className = "status status-success";
     elements.recentScansError.classList.add("hidden");
     elements.recentScansList.classList.add("hidden");
     elements.recentScansList.replaceChildren();
   }
 
   function showRecentScansError(message) {
-    elements.recentScansLoading.classList.add("hidden");
-    elements.recentScansEmpty.classList.add("hidden");
+elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansError.classList.remove("hidden");
     elements.recentScansErrorMessage.textContent = message;
 
@@ -551,3 +550,4 @@ const COPY_RESET_MS = 1_500;
     return Number.isNaN(timestamp) ? 0 : timestamp;
   }
 })();
+

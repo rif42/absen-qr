@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 
 <head>
@@ -16,12 +16,13 @@
       <h1 id="page-title">Student Attendance</h1>
     </header>
 
+    <div class="status status-loading" id="status-banner" role="status" aria-live="polite" style="margin-bottom: 20px;">
+      Resolving your student identity...
+    </div>
+
     <section class="stack">
       <article class="card identity-card">
         <h2 class="card-label">Student identity</h2>
-        <div class="status status-loading" id="status-banner" role="status" aria-live="polite">
-          Resolving your student identity...
-        </div>
         <div id="identity-loading" class="muted-block">Loading identity details…</div>
 
         <div id="identity-success" class="identity-details hidden">
@@ -62,10 +63,6 @@
           </p>
         </div>
 
-        <div id="scanner-status" class="status status-neutral" role="status" aria-live="polite">
-          Scanner stopped.
-        </div>
-
         <div id="scanner-feedback" class="scan-feedback hidden" aria-live="polite">
           <p class="scan-feedback-title" id="scanner-feedback-title"></p>
           <p class="scan-feedback-copy" id="scanner-feedback-copy"></p>
@@ -74,7 +71,6 @@
 
       <article class="card history-card">
         <h2 class="card-label">History</h2>
-        <div id="history-loading" class="muted-block">Waiting for identity to resolve…</div>
 
         <div id="history-error" class="error-panel hidden" role="alert">
           <p class="error-title">We could not load today’s mentor history.</p>
