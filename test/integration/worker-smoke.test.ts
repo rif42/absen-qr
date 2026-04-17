@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import worker from "../../src/worker/index";
+import { REAL_STUDENTS } from "../support/real-roster";
 
 type FetchHandler = NonNullable<typeof worker.fetch>;
 type WorkerRequest = Parameters<FetchHandler>[0];
 type WorkerEnv = Parameters<FetchHandler>[1];
 type WorkerContext = Parameters<FetchHandler>[2];
+
+const [student1] = REAL_STUDENTS;
 
 type MockEnv = {
   ADMIN_SECRET: string;
@@ -114,7 +117,7 @@ describe("worker scaffold", () => {
   it("serves the student placeholder page for a valid secret route", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001") as WorkerRequest,
+      new Request(`https://example.com/student/${student1.secret_path_token}`) as WorkerRequest,
       createEnv() as WorkerEnv,
       {} as WorkerContext
     );
@@ -126,7 +129,7 @@ describe("worker scaffold", () => {
   it("serves the student page content even if assets redirect index requests", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001") as WorkerRequest,
+      new Request(`https://example.com/student/${student1.secret_path_token}`) as WorkerRequest,
       {
         ...createEnv(),
         ASSETS: createRedirectingStudentAssetFetcher()

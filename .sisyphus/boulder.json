@@ -1,58 +1,78 @@
 {
-  "active_plan": "D:\\work\\absen-qr\\.sisyphus\\plans\\admin-date-range-filter.md",
-  "started_at": "2026-04-14T09:39:00+07:00",
+  "active_plan": "D:\\work\\absen-qr\\.sisyphus\\plans\\real-user-seeding-and-db-sync.md",
+  "started_at": "2026-04-17T03:10:02.330Z",
   "session_ids": [
-    "ses_2764f09d5ffeWNMP7eBWWvLz5h"
+    "ses_270f77c17ffeJnswUip3thkE0S",
+    "ses_266a944d1ffe1f3z7H16rgG0Cf",
+    "ses_2666e1176ffeacJmGV1MjC397h",
+    "ses_2666e10b1ffeLGFcT0nUQRDPRQ",
+    "ses_265eb16a5ffeWENs3EDbeZ1a3L",
+    "ses_265eb14e8ffePNAyi8EPaeI1XD",
+    "ses_265eb14e5ffez10B6ASlNPtIcJ"
   ],
-  "plan_name": "admin-date-range-filter",
+  "plan_name": "real-user-seeding-and-db-sync",
   "session_origins": {
-    "ses_2764f09d5ffeWNMP7eBWWvLz5h": "direct"
+    "ses_270f77c17ffeJnswUip3thkE0S": "direct",
+    "ses_266a944d1ffe1f3z7H16rgG0Cf": "direct",
+    "ses_2666e1176ffeacJmGV1MjC397h": "appended",
+    "ses_2666e10b1ffeLGFcT0nUQRDPRQ": "appended",
+    "ses_265eb16a5ffeWENs3EDbeZ1a3L": "appended",
+    "ses_265eb14e8ffePNAyi8EPaeI1XD": "appended",
+    "ses_265eb14e5ffez10B6ASlNPtIcJ": "appended"
   },
   "task_sessions": {
     "todo:1": {
       "task_key": "todo:1",
       "task_label": "1",
-      "task_title": "Add inclusive admin `event_date` range queries and mock support",
-      "session_id": "ses_275786ef9ffeSpqezGjYAvk45u",
+      "task_title": "Lock the canonical roster-selection and identity-generation contract",
+      "session_id": "ses_2668e6d8dffem8hnbp21PQKgla",
       "agent": "Sisyphus-Junior",
-      "category": "quick",
-      "updated_at": "2026-04-14T05:49:18.850Z"
+      "category": "deep",
+      "updated_at": "2026-04-17T03:24:59.453Z"
     },
     "todo:2": {
       "task_key": "todo:2",
       "task_label": "2",
-      "task_title": "Add shared admin route contract for `startDate` + `endDate`",
-      "session_id": "ses_2753b6e81ffeSs5XjFSbe88qjR",
+      "task_title": "Build the canonical artifact writer and CSV round-trip workflow",
+      "session_id": "ses_2668423bbffeRp20ceP4hicJwn",
       "agent": "Sisyphus-Junior",
       "category": "quick",
-      "updated_at": "2026-04-14T06:56:49.184Z"
+      "updated_at": "2026-04-17T03:32:15.162Z"
+    },
+    "todo:3": {
+      "task_key": "todo:3",
+      "task_label": "3",
+      "task_title": "Replace dummy local/test identity fixtures with the selected real roster",
+      "session_id": "ses_2667dfd7effeFnIqNkCA1sbAGN",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-04-17T03:50:36.623Z"
     },
     "todo:4": {
       "task_key": "todo:4",
       "task_label": "4",
-      "task_title": "Wire admin app state, URL sync, apply validation, and export parity",
-      "session_id": "ses_275315d75ffeyQsxQ4smwIG3QG",
+      "task_title": "Implement the production D1 reset-and-apply workflow from the canonical artifact",
+      "session_id": "ses_2666a6a80ffeZY0Ti3SwJsLIaG",
       "agent": "Sisyphus-Junior",
-      "category": "unspecified-high",
-      "updated_at": "2026-04-14T07:10:58.538Z"
+      "category": "deep",
+      "updated_at": "2026-04-17T04:07:19.762Z"
     },
-    "todo:6": {
-      "task_key": "todo:6",
-      "task_label": "6",
-      "task_title": "Run the consolidated admin regression sweep and prepare the branch for review",
-      "session_id": "ses_2752a759dffeii6Mles7sZmN3E",
+    "todo:5": {
+      "task_key": "todo:5",
+      "task_label": "5",
+      "task_title": "Verify live secret-link behavior and revise docs for the expanded real-user test roster",
+      "session_id": "ses_2664be491ffeccA850glh3xahd",
       "agent": "Sisyphus-Junior",
-      "category": "unspecified-low",
-      "updated_at": "2026-04-14T07:12:58.427Z"
+      "category": "writing",
+      "updated_at": "2026-04-17T04:33:50.425Z"
     },
     "final-wave:f1": {
       "task_key": "final-wave:f1",
       "task_label": "F1",
       "task_title": "Plan Compliance Audit — oracle",
-      "session_id": "ses_275260df7ffehQ7NaZbOjisj0X",
+      "session_id": "ses_265dee5b1ffeQfEJtEr5d4NCpu",
       "agent": "oracle",
-      "category": "",
-      "updated_at": "2026-04-14T07:19:34.269Z"
+      "updated_at": "2026-04-17T06:44:44.616Z"
     }
   }
 }

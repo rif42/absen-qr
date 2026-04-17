@@ -1,0 +1,10 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mD:/work/absen-qr[39m
+
+ [32m✓[39m test/integration/admin-api.test.ts [2m([22m[2m27 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 13:26:10
+[2m   Duration [22m 592ms[2m (transform 118ms, setup 0ms, collect 274ms, tests 24ms, environment 0ms, prepare 103ms)[22m
+

@@ -1,0 +1,62 @@
+{
+  "contract_version": 1,
+  "mode": "dry-run",
+  "source_csv": "C:\\Users\\Rif42\\AppData\\Local\\Temp\\f8f84b7a-c192-44bf-bf98-d7af42a3c45c\\collision.csv",
+  "base_url": "https://absen-qr.rif42.workers.dev/",
+  "role_limit": 10,
+  "selected_rows": [
+    {
+      "rowNumber": 2,
+      "selection_order": 1,
+      "display_name": "Anne-Marie",
+      "role": "student",
+      "normalized_name": "Anne-Marie",
+      "slug": "anne-marie",
+      "base_slug": "anne-marie",
+      "slug_collision_index": 1,
+      "person_id": "student-anne-marie",
+      "secret_id": "student-secret-anne-marie",
+      "secret_path_token": "student-anne-marie",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-anne-marie"
+    },
+    {
+      "rowNumber": 3,
+      "selection_order": 2,
+      "display_name": "Anne Marie",
+      "role": "student",
+      "normalized_name": "Anne Marie",
+      "slug": "anne-marie-2",
+      "base_slug": "anne-marie",
+      "slug_collision_index": 2,
+      "person_id": "student-anne-marie-2",
+      "secret_id": "student-secret-anne-marie-2",
+      "secret_path_token": "student-anne-marie-2",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-anne-marie-2"
+    },
+    {
+      "rowNumber": 4,
+      "selection_order": 3,
+      "display_name": "Anne Marie",
+      "role": "mentor",
+      "normalized_name": "Anne Marie",
+      "slug": "anne-marie",
+      "base_slug": "anne-marie",
+      "slug_collision_index": 1,
+      "person_id": "mentor-anne-marie",
+      "secret_id": "mentor-secret-anne-marie",
+      "secret_path_token": "mentor-anne-marie",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-anne-marie"
+    }
+  ],
+  "skipped_rows": [],
+  "summary": {
+    "total_rows": 3,
+    "selected_total": 3,
+    "skipped_total": 0,
+    "selected_students": 2,
+    "selected_mentors": 1,
+    "skipped_duplicates": 0,
+    "skipped_over_quota_students": 0,
+    "skipped_over_quota_mentors": 0
+  }
+}

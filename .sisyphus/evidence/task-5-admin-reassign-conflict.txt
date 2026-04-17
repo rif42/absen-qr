@@ -1,0 +1,19 @@
+Task 5 — Admin reassignment collision test evidence
+===================================================
+
+Test: "rejects reassignment that would create a duplicate student-mentor-day key"
+File: test/integration/admin-api.test.ts
+
+Scenario:
+1. Seed: scan-reassign-source (student-001, mentor-002, 2026-01-15)
+          scan-reassign-target (student-002, mentor-002, 2026-01-15)
+2. PATCH /records/scan-reassign-source with { studentId: "student-002" }
+3. Expect 409 with "Duplicate mentor scan already recorded for this calendar day."
+4. Verify no records mutated (source still student-001, target still student-002)
+
+Result: PASS (all 27 admin tests pass)
+
+Also updated existing "maps uniqueness conflicts" test assertion to use "calendar day" wording.
+
+typecheck: PASS
+npm test -- test/integration/admin-api.test.ts: 27/27 pass

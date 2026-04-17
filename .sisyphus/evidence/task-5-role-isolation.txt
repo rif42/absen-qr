@@ -1,0 +1,65 @@
+Task 5: Role Isolation Verification
+====================================
+
+Purpose: Verify that secret tokens are properly scoped to their role and cross-role misuse fails.
+
+
+Test Case 1: Student route with mentor token
+===========================================
+Command:
+  GET https://absen-qr.rif42.workers.dev/student/mentor-mohammad-ariq-nazar-s-si-m-biomed/api/me
+
+Context:
+  - Route: /student/... (student route)
+  - Token: mentor-mohammad-ariq-nazar-s-si-m-biomed (belongs to mentor)
+  - Expected: Should be rejected as the token belongs to a different role
+
+Expected:
+  - 404 Not Found status
+  - JSON response: { "error": "Not found" }
+
+Actual Response:
+  HTTP Status: 404 Not Found
+  {
+    "error": "Not found"
+  }
+
+Verdict: PASS
+  - Student route correctly rejects mentor token
+  - Status code is 404 as expected
+  - Error message matches expected format
+
+
+Test Case 2: Mentor route with student token
+===========================================
+Command:
+  GET https://absen-qr.rif42.workers.dev/mentor/student-bdn-titik-kurniawati-s-sit-m-kes-m-keb/api/me
+
+Context:
+  - Route: /mentor/... (mentor route)
+  - Token: student-bdn-titik-kurniawati-s-sit-m-kes-m-keb (belongs to student)
+  - Expected: Should be rejected as the token belongs to a different role
+
+Expected:
+  - 404 Not Found status
+  - JSON response: { "error": "Not found" }
+
+Actual Response:
+  HTTP Status: 404 Not Found
+  {
+    "error": "Not found"
+  }
+
+Verdict: PASS
+  - Mentor route correctly rejects student token
+  - Status code is 404 as expected
+  - Error message matches expected format
+
+
+Overall Verdict: PASS
+======================
+Role isolation is working correctly:
+- Student routes reject mentor secret tokens
+- Mentor routes reject student secret tokens
+- Cross-role misuse returns consistent 404 with "Not found" error
+- Secret-link access is properly scoped to the intended role

@@ -2,11 +2,44 @@ import { describe, expect, it, vi } from "vitest";
 
 import worker from "../../src/worker/index";
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
+import {
+  REAL_MENTORS,
+  REAL_MENTORS_BY_NAME,
+  REAL_STUDENTS,
+  REAL_STUDENTS_BY_NAME
+} from "../support/real-roster";
 
 type FetchHandler = NonNullable<typeof worker.fetch>;
 type WorkerRequest = Parameters<FetchHandler>[0];
 type WorkerEnv = Parameters<FetchHandler>[1];
 type WorkerContext = Parameters<FetchHandler>[2];
+
+const [student1, student2, student3, student4] = REAL_STUDENTS;
+const [mentor1, mentor2, mentor3, mentor4, mentor5] = REAL_MENTORS;
+
+function studentOptions() {
+  return REAL_STUDENTS_BY_NAME.map(({ person_id, display_name }) => ({
+    personId: person_id,
+    displayName: display_name
+  }));
+}
+
+function mentorOptions() {
+  return REAL_MENTORS_BY_NAME.map(({ person_id, display_name }) => ({
+    personId: person_id,
+    displayName: display_name
+  }));
+}
+
+function csvField(value: string): string {
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+function exportLine(student: typeof student1, mentor: typeof mentor1, eventDate: string, notes: string): string {
+  return [student.display_name, student.secret_id, mentor.display_name, eventDate, notes]
+    .map(csvField)
+    .join(",");
+}
 
 function createAssetFetcher(): Fetcher {
   return {
@@ -124,8 +157,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-admin-old",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "First record",
@@ -133,8 +166,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-admin-new",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Second record",
@@ -142,8 +175,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-admin-other-day",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           event_date: "2099-01-01",
           scanned_at: "2099-01-01T10:00:00.000Z",
           notes: "Ignore me",
@@ -169,11 +202,11 @@ describe("admin API", () => {
       records: [
         {
           scanId: "scan-admin-new",
-          studentId: "student-002",
-          studentName: "Student Local 02",
-          studentSecretId: "student-secret-002",
-          mentorId: "mentor-002",
-          mentorName: "Mentor Local 02",
+          studentId: student2.person_id,
+          studentName: student2.display_name,
+          studentSecretId: student2.secret_id,
+          mentorId: mentor2.person_id,
+          mentorName: mentor2.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Second record",
@@ -181,31 +214,19 @@ describe("admin API", () => {
         },
         {
           scanId: "scan-admin-old",
-          studentId: "student-001",
-          studentName: "Student Local 01",
-          studentSecretId: "student-secret-001",
-          mentorId: "mentor-001",
-          mentorName: "Mentor Local 01",
+          studentId: student1.person_id,
+          studentName: student1.display_name,
+          studentSecretId: student1.secret_id,
+          mentorId: mentor1.person_id,
+          mentorName: mentor1.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:00:00.000Z`,
           notes: "First record",
           updatedAt: `${configuredEventDate}T08:05:00.000Z`
         }
       ],
-      students: [
-        { personId: "student-001", displayName: "Student Local 01" },
-        { personId: "student-002", displayName: "Student Local 02" },
-        { personId: "student-003", displayName: "Student Local 03" },
-        { personId: "student-004", displayName: "Student Local 04" },
-        { personId: "student-005", displayName: "Student Local 05" }
-      ],
-      mentors: [
-        { personId: "mentor-001", displayName: "Mentor Local 01" },
-        { personId: "mentor-002", displayName: "Mentor Local 02" },
-        { personId: "mentor-003", displayName: "Mentor Local 03" },
-        { personId: "mentor-004", displayName: "Mentor Local 04" },
-        { personId: "mentor-005", displayName: "Mentor Local 05" }
-      ]
+      students: studentOptions(),
+      mentors: mentorOptions()
     });
   });
 
@@ -216,8 +237,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-range-late",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: endDate,
           scanned_at: `${endDate}T09:00:00.000Z`,
           notes: "End range record",
@@ -225,8 +246,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-range-early",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: startDate,
           scanned_at: `${startDate}T08:00:00.000Z`,
           notes: "Start range record",
@@ -234,8 +255,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-range-outside",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           event_date: "2026-01-13",
           scanned_at: "2026-01-13T10:00:00.000Z",
           notes: "Outside range",
@@ -256,11 +277,11 @@ describe("admin API", () => {
       records: [
         {
           scanId: "scan-range-late",
-          studentId: "student-002",
-          studentName: "Student Local 02",
-          studentSecretId: "student-secret-002",
-          mentorId: "mentor-002",
-          mentorName: "Mentor Local 02",
+          studentId: student2.person_id,
+          studentName: student2.display_name,
+          studentSecretId: student2.secret_id,
+          mentorId: mentor2.person_id,
+          mentorName: mentor2.display_name,
           eventDate: endDate,
           scannedAt: `${endDate}T09:00:00.000Z`,
           notes: "End range record",
@@ -268,31 +289,19 @@ describe("admin API", () => {
         },
         {
           scanId: "scan-range-early",
-          studentId: "student-001",
-          studentName: "Student Local 01",
-          studentSecretId: "student-secret-001",
-          mentorId: "mentor-001",
-          mentorName: "Mentor Local 01",
+          studentId: student1.person_id,
+          studentName: student1.display_name,
+          studentSecretId: student1.secret_id,
+          mentorId: mentor1.person_id,
+          mentorName: mentor1.display_name,
           eventDate: startDate,
           scannedAt: `${startDate}T08:00:00.000Z`,
           notes: "Start range record",
           updatedAt: `${startDate}T08:05:00.000Z`
         }
       ],
-      students: [
-        { personId: "student-001", displayName: "Student Local 01" },
-        { personId: "student-002", displayName: "Student Local 02" },
-        { personId: "student-003", displayName: "Student Local 03" },
-        { personId: "student-004", displayName: "Student Local 04" },
-        { personId: "student-005", displayName: "Student Local 05" }
-      ],
-      mentors: [
-        { personId: "mentor-001", displayName: "Mentor Local 01" },
-        { personId: "mentor-002", displayName: "Mentor Local 02" },
-        { personId: "mentor-003", displayName: "Mentor Local 03" },
-        { personId: "mentor-004", displayName: "Mentor Local 04" },
-        { personId: "mentor-005", displayName: "Mentor Local 05" }
-      ]
+      students: studentOptions(),
+      mentors: mentorOptions()
     });
 
     const exportResponse = await fetchAdminApi(`/export.csv?startDate=${startDate}&endDate=${endDate}`, undefined, env);
@@ -301,8 +310,8 @@ describe("admin API", () => {
     await expect(exportResponse.text()).resolves.toBe(
       [
         "student name,secret id,mentor scanned,date,notes",
-        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-14,Start range record",
-        "Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,End range record"
+        exportLine(student1, mentor1, startDate, "Start range record"),
+        exportLine(student2, mentor2, endDate, "End range record")
       ].join("\n")
     );
   });
@@ -312,8 +321,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-fallback-configured",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "Configured day record",
@@ -321,8 +330,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-fallback-outside",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: "2026-01-14",
           scanned_at: "2026-01-14T09:00:00.000Z",
           notes: "Outside fallback day",
@@ -349,11 +358,11 @@ describe("admin API", () => {
           records: [
             {
               scanId: "scan-fallback-configured",
-              studentId: "student-001",
-              studentName: "Student Local 01",
-              studentSecretId: "student-secret-001",
-              mentorId: "mentor-001",
-              mentorName: "Mentor Local 01",
+              studentId: student1.person_id,
+              studentName: student1.display_name,
+              studentSecretId: student1.secret_id,
+              mentorId: mentor1.person_id,
+              mentorName: mentor1.display_name,
               eventDate: configuredEventDate,
               scannedAt: `${configuredEventDate}T08:00:00.000Z`,
               notes: "Configured day record",
@@ -369,7 +378,7 @@ describe("admin API", () => {
       await expect(exportResponse.text()).resolves.toBe(
         [
           "student name,secret id,mentor scanned,date,notes",
-          "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Configured day record"
+          exportLine(student1, mentor1, configuredEventDate, "Configured day record")
         ].join("\n")
       );
     });
@@ -410,8 +419,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-admin-c",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           event_date: configuredEventDate,
           scanned_at: "2026-01-16T00:00:00.000Z",
           notes: "Later row",
@@ -419,8 +428,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-admin-b",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "Plain notes",
@@ -428,8 +437,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-admin-a",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: 'Contains comma, quote "and"\nsecond line',
@@ -454,10 +463,9 @@ describe("admin API", () => {
     await expect(response.text()).resolves.toBe(
       [
         "student name,secret id,mentor scanned,date,notes",
-        'Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,"Contains comma, quote ""and""',
-        'second line"',
-        'Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Plain notes',
-        'Student Local 03,student-secret-003,Mentor Local 03,2026-01-15,Later row'
+        exportLine(student2, mentor2, configuredEventDate, 'Contains comma, quote "and"\nsecond line'),
+        exportLine(student1, mentor1, configuredEventDate, "Plain notes"),
+        exportLine(student3, mentor3, configuredEventDate, "Later row")
       ].join("\n")
     );
   });
@@ -467,8 +475,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-delete-success",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "Delete me",
@@ -544,8 +552,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-notes",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "Original notes",
@@ -573,11 +581,11 @@ describe("admin API", () => {
 
     await expectLatestAdminRecord(response, {
       scanId: "scan-patch-notes",
-      studentId: "student-001",
-      studentName: "Student Local 01",
-      studentSecretId: "student-secret-001",
-      mentorId: "mentor-001",
-      mentorName: "Mentor Local 01",
+      studentId: student1.person_id,
+      studentName: student1.display_name,
+      studentSecretId: student1.secret_id,
+      mentorId: mentor1.person_id,
+      mentorName: mentor1.display_name,
       eventDate: configuredEventDate,
       scannedAt: `${configuredEventDate}T08:00:00.000Z`,
       notes: "Corrected admin note",
@@ -589,17 +597,17 @@ describe("admin API", () => {
         env,
         {
           scanId: "scan-patch-notes",
-          studentId: "student-001",
-          studentName: "Student Local 01",
-          studentSecretId: "student-secret-001",
-          mentorId: "mentor-001",
-          mentorName: "Mentor Local 01",
+          studentId: student1.person_id,
+          studentName: student1.display_name,
+          studentSecretId: student1.secret_id,
+          mentorId: mentor1.person_id,
+          mentorName: mentor1.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:00:00.000Z`,
           notes: "Corrected admin note",
           updatedAt
         },
-        "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,Corrected admin note"
+        exportLine(student1, mentor1, configuredEventDate, "Corrected admin note")
       )
     );
   });
@@ -610,8 +618,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-student",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:10:00.000Z`,
           notes: "Keep notes",
@@ -630,7 +638,7 @@ describe("admin API", () => {
             "content-type": "application/json"
           },
           body: JSON.stringify({
-            studentId: "student-003"
+            studentId: student3.person_id
           })
         },
         env
@@ -639,11 +647,11 @@ describe("admin API", () => {
 
     await expectLatestAdminRecord(response, {
       scanId: "scan-patch-student",
-      studentId: "student-003",
-      studentName: "Student Local 03",
-      studentSecretId: "student-secret-003",
-      mentorId: "mentor-001",
-      mentorName: "Mentor Local 01",
+      studentId: student3.person_id,
+      studentName: student3.display_name,
+      studentSecretId: student3.secret_id,
+      mentorId: mentor1.person_id,
+      mentorName: mentor1.display_name,
       eventDate: configuredEventDate,
       scannedAt: `${configuredEventDate}T08:10:00.000Z`,
       notes: "Keep notes",
@@ -655,17 +663,17 @@ describe("admin API", () => {
         env,
         {
           scanId: "scan-patch-student",
-          studentId: "student-003",
-          studentName: "Student Local 03",
-          studentSecretId: "student-secret-003",
-          mentorId: "mentor-001",
-          mentorName: "Mentor Local 01",
+          studentId: student3.person_id,
+          studentName: student3.display_name,
+          studentSecretId: student3.secret_id,
+          mentorId: mentor1.person_id,
+          mentorName: mentor1.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:10:00.000Z`,
           notes: "Keep notes",
           updatedAt
         },
-        "Student Local 03,student-secret-003,Mentor Local 01,2026-01-15,Keep notes"
+        exportLine(student3, mentor1, configuredEventDate, "Keep notes")
       )
     );
   });
@@ -676,8 +684,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-mentor",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:20:00.000Z`,
           notes: "Keep this note",
@@ -696,7 +704,7 @@ describe("admin API", () => {
             "content-type": "application/json"
           },
           body: JSON.stringify({
-            mentorId: "mentor-004"
+            mentorId: mentor4.person_id
           })
         },
         env
@@ -705,11 +713,11 @@ describe("admin API", () => {
 
     await expectLatestAdminRecord(response, {
       scanId: "scan-patch-mentor",
-      studentId: "student-001",
-      studentName: "Student Local 01",
-      studentSecretId: "student-secret-001",
-      mentorId: "mentor-004",
-      mentorName: "Mentor Local 04",
+      studentId: student1.person_id,
+      studentName: student1.display_name,
+      studentSecretId: student1.secret_id,
+      mentorId: mentor4.person_id,
+      mentorName: mentor4.display_name,
       eventDate: configuredEventDate,
       scannedAt: `${configuredEventDate}T08:20:00.000Z`,
       notes: "Keep this note",
@@ -721,17 +729,17 @@ describe("admin API", () => {
         env,
         {
           scanId: "scan-patch-mentor",
-          studentId: "student-001",
-          studentName: "Student Local 01",
-          studentSecretId: "student-secret-001",
-          mentorId: "mentor-004",
-          mentorName: "Mentor Local 04",
+          studentId: student1.person_id,
+          studentName: student1.display_name,
+          studentSecretId: student1.secret_id,
+          mentorId: mentor4.person_id,
+          mentorName: mentor4.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:20:00.000Z`,
           notes: "Keep this note",
           updatedAt
         },
-        "Student Local 01,student-secret-001,Mentor Local 04,2026-01-15,Keep this note"
+        exportLine(student1, mentor4, configuredEventDate, "Keep this note")
       )
     );
   });
@@ -742,8 +750,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-combined",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:30:00.000Z`,
           notes: "Old note",
@@ -763,8 +771,8 @@ describe("admin API", () => {
           },
           body: JSON.stringify({
             notes: "Final admin correction",
-            studentId: "student-004",
-            mentorId: "mentor-005"
+            studentId: student4.person_id,
+            mentorId: mentor5.person_id
           })
         },
         env
@@ -773,11 +781,11 @@ describe("admin API", () => {
 
     await expectLatestAdminRecord(response, {
       scanId: "scan-patch-combined",
-      studentId: "student-004",
-      studentName: "Student Local 04",
-      studentSecretId: "student-secret-004",
-      mentorId: "mentor-005",
-      mentorName: "Mentor Local 05",
+      studentId: student4.person_id,
+      studentName: student4.display_name,
+      studentSecretId: student4.secret_id,
+      mentorId: mentor5.person_id,
+      mentorName: mentor5.display_name,
       eventDate: configuredEventDate,
       scannedAt: `${configuredEventDate}T08:30:00.000Z`,
       notes: "Final admin correction",
@@ -789,17 +797,17 @@ describe("admin API", () => {
         env,
         {
           scanId: "scan-patch-combined",
-          studentId: "student-004",
-          studentName: "Student Local 04",
-          studentSecretId: "student-secret-004",
-          mentorId: "mentor-005",
-          mentorName: "Mentor Local 05",
+          studentId: student4.person_id,
+          studentName: student4.display_name,
+          studentSecretId: student4.secret_id,
+          mentorId: mentor5.person_id,
+          mentorName: mentor5.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:30:00.000Z`,
           notes: "Final admin correction",
           updatedAt
         },
-        "Student Local 04,student-secret-004,Mentor Local 05,2026-01-15,Final admin correction"
+        exportLine(student4, mentor5, configuredEventDate, "Final admin correction")
       )
     );
   });
@@ -810,8 +818,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-clear-notes",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:40:00.000Z`,
           notes: "Needs clearing",
@@ -839,11 +847,11 @@ describe("admin API", () => {
 
     await expectLatestAdminRecord(response, {
       scanId: "scan-patch-clear-notes",
-      studentId: "student-002",
-      studentName: "Student Local 02",
-      studentSecretId: "student-secret-002",
-      mentorId: "mentor-002",
-      mentorName: "Mentor Local 02",
+      studentId: student2.person_id,
+      studentName: student2.display_name,
+      studentSecretId: student2.secret_id,
+      mentorId: mentor2.person_id,
+      mentorName: mentor2.display_name,
       eventDate: configuredEventDate,
       scannedAt: `${configuredEventDate}T08:40:00.000Z`,
       notes: "",
@@ -855,17 +863,17 @@ describe("admin API", () => {
         env,
         {
           scanId: "scan-patch-clear-notes",
-          studentId: "student-002",
-          studentName: "Student Local 02",
-          studentSecretId: "student-secret-002",
-          mentorId: "mentor-002",
-          mentorName: "Mentor Local 02",
+          studentId: student2.person_id,
+          studentName: student2.display_name,
+          studentSecretId: student2.secret_id,
+          mentorId: mentor2.person_id,
+          mentorName: mentor2.display_name,
           eventDate: configuredEventDate,
           scannedAt: `${configuredEventDate}T08:40:00.000Z`,
           notes: "",
           updatedAt
         },
-        "Student Local 02,student-secret-002,Mentor Local 02,2026-01-15,"
+        exportLine(student2, mentor2, configuredEventDate, "")
       )
     );
   });
@@ -875,8 +883,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-bad-key",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:50:00.000Z`,
           notes: "Original",
@@ -906,8 +914,8 @@ describe("admin API", () => {
       error: "Invalid admin record patch payload."
     });
     expect(readMockD1State(database).scanRecords[0]).toMatchObject({
-      student_id: "student-001",
-      mentor_id: "mentor-001",
+      student_id: student1.person_id,
+      mentor_id: mentor1.person_id,
       notes: "Original"
     });
   });
@@ -977,8 +985,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-missing-student",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:20:00.000Z`,
           notes: "Original",
@@ -995,7 +1003,7 @@ describe("admin API", () => {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          studentId: "mentor-001"
+          studentId: mentor1.person_id
         })
       },
       createEnv(database)
@@ -1010,8 +1018,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-missing-mentor",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:30:00.000Z`,
           notes: "Original",
@@ -1028,7 +1036,7 @@ describe("admin API", () => {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          mentorId: "student-001"
+          mentorId: student1.person_id
         })
       },
       createEnv(database)
@@ -1043,8 +1051,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-patch-conflict-source",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Source row",
@@ -1052,8 +1060,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-patch-conflict-existing",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:10:00.000Z`,
           notes: "Existing row",
@@ -1071,8 +1079,8 @@ describe("admin API", () => {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          studentId: "student-002",
-          mentorId: "mentor-002"
+          studentId: student2.person_id,
+          mentorId: mentor2.person_id
         })
       },
       env
@@ -1085,8 +1093,8 @@ describe("admin API", () => {
     expect(readMockD1State(database).scanRecords).toEqual([
       {
         scan_id: "scan-patch-conflict-source",
-        student_id: "student-001",
-        mentor_id: "mentor-001",
+        student_id: student1.person_id,
+        mentor_id: mentor1.person_id,
         event_date: configuredEventDate,
         scanned_at: `${configuredEventDate}T09:00:00.000Z`,
         notes: "Source row",
@@ -1094,8 +1102,8 @@ describe("admin API", () => {
       },
       {
         scan_id: "scan-patch-conflict-existing",
-        student_id: "student-002",
-        mentor_id: "mentor-002",
+        student_id: student2.person_id,
+        mentor_id: mentor2.person_id,
         event_date: configuredEventDate,
         scanned_at: `${configuredEventDate}T09:10:00.000Z`,
         notes: "Existing row",
@@ -1109,8 +1117,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-reassign-source",
-          student_id: "student-001",
-          mentor_id: "mentor-002",
+          student_id: student1.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:00:00.000Z`,
           notes: "Source row",
@@ -1118,8 +1126,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-reassign-target",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T09:10:00.000Z`,
           notes: "Target row",
@@ -1129,7 +1137,7 @@ describe("admin API", () => {
     });
     const env = createEnv(database);
 
-    // PATCH source's studentId to match target's → (student-002, mentor-002) collision
+    // PATCH source's studentId to match target's → (student2, mentor2) collision
     const response = await fetchAdminApi(
       "/records/scan-reassign-source",
       {
@@ -1138,7 +1146,7 @@ describe("admin API", () => {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          studentId: "student-002"
+          studentId: student2.person_id
         })
       },
       env
@@ -1152,8 +1160,8 @@ describe("admin API", () => {
     expect(readMockD1State(database).scanRecords).toEqual([
       {
         scan_id: "scan-reassign-source",
-        student_id: "student-001",
-        mentor_id: "mentor-002",
+        student_id: student1.person_id,
+        mentor_id: mentor2.person_id,
         event_date: configuredEventDate,
         scanned_at: `${configuredEventDate}T09:00:00.000Z`,
         notes: "Source row",
@@ -1161,8 +1169,8 @@ describe("admin API", () => {
       },
       {
         scan_id: "scan-reassign-target",
-        student_id: "student-002",
-        mentor_id: "mentor-002",
+        student_id: student2.person_id,
+        mentor_id: mentor2.person_id,
         event_date: configuredEventDate,
         scanned_at: `${configuredEventDate}T09:10:00.000Z`,
         notes: "Target row",
@@ -1177,8 +1185,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-utc-day-record",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: frozenUtcDay,
           scanned_at: `${frozenUtcDay}T10:00:00.000Z`,
           notes: "On frozen UTC day",
@@ -1186,8 +1194,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-configured-day-record",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "On configured EVENT_DATE",
@@ -1209,11 +1217,11 @@ describe("admin API", () => {
         records: [
           {
             scanId: "scan-utc-day-record",
-            studentId: "student-001",
-            studentName: "Student Local 01",
-            studentSecretId: "student-secret-001",
-            mentorId: "mentor-001",
-            mentorName: "Mentor Local 01",
+            studentId: student1.person_id,
+            studentName: student1.display_name,
+            studentSecretId: student1.secret_id,
+            mentorId: mentor1.person_id,
+            mentorName: mentor1.display_name,
             eventDate: frozenUtcDay,
             scannedAt: `${frozenUtcDay}T10:00:00.000Z`,
             notes: "On frozen UTC day",
@@ -1230,8 +1238,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-export-utc-day",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           event_date: frozenUtcDay,
           scanned_at: `${frozenUtcDay}T11:00:00.000Z`,
           notes: "Export UTC day",
@@ -1239,8 +1247,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-export-configured-day",
-          student_id: "student-004",
-          mentor_id: "mentor-004",
+          student_id: student4.person_id,
+          mentor_id: mentor4.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T14:00:00.000Z`,
           notes: "Export configured day",
@@ -1260,7 +1268,7 @@ describe("admin API", () => {
       await expect(response.text()).resolves.toBe(
         [
           "student name,secret id,mentor scanned,date,notes",
-          "Student Local 03,student-secret-003,Mentor Local 03,2026-01-20,Export UTC day"
+          exportLine(student3, mentor3, frozenUtcDay, "Export UTC day")
         ].join("\n")
       );
     });
@@ -1274,8 +1282,8 @@ describe("admin API", () => {
       scanRecords: [
         {
           scan_id: "scan-explicit-in-range",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "In explicit range",
@@ -1283,8 +1291,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-explicit-on-frozen-day",
-          student_id: "student-002",
-          mentor_id: "mentor-002",
+          student_id: student2.person_id,
+          mentor_id: mentor2.person_id,
           event_date: frozenUtcDay,
           scanned_at: `${frozenUtcDay}T10:00:00.000Z`,
           notes: "On frozen day but outside explicit range",
@@ -1292,8 +1300,8 @@ describe("admin API", () => {
         },
         {
           scan_id: "scan-explicit-before-range",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           event_date: "2026-01-13",
           scanned_at: "2026-01-13T10:00:00.000Z",
           notes: "Before range",
@@ -1319,7 +1327,7 @@ describe("admin API", () => {
         records: [
           {
             scanId: "scan-explicit-in-range",
-            studentId: "student-001",
+            studentId: student1.person_id,
             eventDate: configuredEventDate,
             notes: "In explicit range"
           }
@@ -1336,7 +1344,7 @@ describe("admin API", () => {
       await expect(exportResponse.text()).resolves.toBe(
         [
           "student name,secret id,mentor scanned,date,notes",
-          "Student Local 01,student-secret-001,Mentor Local 01,2026-01-15,In explicit range"
+          exportLine(student1, mentor1, configuredEventDate, "In explicit range")
         ].join("\n")
       );
     });

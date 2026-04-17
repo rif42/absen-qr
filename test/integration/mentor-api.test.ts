@@ -2,11 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import worker from "../../src/worker/index";
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
+import { REAL_MENTORS, REAL_STUDENTS } from "../support/real-roster";
 
 type FetchHandler = NonNullable<typeof worker.fetch>;
 type WorkerRequest = Parameters<FetchHandler>[0];
 type WorkerEnv = Parameters<FetchHandler>[1];
 type WorkerContext = Parameters<FetchHandler>[2];
+
+const [student1, student2, student3, student4] = REAL_STUDENTS;
+const [mentor1, mentor2] = REAL_MENTORS;
 
 function createAssetFetcher(): Fetcher {
   return {
@@ -40,7 +44,7 @@ describe("mentor API", () => {
   it("returns the mentor identity and QR payload for a valid mentor secret token", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/mentor/local-mentor-token-001/api/me") as WorkerRequest,
+      new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/me`) as WorkerRequest,
       createEnv(),
       {} as WorkerContext
     );
@@ -50,11 +54,11 @@ describe("mentor API", () => {
 
     expect(responseBody).toMatchObject({
       mentor: {
-        personId: "mentor-001",
-        displayName: "Mentor Local 01",
-        secretId: "mentor-secret-001"
+        personId: mentor1.person_id,
+        displayName: mentor1.display_name,
+        secretId: mentor1.secret_id
       },
-      qrPayload: "absenqr:v1:mentor:mentor-001"
+      qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
     });
     expect(responseBody.qrSvg).toContain("<svg");
     expect(responseBody.qrSvg).toContain("</svg>");
@@ -63,7 +67,7 @@ describe("mentor API", () => {
   it("rejects a mentor route whose secret token belongs to another role", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/mentor/local-student-token-001/api/me") as WorkerRequest,
+      new Request(`https://example.com/mentor/${student1.secret_path_token}/api/me`) as WorkerRequest,
       createEnv(),
       {} as WorkerContext
     );
@@ -87,8 +91,8 @@ describe("mentor API", () => {
         scanRecords: [
           {
             scan_id: "scan-mentor-1",
-            student_id: "student-001",
-            mentor_id: "mentor-001",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
             event_date: nonTodayEventDate,
             scanned_at: `${runtimeUtcDate}T08:00:00.000Z`,
             notes: "First note",
@@ -96,8 +100,8 @@ describe("mentor API", () => {
           },
           {
             scan_id: "scan-mentor-2",
-            student_id: "student-002",
-            mentor_id: "mentor-001",
+            student_id: student2.person_id,
+            mentor_id: mentor1.person_id,
             event_date: nonTodayEventDate,
             scanned_at: `${runtimeUtcDate}T09:00:00.000Z`,
             notes: "Second note",
@@ -105,8 +109,8 @@ describe("mentor API", () => {
           },
           {
             scan_id: "scan-other-mentor",
-            student_id: "student-003",
-            mentor_id: "mentor-002",
+            student_id: student3.person_id,
+            mentor_id: mentor2.person_id,
             event_date: nonTodayEventDate,
             scanned_at: `${runtimeUtcDate}T10:00:00.000Z`,
             notes: "Other mentor",
@@ -114,8 +118,8 @@ describe("mentor API", () => {
           },
           {
             scan_id: "scan-other-day",
-            student_id: "student-004",
-            mentor_id: "mentor-001",
+            student_id: student4.person_id,
+            mentor_id: mentor1.person_id,
             event_date: "2099-01-01",
             scanned_at: "2099-01-01T11:00:00.000Z",
             notes: "Other day",
@@ -125,25 +129,25 @@ describe("mentor API", () => {
       });
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
-        new Request("https://example.com/mentor/local-mentor-token-001/api/recent-scans") as WorkerRequest,
-        createEnv(database, { EVENT_DATE: nonTodayEventDate }),
-        {} as WorkerContext
-      );
+          new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
+          createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+          {} as WorkerContext
+        );
 
       expect(response.status).toBe(200);
       await expect(response.json()).resolves.toEqual({
         recentScans: [
           {
             scanId: "scan-mentor-2",
-            studentId: "student-002",
-            studentName: "Student Local 02",
+            studentId: student2.person_id,
+            studentName: student2.display_name,
             scannedAt: `${runtimeUtcDate}T09:00:00.000Z`,
             notes: "Second note"
           },
           {
             scanId: "scan-mentor-1",
-            studentId: "student-001",
-            studentName: "Student Local 01",
+            studentId: student1.person_id,
+            studentName: student1.display_name,
             scannedAt: `${runtimeUtcDate}T08:00:00.000Z`,
             notes: "First note"
           }
@@ -156,8 +160,8 @@ describe("mentor API", () => {
         scanRecords: [
           {
             scan_id: "scan-old-mentor-1",
-            student_id: "student-001",
-            mentor_id: "mentor-001",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
             event_date: nonTodayEventDate,
             scanned_at: `${nonTodayEventDate}T08:00:00.000Z`,
             notes: "Old note 1",
@@ -165,8 +169,8 @@ describe("mentor API", () => {
           },
           {
             scan_id: "scan-old-mentor-2",
-            student_id: "student-002",
-            mentor_id: "mentor-001",
+            student_id: student2.person_id,
+            mentor_id: mentor1.person_id,
             event_date: nonTodayEventDate,
             scanned_at: `${nonTodayEventDate}T09:00:00.000Z`,
             notes: "Old note 2",
@@ -176,10 +180,10 @@ describe("mentor API", () => {
       });
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
-        new Request("https://example.com/mentor/local-mentor-token-001/api/recent-scans") as WorkerRequest,
-        createEnv(database, { EVENT_DATE: nonTodayEventDate }),
-        {} as WorkerContext
-      );
+          new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
+          createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+          {} as WorkerContext
+        );
 
       expect(response.status).toBe(200);
       await expect(response.json()).resolves.toEqual({
@@ -193,8 +197,8 @@ describe("mentor API", () => {
       scanRecords: [
         {
           scan_id: "scan-note-target",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "",
@@ -204,7 +208,7 @@ describe("mentor API", () => {
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/mentor/local-mentor-token-001/api/notes/scan-note-target", {
+      new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/notes/scan-note-target`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
@@ -236,8 +240,8 @@ describe("mentor API", () => {
       scanRecords: [
         {
           scan_id: "scan-other-mentor-note",
-          student_id: "student-001",
-          mentor_id: "mentor-002",
+          student_id: student1.person_id,
+          mentor_id: mentor2.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "",
@@ -247,7 +251,7 @@ describe("mentor API", () => {
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/mentor/local-mentor-token-001/api/notes/scan-other-mentor-note", {
+      new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/notes/scan-other-mentor-note`, {
         method: "POST",
         headers: {
           "content-type": "application/json"

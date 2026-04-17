@@ -1,21 +1,25 @@
 import { describe, expect, it } from "vitest";
 
 import { parseSecretLinkPath } from "../../src/worker/services/secret-links";
+import { REAL_MENTORS, REAL_STUDENTS } from "../support/real-roster";
+
+const [student1] = REAL_STUDENTS;
+const [mentor1] = REAL_MENTORS;
 
 describe("parseSecretLinkPath", () => {
   it("parses a student secret page route", () => {
-    expect(parseSecretLinkPath("/student/local-student-token-001")).toEqual({
+    expect(parseSecretLinkPath(`/student/${student1.secret_path_token}`)).toEqual({
       kind: "page",
       role: "student",
-      secretToken: "local-student-token-001"
+      secretToken: student1.secret_path_token
     });
   });
 
   it("parses a mentor API route beneath the same secret link", () => {
-    expect(parseSecretLinkPath("/mentor/local-mentor-token-001/api/recent-scans")).toEqual({
+    expect(parseSecretLinkPath(`/mentor/${mentor1.secret_path_token}/api/recent-scans`)).toEqual({
       kind: "api",
       role: "mentor",
-      secretToken: "local-mentor-token-001",
+      secretToken: mentor1.secret_path_token,
       apiPath: "/recent-scans"
     });
   });

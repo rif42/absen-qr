@@ -7,6 +7,8 @@
 ## Purpose
 This document translates the approved PRD into an implementation-ready engineering plan. It defines the expected architecture, delivery phases, data model, APIs, UI responsibilities, validation strategy, and rollout order for the v1 internal pilot.
 
+**Note:** The implementation has been approved for a 20-person expanded real-user test roster (10 mentors + 10 students) as an exception to the original pilot scope.
+
 ## Scope Summary
 The system must support three web roles for a single UTC calendar-day:
 - **Student:** scan a mentor QR code and view same-day mentor scan history.
@@ -16,7 +18,7 @@ The system must support three web roles for a single UTC calendar-day:
 Locked product constraints:
 - single UTC calendar-day only
 - one secret link per person
-- stable unique IDs for all students and mentors
+- stable unique IDs for all students and mentors (10 mentors and 10 students for the approved 20-person real-user test roster)
 - duplicate student→mentor scans are rejected
 - admin correction behavior is last-write-wins
 - admin records and CSV export share one inclusive `startDate` / `endDate` contract over stored `event_date`
@@ -201,7 +203,7 @@ Student history and mentor recent-scan visibility use the same UTC calendar-day 
 ### Phase 1 — Scaffolding and Foundations
 - scaffold Worker project and docs-aware repo layout
 - configure D1, migrations, seed flow, and test harness
-- create seeded identity model for 5 students and 5 mentors
+- create seeded identity model for 10 students and 10 mentors (approved 20-person real-user test roster)
 - establish secret-link resolution rules
 
 **Exit criteria**

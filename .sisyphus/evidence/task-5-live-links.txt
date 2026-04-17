@@ -1,0 +1,78 @@
+Task 5: Live Secret Link Behavior Verification
+===============================================
+
+Selected Test Users from userlist.csv:
+---------------------------------------
+Student: Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb
+  - Person ID: student-bdn-titik-kurniawati-s-sit-m-kes-m-keb
+  - Secret Link: https://absen-qr.rif42.workers.dev/student/student-bdn-titik-kurniawati-s-sit-m-kes-m-keb
+
+Mentor: Mohammad Ariq Nazar, S.Si, M.Biomed
+  - Person ID: mentor-mohammad-ariq-nazar-s-si-m-biomed
+  - Secret Link: https://absen-qr.rif42.workers.dev/mentor/mentor-mohammad-ariq-nazar-s-si-m-biomed
+
+
+Test Case 1: Student /api/me endpoint
+=====================================
+Command:
+  GET https://absen-qr.rif42.workers.dev/student/student-bdn-titik-kurniawati-s-sit-m-kes-m-keb/api/me
+
+Expected:
+  - 200 OK status
+  - JSON response with student identity containing:
+    * personId: student-bdn-titik-kurniawati-s-sit-m-kes-m-keb
+    * displayName: "Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb"
+    * secretId: student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb
+
+Actual Response:
+  HTTP Status: 200 OK
+  {
+    "student": {
+      "personId": "student-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "displayName": "Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb",
+      "secretId": "student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb"
+    }
+  }
+
+Verdict: PASS
+  - Status code is correct
+  - All expected identity fields present with correct values
+
+
+Test Case 2: Mentor /api/me endpoint
+====================================
+Command:
+  GET https://absen-qr.rif42.workers.dev/mentor/mentor-mohammad-ariq-nazar-s-si-m-biomed/api/me
+
+Expected:
+  - 200 OK status
+  - JSON response with:
+    * mentor identity (personId, displayName, secretId)
+    * qrPayload matching pattern: absenqr:v1:mentor:mentor-mohammad-ariq-nazar-s-si-m-biomed
+    * qrSvg: SVG markup
+
+Actual Response:
+  HTTP Status: 200 OK
+  {
+    "mentor": {
+      "personId": "mentor-mohammad-ariq-nazar-s-si-m-biomed",
+      "displayName": "Mohammad Ariq Nazar, S.Si, M.Biomed",
+      "secretId": "mentor-secret-mohammad-ariq-nazar-s-si-m-biomed"
+    },
+    "qrPayload": "absenqr:v1:mentor:mentor-mohammad-ariq-nazar-s-si-m-biomed",
+    "qrSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 256 256\">..."
+  }
+
+Verdict: PASS
+  - Status code is correct
+  - Mentor identity fields present with correct values
+  - QR payload matches expected pattern: absenqr:v1:mentor:mentor-mohammad-ariq-nazar-s-si-m-biomed
+  - QR SVG is present and valid
+
+
+Overall Verdict: PASS
+====================
+Both selected student and mentor production secret links resolve correctly:
+- Student /api/me returns correct student identity
+- Mentor /api/me returns correct mentor identity with QR payload pattern absenqr:v1:mentor:...
+- All identity fields match the canonical roster from userlist.csv

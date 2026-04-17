@@ -1,18 +1,25 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
+import {
+  REAL_MENTORS,
+  REAL_STUDENTS,
+  REAL_STUDENTS_BY_NAME
+} from "../support/real-roster";
 
 const configuredEventDate = "2026-01-15";
 const rangeStartDate = "2026-01-14";
 const rangeEndDate = "2026-01-15";
+const [student1, student2, student3] = REAL_STUDENTS;
+const [mentor1, mentor2, mentor3] = REAL_MENTORS;
 
 function createAdminMockDatabase(): D1Database {
   return createMockD1Database({
     scanRecords: [
       {
         scan_id: "scan-admin-early",
-        student_id: "student-003",
-        mentor_id: "mentor-003",
+        student_id: student3.person_id,
+        mentor_id: mentor3.person_id,
         event_date: rangeStartDate,
         scanned_at: `${rangeStartDate}T08:00:00.000Z`,
         notes: "Early note",
@@ -20,8 +27,8 @@ function createAdminMockDatabase(): D1Database {
       },
       {
         scan_id: "scan-admin-alpha",
-        student_id: "student-001",
-        mentor_id: "mentor-001",
+        student_id: student1.person_id,
+        mentor_id: mentor1.person_id,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Alpha note",
@@ -29,8 +36,8 @@ function createAdminMockDatabase(): D1Database {
       },
       {
         scan_id: "scan-admin-zeta",
-        student_id: "student-002",
-        mentor_id: "mentor-002",
+        student_id: student2.person_id,
+        mentor_id: mentor2.person_id,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Zeta note",
@@ -38,8 +45,8 @@ function createAdminMockDatabase(): D1Database {
       },
       {
         scan_id: "scan-admin-conflict-source",
-        student_id: "student-002",
-        mentor_id: "mentor-001",
+        student_id: student2.person_id,
+        mentor_id: mentor1.person_id,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T08:30:00.000Z`,
         notes: "Conflict candidate",
@@ -47,8 +54,8 @@ function createAdminMockDatabase(): D1Database {
       },
       {
         scan_id: "scan-admin-delete-target",
-        student_id: "student-001",
-        mentor_id: "mentor-002",
+        student_id: student1.person_id,
+        mentor_id: mentor2.person_id,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T07:00:00.000Z`,
         notes: "Delete me",
@@ -56,8 +63,8 @@ function createAdminMockDatabase(): D1Database {
       },
       {
         scan_id: "scan-admin-other-day",
-        student_id: "student-001",
-        mentor_id: "mentor-001",
+        student_id: student1.person_id,
+        mentor_id: mentor1.person_id,
         event_date: "2099-01-01",
         scanned_at: "2099-01-01T10:00:00.000Z",
         notes: "Ignore me",
@@ -86,13 +93,9 @@ describe("mock D1 admin query shapes", () => {
         display_name: string;
       }>();
 
-    expect(students.results.map((student) => student.display_name)).toEqual([
-      "Student Local 01",
-      "Student Local 02",
-      "Student Local 03",
-      "Student Local 04",
-      "Student Local 05"
-    ]);
+    expect(students.results.map((student) => student.display_name)).toEqual(
+      REAL_STUDENTS_BY_NAME.map((student) => student.display_name)
+    );
   });
 
   it("returns joined admin record rows newest first for the event day", async () => {
@@ -141,11 +144,11 @@ describe("mock D1 admin query shapes", () => {
     expect(records.results).toEqual([
       {
         scan_id: "scan-admin-zeta",
-        student_id: "student-002",
-        student_name: "Student Local 02",
-        student_secret_id: "student-secret-002",
-        mentor_id: "mentor-002",
-        mentor_name: "Mentor Local 02",
+        student_id: student2.person_id,
+        student_name: student2.display_name,
+        student_secret_id: student2.secret_id,
+        mentor_id: mentor2.person_id,
+        mentor_name: mentor2.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Zeta note",
@@ -153,11 +156,11 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-alpha",
-        student_id: "student-001",
-        student_name: "Student Local 01",
-        student_secret_id: "student-secret-001",
-        mentor_id: "mentor-001",
-        mentor_name: "Mentor Local 01",
+        student_id: student1.person_id,
+        student_name: student1.display_name,
+        student_secret_id: student1.secret_id,
+        mentor_id: mentor1.person_id,
+        mentor_name: mentor1.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Alpha note",
@@ -165,11 +168,11 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-conflict-source",
-        student_id: "student-002",
-        student_name: "Student Local 02",
-        student_secret_id: "student-secret-002",
-        mentor_id: "mentor-001",
-        mentor_name: "Mentor Local 01",
+        student_id: student2.person_id,
+        student_name: student2.display_name,
+        student_secret_id: student2.secret_id,
+        mentor_id: mentor1.person_id,
+        mentor_name: mentor1.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T08:30:00.000Z`,
         notes: "Conflict candidate",
@@ -177,11 +180,11 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-delete-target",
-        student_id: "student-001",
-        student_name: "Student Local 01",
-        student_secret_id: "student-secret-001",
-        mentor_id: "mentor-002",
-        mentor_name: "Mentor Local 02",
+        student_id: student1.person_id,
+        student_name: student1.display_name,
+        student_secret_id: student1.secret_id,
+        mentor_id: mentor2.person_id,
+        mentor_name: mentor2.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T07:00:00.000Z`,
         notes: "Delete me",
@@ -189,11 +192,11 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-early",
-        student_id: "student-003",
-        student_name: "Student Local 03",
-        student_secret_id: "student-secret-003",
-        mentor_id: "mentor-003",
-        mentor_name: "Mentor Local 03",
+        student_id: student3.person_id,
+        student_name: student3.display_name,
+        student_secret_id: student3.secret_id,
+        mentor_id: mentor3.person_id,
+        mentor_name: mentor3.display_name,
         event_date: rangeStartDate,
         scanned_at: `${rangeStartDate}T08:00:00.000Z`,
         notes: "Early note",
@@ -236,18 +239,18 @@ describe("mock D1 admin query shapes", () => {
       }>();
 
     expect(rows.results.map((row) => row.student_name)).toEqual([
-      "Student Local 03",
-      "Student Local 01",
-      "Student Local 02",
-      "Student Local 01",
-      "Student Local 02"
+      student3.display_name,
+      student1.display_name,
+      student2.display_name,
+      student1.display_name,
+      student2.display_name
     ]);
     expect(rows.results.map((row) => row.mentor_name)).toEqual([
-      "Mentor Local 03",
-      "Mentor Local 02",
-      "Mentor Local 01",
-      "Mentor Local 01",
-      "Mentor Local 02"
+      mentor3.display_name,
+      mentor2.display_name,
+      mentor1.display_name,
+      mentor1.display_name,
+      mentor2.display_name
     ]);
   });
 
@@ -292,11 +295,11 @@ describe("mock D1 admin query shapes", () => {
 
     expect(record).toMatchObject({
       scan_id: "scan-admin-alpha",
-      student_id: "student-001",
-      student_name: "Student Local 01",
-      student_secret_id: "student-secret-001",
-      mentor_id: "mentor-001",
-      mentor_name: "Mentor Local 01",
+      student_id: student1.person_id,
+      student_name: student1.display_name,
+      student_secret_id: student1.secret_id,
+      mentor_id: mentor1.person_id,
+      mentor_name: mentor1.display_name,
       notes: "Alpha note"
     });
   });
@@ -314,8 +317,8 @@ describe("mock D1 admin query shapes", () => {
       )
       .bind(
         "Updated by admin",
-        "student-003",
-        "mentor-003",
+        student3.person_id,
+        mentor3.person_id,
         `${configuredEventDate}T11:00:00.000Z`,
         "scan-admin-conflict-source"
       )
@@ -325,8 +328,8 @@ describe("mock D1 admin query shapes", () => {
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",
-          student_id: "student-003",
-          mentor_id: "mentor-003",
+          student_id: student3.person_id,
+          mentor_id: mentor3.person_id,
           notes: "Updated by admin",
           updated_at: `${configuredEventDate}T11:00:00.000Z`
         })
@@ -347,8 +350,8 @@ describe("mock D1 admin query shapes", () => {
           `
         )
         .bind(
-          "student-001",
-          "mentor-001",
+          student1.person_id,
+          mentor1.person_id,
           `${configuredEventDate}T12:00:00.000Z`,
           "scan-admin-conflict-source"
         )
@@ -361,8 +364,8 @@ describe("mock D1 admin query shapes", () => {
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",
-          student_id: "student-002",
-          mentor_id: "mentor-001",
+          student_id: student2.person_id,
+          mentor_id: mentor1.person_id,
           updated_at: `${configuredEventDate}T08:30:00.000Z`
         })
       ])

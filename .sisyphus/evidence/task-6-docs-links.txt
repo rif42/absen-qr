@@ -1,0 +1,5 @@
+docs/README.md file references check:
+- ./prd/mentor-student-qr-attendance-v1.md → EXISTS ✓
+- ./implementation/mentor-student-qr-attendance-v1-plan.md → EXISTS ✓
+
+All references valid.

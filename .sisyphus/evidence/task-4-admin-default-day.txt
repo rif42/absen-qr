@@ -1,0 +1,34 @@
+Task 4: Admin endpoints default to runtime UTC day, not EVENT_DATE
+=====================================================================
+
+Evidence: All 26 tests pass including 3 new regression tests.
+
+New tests added to test/integration/admin-api.test.ts:
+
+1. "defaults to the runtime UTC day for /records when no query params are given, not the configured EVENT_DATE"
+   - Freezes time to "2026-01-20" (different from EVENT_DATE "2026-01-15")
+   - Seeds records on BOTH dates
+   - Calls /records with NO query params
+   - Asserts only the frozen-UTC-day record is returned
+   - Asserts dateFilter: { startDate: "2026-01-20", endDate: "2026-01-20" }
+
+2. "defaults to the runtime UTC day for /export.csv when no query params are given, not the configured EVENT_DATE"
+   - Same frozen time ("2026-01-20") different from EVENT_DATE
+   - Seeds records on both dates
+   - Calls /export.csv with NO query params
+   - Asserts only the frozen-UTC-day CSV row is returned
+   - Asserts content-disposition filename uses frozen UTC day
+
+3. "uses explicit startDate/endDate params that differ from both the frozen UTC day and EVENT_DATE"
+   - Freezes time to "2026-01-20"
+   - Uses explicit range 2026-01-14 to 2026-01-16
+   - Seeds records on 3 different dates
+   - Asserts only the record within the explicit range is returned
+   - Tests both /records and /export.csv
+
+Test output:
+  ✓ test/integration/admin-api.test.ts (26 tests) 38ms
+  Test Files  1 passed (1)
+       Tests  26 passed (26)
+
+Typecheck: PASS (no errors)

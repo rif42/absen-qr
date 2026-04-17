@@ -15,7 +15,7 @@ The earlier attendance MVP was designed around a simpler attendee/admin check-in
 Without this structure, the system risks shipping with the wrong user model, incomplete auditability, and a workflow that does not match real event operations.
 
 ## Goals
-- Support a complete UTC calendar-day workflow for 5 mentors and 5 students using stable QR-linked identities.
+- Support a complete UTC calendar-day workflow for 10 mentors and 10 students using stable QR-linked identities (20-person expanded real-user test roster exception to original pilot scope).
 - Let students scan mentor QR codes and immediately see an accurate same-day history of mentors scanned.
 - Let mentors keep a QR page open and receive live note-entry state as soon as a student scan is recorded.
 - Give admins a secure secret-link interface to view, filter, export, edit, delete, and reassign records, defaulting to the current UTC calendar day or using an inclusive stored `event_date` range.
@@ -140,7 +140,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - [ ] Correction actions persist to storage and are reflected in export output.
 
 #### 8. Stable identity model
-- All 5 students and 5 mentors have unique, stable IDs mapped to their QR identity.
+- All 10 students and 10 mentors have unique, stable IDs mapped to their QR identity.
 
 **Acceptance criteria**
 - [ ] QR identity does not change between sessions for the same person.
@@ -180,7 +180,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - **Revisit later if:** the product expands into multi-event workflows, sophisticated permissions, scheduled reporting, or heavyweight document generation.
 
 ## Constraints and Assumptions
-- Pilot size is 5 mentors and 5 students.
+- Pilot size is 10 mentors and 10 students (20-person expanded real-user test roster exception to original pilot scope).
 - Scope is a single UTC calendar-day.
 - Each person has a stable unique ID.
 - Secret links are used instead of formal login.
@@ -191,7 +191,7 @@ Without this structure, the system risks shipping with the wrong user model, inc
 - CSV is the only required export format in v1.
 
 ## Timeline Considerations
-- This scope is appropriate for a single v1 pilot if multi-event support remains out of scope.
+- This scope is appropriate for a single v1 pilot with the approved 20-person real-user testing exception (10 mentors + 10 students) if multi-event support remains out of scope.
 - The highest-risk interaction is the live mentor-page update after student scan and should be validated early.
 - CSV export and correction tooling are part of the core admin workflow and should not be deferred.
 

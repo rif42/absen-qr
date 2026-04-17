@@ -1,0 +1,10 @@
+AGENTS.md
+README.md
+docs\README.md
+docs\implementation\mentor-student-qr-attendance-v1-plan.md
+docs\prd\mentor-student-qr-attendance-v1.md
+admin-page.png
+mentor-page-full.png
+student-mobile-redesign.png
+student-page-full.png
+student-page.png

@@ -1,0 +1,58 @@
+Name,Role,Selected,Status,Person ID,Secret ID,Secret Token,Secret Link,Selection Order
+"Mohammad Ariq Nazar, S.Si, M.Biomed",Mentor,YES,selected,mentor-mohammad-ariq-nazar-s-si-m-biomed,mentor-secret-mohammad-ariq-nazar-s-si-m-biomed,mentor-mohammad-ariq-nazar-s-si-m-biomed,https://absen-qr.rif42.workers.dev/mentor/mentor-mohammad-ariq-nazar-s-si-m-biomed,1
+"Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb",Student,YES,selected,student-bdn-titik-kurniawati-s-sit-m-kes-m-keb,student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb,student-bdn-titik-kurniawati-s-sit-m-kes-m-keb,https://absen-qr.rif42.workers.dev/student/student-bdn-titik-kurniawati-s-sit-m-kes-m-keb,2
+"Rizqitha, S.Tr.Keb., M.Tr.Keb",Student,YES,selected,student-rizqitha-s-tr-keb-m-tr-keb,student-secret-rizqitha-s-tr-keb-m-tr-keb,student-rizqitha-s-tr-keb-m-tr-keb,https://absen-qr.rif42.workers.dev/student/student-rizqitha-s-tr-keb-m-tr-keb,3
+"Qolbi Hanif Fadhlulloh, S.H.,M.H.",Student,YES,selected,student-qolbi-hanif-fadhlulloh-s-h-m-h,student-secret-qolbi-hanif-fadhlulloh-s-h-m-h,student-qolbi-hanif-fadhlulloh-s-h-m-h,https://absen-qr.rif42.workers.dev/student/student-qolbi-hanif-fadhlulloh-s-h-m-h,4
+"Muhamad Agung S, S.Sos., M.Sos",Student,YES,selected,student-muhamad-agung-s-s-sos-m-sos,student-secret-muhamad-agung-s-s-sos-m-sos,student-muhamad-agung-s-s-sos-m-sos,https://absen-qr.rif42.workers.dev/student/student-muhamad-agung-s-s-sos-m-sos,5
+"Reni Nur Arifah, S.E., M.M.",Student,YES,selected,student-reni-nur-arifah-s-e-m-m,student-secret-reni-nur-arifah-s-e-m-m,student-reni-nur-arifah-s-e-m-m,https://absen-qr.rif42.workers.dev/student/student-reni-nur-arifah-s-e-m-m,6
+"Nadya Audina NS. S.Si., M.Biomed",Student,YES,selected,student-nadya-audina-ns-s-si-m-biomed,student-secret-nadya-audina-ns-s-si-m-biomed,student-nadya-audina-ns-s-si-m-biomed,https://absen-qr.rif42.workers.dev/student/student-nadya-audina-ns-s-si-m-biomed,7
+"Fauziah Novita Putri Rifai, S.Si, M.Biotech",Student,YES,selected,student-fauziah-novita-putri-rifai-s-si-m-biotech,student-secret-fauziah-novita-putri-rifai-s-si-m-biotech,student-fauziah-novita-putri-rifai-s-si-m-biotech,https://absen-qr.rif42.workers.dev/student/student-fauziah-novita-putri-rifai-s-si-m-biotech,8
+"Erna Setyaningsih, S.S.T.,M.Tr.Keb",Student,YES,selected,student-erna-setyaningsih-s-s-t-m-tr-keb,student-secret-erna-setyaningsih-s-s-t-m-tr-keb,student-erna-setyaningsih-s-s-t-m-tr-keb,https://absen-qr.rif42.workers.dev/student/student-erna-setyaningsih-s-s-t-m-tr-keb,9
+"Bd. Mariza Mustika D, S.Tr.Keb., M.Tr.Keb",Mentor,YES,selected,mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb,mentor-secret-bd-mariza-mustika-d-s-tr-keb-m-tr-keb,mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb,https://absen-qr.rif42.workers.dev/mentor/mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb,10
+"Diah Widyatun, S.S.T., M.Tr.Keb",Student,YES,selected,student-diah-widyatun-s-s-t-m-tr-keb,student-secret-diah-widyatun-s-s-t-m-tr-keb,student-diah-widyatun-s-s-t-m-tr-keb,https://absen-qr.rif42.workers.dev/student/student-diah-widyatun-s-s-t-m-tr-keb,11
+"Bdn. Sri Mularsih, S.SiT, M.Kes",Student,YES,selected,student-bdn-sri-mularsih-s-sit-m-kes,student-secret-bdn-sri-mularsih-s-sit-m-kes,student-bdn-sri-mularsih-s-sit-m-kes,https://absen-qr.rif42.workers.dev/student/student-bdn-sri-mularsih-s-sit-m-kes,12
+"Dewi Elliana, SKM, S.Tr.Keb, M.Kes",Student,NO,over-quota-student,,,,,
+"Naufal Sebastian, S.H.,M.H.",Mentor,YES,selected,mentor-naufal-sebastian-s-h-m-h,mentor-secret-naufal-sebastian-s-h-m-h,mentor-naufal-sebastian-s-h-m-h,https://absen-qr.rif42.workers.dev/mentor/mentor-naufal-sebastian-s-h-m-h,13
+"dr. Erwin, S.H., M.H",Student,NO,over-quota-student,,,,,
+"Zain Arfin Utama, S.H., M.H.",Student,NO,over-quota-student,,,,,
+"Sutinnarto, S.I.Kom., M.I.Kom",Mentor,YES,selected,mentor-sutinnarto-s-i-kom-m-i-kom,mentor-secret-sutinnarto-s-i-kom-m-i-kom,mentor-sutinnarto-s-i-kom-m-i-kom,https://absen-qr.rif42.workers.dev/mentor/mentor-sutinnarto-s-i-kom-m-i-kom,14
+"Najmi Rizki Khairani, S.Sos., M.I.Kom",Mentor,YES,selected,mentor-najmi-rizki-khairani-s-sos-m-i-kom,mentor-secret-najmi-rizki-khairani-s-sos-m-i-kom,mentor-najmi-rizki-khairani-s-sos-m-i-kom,https://absen-qr.rif42.workers.dev/mentor/mentor-najmi-rizki-khairani-s-sos-m-i-kom,15
+"Lakna Tulas'un, S.Sos, M.I.Kom",Student,NO,over-quota-student,,,,,
+"Rif'atul Himmah, S.Sos. M.I.Kom.",Student,NO,over-quota-student,,,,,
+"Yetty Yuliany K, S.E., M.M",Student,NO,over-quota-student,,,,,
+"Putri Aryo Jelang Fitri Khothimah, S.E., M.M.",Student,NO,over-quota-student,,,,,
+"Randika Shafly Fawwaz, S.M., M.M",Student,NO,over-quota-student,,,,,
+"Dr. Ir. Agus F. Abdillah, MBA, ERMAP",Mentor,YES,selected,mentor-dr-ir-agus-f-abdillah-mba-ermap,mentor-secret-dr-ir-agus-f-abdillah-mba-ermap,mentor-dr-ir-agus-f-abdillah-mba-ermap,https://absen-qr.rif42.workers.dev/mentor/mentor-dr-ir-agus-f-abdillah-mba-ermap,16
+"Eva Fachria, S.E., M.S.M.",Mentor,YES,selected,mentor-eva-fachria-s-e-m-s-m,mentor-secret-eva-fachria-s-e-m-s-m,mentor-eva-fachria-s-e-m-s-m,https://absen-qr.rif42.workers.dev/mentor/mentor-eva-fachria-s-e-m-s-m,17
+"Anindya Putri Utami, S.M., M.M.",Mentor,YES,selected,mentor-anindya-putri-utami-s-m-m-m,mentor-secret-anindya-putri-utami-s-m-m-m,mentor-anindya-putri-utami-s-m-m-m,https://absen-qr.rif42.workers.dev/mentor/mentor-anindya-putri-utami-s-m-m-m,18
+"Dian Respati Ayu, S.Si., M.Biomed",Mentor,YES,selected,mentor-dian-respati-ayu-s-si-m-biomed,mentor-secret-dian-respati-ayu-s-si-m-biomed,mentor-dian-respati-ayu-s-si-m-biomed,https://absen-qr.rif42.workers.dev/mentor/mentor-dian-respati-ayu-s-si-m-biomed,19
+"Risky Chandra Satria Irawan S.Si, M.Biomed",Student,NO,over-quota-student,,,,,
+"Dendi Krisna Nugraha, M.Sc., Ph.D.",Mentor,YES,selected,mentor-dendi-krisna-nugraha-m-sc-ph-d,mentor-secret-dendi-krisna-nugraha-m-sc-ph-d,mentor-dendi-krisna-nugraha-m-sc-ph-d,https://absen-qr.rif42.workers.dev/mentor/mentor-dendi-krisna-nugraha-m-sc-ph-d,20
+"Nurul Hidayah S.Si, M.Biotech",Mentor,NO,over-quota-mentor,,,,,
+"Salindri Prawitasari, S.Si, M.Si.",Mentor,NO,over-quota-mentor,,,,,
+"Dini Cahyani, S.Si, M.Biotech",Student,NO,over-quota-student,,,,,
+Rudi Hermawan S.Kom,Student,NO,over-quota-student,,,,,
+"Panji Agung Pedekso, S.Hum",Mentor,NO,over-quota-mentor,,,,,
+"Ridha Azahra, S.Pd",Student,NO,over-quota-student,,,,,
+"Claudea Winandyaz R, S.Pd, M.Pd.",Student,NO,over-quota-student,,,,,
+"Bela Pristiandani, S.Ak",Student,NO,over-quota-student,,,,,
+"Alya Pramesty, S.Si",Student,NO,over-quota-student,,,,,
+"Bondan Eko Suratno, M.Hum",Mentor,NO,over-quota-mentor,,,,,
+"Rifky Ariya Pratama, S.Kom.",Mentor,NO,over-quota-mentor,,,,,
+"Alya Namira Ikfinasulkha, S.IP.",Student,NO,over-quota-student,,,,,
+"Daffa Restu Fadhillah, S.Kom",Mentor,NO,over-quota-mentor,,,,,
+"Firda Rismadhani, S.M",Student,NO,over-quota-student,,,,,
+"Rahmawati, S.A.B",Student,NO,over-quota-student,,,,,
+"Alvin Syaptia Pratama, S.I.Kom",Student,NO,over-quota-student,,,,,
+"Galih Nanda Purnama , S.Ds",Student,NO,over-quota-student,,,,,
+"Dina Haida Shofwa, A.Md.Keb.",Mentor,NO,over-quota-mentor,,,,,
+"Labbra Pasaribu, S.M",Student,NO,over-quota-student,,,,,
+Ms Endah,Mentor,NO,over-quota-mentor,,,,,
+Ms Waheni,Mentor,NO,over-quota-mentor,,,,,
+Mr Naufal Sebastian Anggoro,Mentor,NO,over-quota-mentor,,,,,
+Mr Faheem,Mentor,NO,over-quota-mentor,,,,,
+Mr Faris,Mentor,NO,over-quota-mentor,,,,,
+Prof Yayuk,Mentor,NO,over-quota-mentor,,,,,
+Ms Nina,Mentor,NO,over-quota-mentor,,,,,
+Mr Adam,Mentor,NO,over-quota-mentor,,,,,
+Mr Dendi,Mentor,NO,over-quota-mentor,,,,,

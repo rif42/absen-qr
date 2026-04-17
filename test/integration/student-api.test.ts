@@ -2,11 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import worker from "../../src/worker/index";
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
+import { REAL_MENTORS, REAL_STUDENTS } from "../support/real-roster";
 
 type FetchHandler = NonNullable<typeof worker.fetch>;
 type WorkerRequest = Parameters<FetchHandler>[0];
 type WorkerEnv = Parameters<FetchHandler>[1];
 type WorkerContext = Parameters<FetchHandler>[2];
+
+const [student1, student2] = REAL_STUDENTS;
+const [mentor1, mentor2] = REAL_MENTORS;
 
 function createAssetFetcher(): Fetcher {
   return {
@@ -34,7 +38,7 @@ describe("student API", () => {
   it("returns the student identity for a valid student secret token", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/me") as WorkerRequest,
+      new Request(`https://example.com/student/${student1.secret_path_token}/api/me`) as WorkerRequest,
       createEnv(),
       {} as WorkerContext
     );
@@ -42,9 +46,9 @@ describe("student API", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       student: {
-        personId: "student-001",
-        displayName: "Student Local 01",
-        secretId: "student-secret-001"
+        personId: student1.person_id,
+        displayName: student1.display_name,
+        secretId: student1.secret_id
       }
     });
   });
@@ -52,7 +56,7 @@ describe("student API", () => {
   it("rejects a student route whose secret token belongs to another role", async () => {
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-mentor-token-001/api/me") as WorkerRequest,
+      new Request(`https://example.com/student/${mentor1.secret_path_token}/api/me`) as WorkerRequest,
       createEnv(),
       {} as WorkerContext
     );
@@ -68,13 +72,13 @@ describe("student API", () => {
     const database = createMockD1Database();
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+      new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
+          qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
         })
       }) as WorkerRequest,
       createEnv(database),
@@ -87,20 +91,20 @@ describe("student API", () => {
 
     await expect(response.json()).resolves.toMatchObject({
       scan: {
-        studentId: "student-001",
-        mentorId: "mentor-001",
+        studentId: student1.person_id,
+        mentorId: mentor1.person_id,
         eventDate: configuredEventDate
       },
       mentor: {
-        personId: "mentor-001",
-        displayName: "Mentor Local 01"
+        personId: mentor1.person_id,
+        displayName: mentor1.display_name
       }
     });
 
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
     expect(readMockD1State(database).scanRecords[0]).toMatchObject({
-      student_id: "student-001",
-      mentor_id: "mentor-001",
+      student_id: student1.person_id,
+      mentor_id: mentor1.person_id,
       event_date: configuredEventDate
     });
   });
@@ -115,15 +119,15 @@ describe("student API", () => {
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
-        })
-      }) as WorkerRequest,
+            qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
+          })
+        }) as WorkerRequest,
       createEnv(database),
       {} as WorkerContext
     );
@@ -141,7 +145,7 @@ describe("student API", () => {
     const database = createMockD1Database();
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
@@ -169,8 +173,8 @@ describe("student API", () => {
       scanRecords: [
         {
           scan_id: "scan-duplicate-existing",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: configuredEventDate,
           scanned_at: `${configuredEventDate}T08:00:00.000Z`,
           notes: "",
@@ -180,15 +184,15 @@ describe("student API", () => {
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
-        })
-      }) as WorkerRequest,
+            qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
+          })
+        }) as WorkerRequest,
       createEnv(database),
       {} as WorkerContext
     );
@@ -210,8 +214,8 @@ describe("student API", () => {
       scanRecords: [
         {
           scan_id: "scan-duplicate-existing-runtime-mismatch",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
           event_date: "2026-01-14",
           scanned_at: "2026-01-13T08:00:00.000Z",
           notes: "Existing event-day duplicate",
@@ -221,15 +225,15 @@ describe("student API", () => {
     });
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
-        })
-      }) as WorkerRequest,
+            qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
+          })
+        }) as WorkerRequest,
       createEnv(database, "2026-01-14"),
       {} as WorkerContext
     );
@@ -249,15 +253,15 @@ describe("student API", () => {
     vi.setSystemTime(new Date("2026-01-14T23:59:59.000Z"));
 
     const firstResponse = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
-        })
-      }) as WorkerRequest,
+            qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
+          })
+        }) as WorkerRequest,
       createEnv(database, "2026-01-14"),
       {} as WorkerContext
     );
@@ -268,15 +272,15 @@ describe("student API", () => {
     vi.setSystemTime(new Date("2026-01-15T00:00:01.000Z"));
 
     const secondResponse = await fetchHandler(
-      new Request("https://example.com/student/local-student-token-001/api/scan", {
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/scan`, {
         method: "POST",
         headers: {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          qrPayload: "absenqr:v1:mentor:mentor-001"
-        })
-      }) as WorkerRequest,
+            qrPayload: `absenqr:v1:mentor:${mentor1.person_id}`
+          })
+        }) as WorkerRequest,
       createEnv(database, "2026-01-15"),
       {} as WorkerContext
     );
@@ -302,8 +306,8 @@ describe("student API", () => {
         scanRecords: [
           {
             scan_id: "scan-history-1",
-            student_id: "student-001",
-            mentor_id: "mentor-001",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
             event_date: configuredEventDate,
             scanned_at: `${configuredEventDate}T08:00:00.000Z`,
             notes: "First mentor",
@@ -311,8 +315,8 @@ describe("student API", () => {
           },
           {
             scan_id: "scan-history-2",
-            student_id: "student-001",
-            mentor_id: "mentor-002",
+            student_id: student1.person_id,
+            mentor_id: mentor2.person_id,
             event_date: configuredEventDate,
             scanned_at: `${configuredEventDate}T09:00:00.000Z`,
             notes: "Second mentor",
@@ -320,8 +324,8 @@ describe("student API", () => {
           },
           {
             scan_id: "scan-other-student",
-            student_id: "student-002",
-            mentor_id: "mentor-001",
+            student_id: student2.person_id,
+            mentor_id: mentor1.person_id,
             event_date: configuredEventDate,
             scanned_at: `${configuredEventDate}T10:00:00.000Z`,
             notes: "Other student",
@@ -329,8 +333,8 @@ describe("student API", () => {
           },
           {
             scan_id: "scan-other-day",
-            student_id: "student-001",
-            mentor_id: "mentor-001",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
             event_date: "2099-01-01",
             scanned_at: "2099-01-01T11:00:00.000Z",
             notes: "Other day",
@@ -340,7 +344,7 @@ describe("student API", () => {
       });
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
-        new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/history`) as WorkerRequest,
         createEnv(database, "2026-01-14"),
         {} as WorkerContext
       );
@@ -350,15 +354,15 @@ describe("student API", () => {
         history: [
           {
             scanId: "scan-history-2",
-            mentorId: "mentor-002",
-            mentorName: "Mentor Local 02",
+            mentorId: mentor2.person_id,
+            mentorName: mentor2.display_name,
             scannedAt: `${configuredEventDate}T09:00:00.000Z`,
             notes: "Second mentor"
           },
           {
             scanId: "scan-history-1",
-            mentorId: "mentor-001",
-            mentorName: "Mentor Local 01",
+            mentorId: mentor1.person_id,
+            mentorName: mentor1.display_name,
             scannedAt: `${configuredEventDate}T08:00:00.000Z`,
             notes: "First mentor"
           }
@@ -371,8 +375,8 @@ describe("student API", () => {
         scanRecords: [
           {
             scan_id: "scan-old-1",
-            student_id: "student-001",
-            mentor_id: "mentor-001",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
             event_date: "2026-01-14",
             scanned_at: "2026-01-14T08:00:00.000Z",
             notes: "Old mentor 1",
@@ -380,8 +384,8 @@ describe("student API", () => {
           },
           {
             scan_id: "scan-old-2",
-            student_id: "student-001",
-            mentor_id: "mentor-002",
+            student_id: student1.person_id,
+            mentor_id: mentor2.person_id,
             event_date: "2026-01-13",
             scanned_at: "2026-01-13T09:00:00.000Z",
             notes: "Old mentor 2",
@@ -389,8 +393,8 @@ describe("student API", () => {
           },
           {
             scan_id: "scan-other-student-today",
-            student_id: "student-002",
-            mentor_id: "mentor-001",
+            student_id: student2.person_id,
+            mentor_id: mentor1.person_id,
             event_date: configuredEventDate,
             scanned_at: `${configuredEventDate}T10:00:00.000Z`,
             notes: "Other student today",
@@ -400,7 +404,7 @@ describe("student API", () => {
       });
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
-        new Request("https://example.com/student/local-student-token-001/api/history") as WorkerRequest,
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/history`) as WorkerRequest,
         createEnv(database, "2026-01-14"),
         {} as WorkerContext
       );

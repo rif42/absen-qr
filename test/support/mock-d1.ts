@@ -1,5 +1,7 @@
 import type { PersonRecord, ScanRecord } from "../../src/worker/types";
 
+import { REAL_ROSTER } from "./real-roster";
+
 type MockState = {
   people: PersonRecord[];
   scanRecords: ScanRecord[];
@@ -22,78 +24,7 @@ type StatementExecutor = {
   run(): Promise<{ success: true; meta: Record<string, unknown> }>;
 };
 
-const DEFAULT_PEOPLE: PersonRecord[] = [
-  {
-    person_id: "student-001",
-    display_name: "Student Local 01",
-    role: "student",
-    secret_id: "student-secret-001",
-    secret_path_token: "local-student-token-001"
-  },
-  {
-    person_id: "student-002",
-    display_name: "Student Local 02",
-    role: "student",
-    secret_id: "student-secret-002",
-    secret_path_token: "local-student-token-002"
-  },
-  {
-    person_id: "student-003",
-    display_name: "Student Local 03",
-    role: "student",
-    secret_id: "student-secret-003",
-    secret_path_token: "local-student-token-003"
-  },
-  {
-    person_id: "student-004",
-    display_name: "Student Local 04",
-    role: "student",
-    secret_id: "student-secret-004",
-    secret_path_token: "local-student-token-004"
-  },
-  {
-    person_id: "student-005",
-    display_name: "Student Local 05",
-    role: "student",
-    secret_id: "student-secret-005",
-    secret_path_token: "local-student-token-005"
-  },
-  {
-    person_id: "mentor-001",
-    display_name: "Mentor Local 01",
-    role: "mentor",
-    secret_id: "mentor-secret-001",
-    secret_path_token: "local-mentor-token-001"
-  },
-  {
-    person_id: "mentor-002",
-    display_name: "Mentor Local 02",
-    role: "mentor",
-    secret_id: "mentor-secret-002",
-    secret_path_token: "local-mentor-token-002"
-  },
-  {
-    person_id: "mentor-003",
-    display_name: "Mentor Local 03",
-    role: "mentor",
-    secret_id: "mentor-secret-003",
-    secret_path_token: "local-mentor-token-003"
-  },
-  {
-    person_id: "mentor-004",
-    display_name: "Mentor Local 04",
-    role: "mentor",
-    secret_id: "mentor-secret-004",
-    secret_path_token: "local-mentor-token-004"
-  },
-  {
-    person_id: "mentor-005",
-    display_name: "Mentor Local 05",
-    role: "mentor",
-    secret_id: "mentor-secret-005",
-    secret_path_token: "local-mentor-token-005"
-  }
-];
+const DEFAULT_PEOPLE: PersonRecord[] = REAL_ROSTER;
 
 function cloneState(seed?: Partial<MockState>): MockState {
   return {

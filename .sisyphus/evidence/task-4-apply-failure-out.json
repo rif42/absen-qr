@@ -1,0 +1,944 @@
+{
+  "contract_version": 1,
+  "mode": "apply-remote",
+  "source_csv": "./userlist.csv",
+  "base_url": "https://absen-qr.rif42.workers.dev/",
+  "role_limit": 10,
+  "selected_rows": [
+    {
+      "rowNumber": 2,
+      "selection_order": 1,
+      "display_name": "Mohammad Ariq Nazar, S.Si, M.Biomed",
+      "role": "mentor",
+      "normalized_name": "Mohammad Ariq Nazar, S.Si, M.Biomed",
+      "slug": "mohammad-ariq-nazar-s-si-m-biomed",
+      "base_slug": "mohammad-ariq-nazar-s-si-m-biomed",
+      "slug_collision_index": 1,
+      "person_id": "mentor-mohammad-ariq-nazar-s-si-m-biomed",
+      "secret_id": "mentor-secret-mohammad-ariq-nazar-s-si-m-biomed",
+      "secret_path_token": "mentor-mohammad-ariq-nazar-s-si-m-biomed",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-mohammad-ariq-nazar-s-si-m-biomed"
+    },
+    {
+      "rowNumber": 3,
+      "selection_order": 2,
+      "display_name": "Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb",
+      "role": "student",
+      "normalized_name": "Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb",
+      "slug": "bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "base_slug": "bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "slug_collision_index": 1,
+      "person_id": "student-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "secret_id": "student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "secret_path_token": "student-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-bdn-titik-kurniawati-s-sit-m-kes-m-keb"
+    },
+    {
+      "rowNumber": 4,
+      "selection_order": 3,
+      "display_name": "Rizqitha, S.Tr.Keb., M.Tr.Keb",
+      "role": "student",
+      "normalized_name": "Rizqitha, S.Tr.Keb., M.Tr.Keb",
+      "slug": "rizqitha-s-tr-keb-m-tr-keb",
+      "base_slug": "rizqitha-s-tr-keb-m-tr-keb",
+      "slug_collision_index": 1,
+      "person_id": "student-rizqitha-s-tr-keb-m-tr-keb",
+      "secret_id": "student-secret-rizqitha-s-tr-keb-m-tr-keb",
+      "secret_path_token": "student-rizqitha-s-tr-keb-m-tr-keb",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-rizqitha-s-tr-keb-m-tr-keb"
+    },
+    {
+      "rowNumber": 5,
+      "selection_order": 4,
+      "display_name": "Qolbi Hanif Fadhlulloh, S.H.,M.H.",
+      "role": "student",
+      "normalized_name": "Qolbi Hanif Fadhlulloh, S.H.,M.H.",
+      "slug": "qolbi-hanif-fadhlulloh-s-h-m-h",
+      "base_slug": "qolbi-hanif-fadhlulloh-s-h-m-h",
+      "slug_collision_index": 1,
+      "person_id": "student-qolbi-hanif-fadhlulloh-s-h-m-h",
+      "secret_id": "student-secret-qolbi-hanif-fadhlulloh-s-h-m-h",
+      "secret_path_token": "student-qolbi-hanif-fadhlulloh-s-h-m-h",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-qolbi-hanif-fadhlulloh-s-h-m-h"
+    },
+    {
+      "rowNumber": 6,
+      "selection_order": 5,
+      "display_name": "Muhamad Agung S, S.Sos., M.Sos",
+      "role": "student",
+      "normalized_name": "Muhamad Agung S, S.Sos., M.Sos",
+      "slug": "muhamad-agung-s-s-sos-m-sos",
+      "base_slug": "muhamad-agung-s-s-sos-m-sos",
+      "slug_collision_index": 1,
+      "person_id": "student-muhamad-agung-s-s-sos-m-sos",
+      "secret_id": "student-secret-muhamad-agung-s-s-sos-m-sos",
+      "secret_path_token": "student-muhamad-agung-s-s-sos-m-sos",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-muhamad-agung-s-s-sos-m-sos"
+    },
+    {
+      "rowNumber": 7,
+      "selection_order": 6,
+      "display_name": "Reni Nur Arifah, S.E., M.M.",
+      "role": "student",
+      "normalized_name": "Reni Nur Arifah, S.E., M.M.",
+      "slug": "reni-nur-arifah-s-e-m-m",
+      "base_slug": "reni-nur-arifah-s-e-m-m",
+      "slug_collision_index": 1,
+      "person_id": "student-reni-nur-arifah-s-e-m-m",
+      "secret_id": "student-secret-reni-nur-arifah-s-e-m-m",
+      "secret_path_token": "student-reni-nur-arifah-s-e-m-m",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-reni-nur-arifah-s-e-m-m"
+    },
+    {
+      "rowNumber": 8,
+      "selection_order": 7,
+      "display_name": "Nadya Audina NS. S.Si., M.Biomed",
+      "role": "student",
+      "normalized_name": "Nadya Audina NS. S.Si., M.Biomed",
+      "slug": "nadya-audina-ns-s-si-m-biomed",
+      "base_slug": "nadya-audina-ns-s-si-m-biomed",
+      "slug_collision_index": 1,
+      "person_id": "student-nadya-audina-ns-s-si-m-biomed",
+      "secret_id": "student-secret-nadya-audina-ns-s-si-m-biomed",
+      "secret_path_token": "student-nadya-audina-ns-s-si-m-biomed",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-nadya-audina-ns-s-si-m-biomed"
+    },
+    {
+      "rowNumber": 9,
+      "selection_order": 8,
+      "display_name": "Fauziah Novita Putri Rifai, S.Si, M.Biotech",
+      "role": "student",
+      "normalized_name": "Fauziah Novita Putri Rifai, S.Si, M.Biotech",
+      "slug": "fauziah-novita-putri-rifai-s-si-m-biotech",
+      "base_slug": "fauziah-novita-putri-rifai-s-si-m-biotech",
+      "slug_collision_index": 1,
+      "person_id": "student-fauziah-novita-putri-rifai-s-si-m-biotech",
+      "secret_id": "student-secret-fauziah-novita-putri-rifai-s-si-m-biotech",
+      "secret_path_token": "student-fauziah-novita-putri-rifai-s-si-m-biotech",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-fauziah-novita-putri-rifai-s-si-m-biotech"
+    },
+    {
+      "rowNumber": 10,
+      "selection_order": 9,
+      "display_name": "Erna Setyaningsih, S.S.T.,M.Tr.Keb",
+      "role": "student",
+      "normalized_name": "Erna Setyaningsih, S.S.T.,M.Tr.Keb",
+      "slug": "erna-setyaningsih-s-s-t-m-tr-keb",
+      "base_slug": "erna-setyaningsih-s-s-t-m-tr-keb",
+      "slug_collision_index": 1,
+      "person_id": "student-erna-setyaningsih-s-s-t-m-tr-keb",
+      "secret_id": "student-secret-erna-setyaningsih-s-s-t-m-tr-keb",
+      "secret_path_token": "student-erna-setyaningsih-s-s-t-m-tr-keb",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-erna-setyaningsih-s-s-t-m-tr-keb"
+    },
+    {
+      "rowNumber": 11,
+      "selection_order": 10,
+      "display_name": "Bd. Mariza Mustika D, S.Tr.Keb., M.Tr.Keb",
+      "role": "mentor",
+      "normalized_name": "Bd. Mariza Mustika D, S.Tr.Keb., M.Tr.Keb",
+      "slug": "bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+      "base_slug": "bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+      "slug_collision_index": 1,
+      "person_id": "mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+      "secret_id": "mentor-secret-bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+      "secret_path_token": "mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb"
+    },
+    {
+      "rowNumber": 12,
+      "selection_order": 11,
+      "display_name": "Diah Widyatun, S.S.T., M.Tr.Keb",
+      "role": "student",
+      "normalized_name": "Diah Widyatun, S.S.T., M.Tr.Keb",
+      "slug": "diah-widyatun-s-s-t-m-tr-keb",
+      "base_slug": "diah-widyatun-s-s-t-m-tr-keb",
+      "slug_collision_index": 1,
+      "person_id": "student-diah-widyatun-s-s-t-m-tr-keb",
+      "secret_id": "student-secret-diah-widyatun-s-s-t-m-tr-keb",
+      "secret_path_token": "student-diah-widyatun-s-s-t-m-tr-keb",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-diah-widyatun-s-s-t-m-tr-keb"
+    },
+    {
+      "rowNumber": 13,
+      "selection_order": 12,
+      "display_name": "Bdn. Sri Mularsih, S.SiT, M.Kes",
+      "role": "student",
+      "normalized_name": "Bdn. Sri Mularsih, S.SiT, M.Kes",
+      "slug": "bdn-sri-mularsih-s-sit-m-kes",
+      "base_slug": "bdn-sri-mularsih-s-sit-m-kes",
+      "slug_collision_index": 1,
+      "person_id": "student-bdn-sri-mularsih-s-sit-m-kes",
+      "secret_id": "student-secret-bdn-sri-mularsih-s-sit-m-kes",
+      "secret_path_token": "student-bdn-sri-mularsih-s-sit-m-kes",
+      "production_link": "https://absen-qr.rif42.workers.dev/student/student-bdn-sri-mularsih-s-sit-m-kes"
+    },
+    {
+      "rowNumber": 15,
+      "selection_order": 13,
+      "display_name": "Naufal Sebastian, S.H.,M.H.",
+      "role": "mentor",
+      "normalized_name": "Naufal Sebastian, S.H.,M.H.",
+      "slug": "naufal-sebastian-s-h-m-h",
+      "base_slug": "naufal-sebastian-s-h-m-h",
+      "slug_collision_index": 1,
+      "person_id": "mentor-naufal-sebastian-s-h-m-h",
+      "secret_id": "mentor-secret-naufal-sebastian-s-h-m-h",
+      "secret_path_token": "mentor-naufal-sebastian-s-h-m-h",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-naufal-sebastian-s-h-m-h"
+    },
+    {
+      "rowNumber": 18,
+      "selection_order": 14,
+      "display_name": "Sutinnarto, S.I.Kom., M.I.Kom",
+      "role": "mentor",
+      "normalized_name": "Sutinnarto, S.I.Kom., M.I.Kom",
+      "slug": "sutinnarto-s-i-kom-m-i-kom",
+      "base_slug": "sutinnarto-s-i-kom-m-i-kom",
+      "slug_collision_index": 1,
+      "person_id": "mentor-sutinnarto-s-i-kom-m-i-kom",
+      "secret_id": "mentor-secret-sutinnarto-s-i-kom-m-i-kom",
+      "secret_path_token": "mentor-sutinnarto-s-i-kom-m-i-kom",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-sutinnarto-s-i-kom-m-i-kom"
+    },
+    {
+      "rowNumber": 19,
+      "selection_order": 15,
+      "display_name": "Najmi Rizki Khairani, S.Sos., M.I.Kom",
+      "role": "mentor",
+      "normalized_name": "Najmi Rizki Khairani, S.Sos., M.I.Kom",
+      "slug": "najmi-rizki-khairani-s-sos-m-i-kom",
+      "base_slug": "najmi-rizki-khairani-s-sos-m-i-kom",
+      "slug_collision_index": 1,
+      "person_id": "mentor-najmi-rizki-khairani-s-sos-m-i-kom",
+      "secret_id": "mentor-secret-najmi-rizki-khairani-s-sos-m-i-kom",
+      "secret_path_token": "mentor-najmi-rizki-khairani-s-sos-m-i-kom",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-najmi-rizki-khairani-s-sos-m-i-kom"
+    },
+    {
+      "rowNumber": 25,
+      "selection_order": 16,
+      "display_name": "Dr. Ir. Agus F. Abdillah, MBA, ERMAP",
+      "role": "mentor",
+      "normalized_name": "Dr. Ir. Agus F. Abdillah, MBA, ERMAP",
+      "slug": "dr-ir-agus-f-abdillah-mba-ermap",
+      "base_slug": "dr-ir-agus-f-abdillah-mba-ermap",
+      "slug_collision_index": 1,
+      "person_id": "mentor-dr-ir-agus-f-abdillah-mba-ermap",
+      "secret_id": "mentor-secret-dr-ir-agus-f-abdillah-mba-ermap",
+      "secret_path_token": "mentor-dr-ir-agus-f-abdillah-mba-ermap",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-dr-ir-agus-f-abdillah-mba-ermap"
+    },
+    {
+      "rowNumber": 26,
+      "selection_order": 17,
+      "display_name": "Eva Fachria, S.E., M.S.M.",
+      "role": "mentor",
+      "normalized_name": "Eva Fachria, S.E., M.S.M.",
+      "slug": "eva-fachria-s-e-m-s-m",
+      "base_slug": "eva-fachria-s-e-m-s-m",
+      "slug_collision_index": 1,
+      "person_id": "mentor-eva-fachria-s-e-m-s-m",
+      "secret_id": "mentor-secret-eva-fachria-s-e-m-s-m",
+      "secret_path_token": "mentor-eva-fachria-s-e-m-s-m",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-eva-fachria-s-e-m-s-m"
+    },
+    {
+      "rowNumber": 27,
+      "selection_order": 18,
+      "display_name": "Anindya Putri Utami, S.M., M.M.",
+      "role": "mentor",
+      "normalized_name": "Anindya Putri Utami, S.M., M.M.",
+      "slug": "anindya-putri-utami-s-m-m-m",
+      "base_slug": "anindya-putri-utami-s-m-m-m",
+      "slug_collision_index": 1,
+      "person_id": "mentor-anindya-putri-utami-s-m-m-m",
+      "secret_id": "mentor-secret-anindya-putri-utami-s-m-m-m",
+      "secret_path_token": "mentor-anindya-putri-utami-s-m-m-m",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-anindya-putri-utami-s-m-m-m"
+    },
+    {
+      "rowNumber": 28,
+      "selection_order": 19,
+      "display_name": "Dian Respati Ayu, S.Si., M.Biomed",
+      "role": "mentor",
+      "normalized_name": "Dian Respati Ayu, S.Si., M.Biomed",
+      "slug": "dian-respati-ayu-s-si-m-biomed",
+      "base_slug": "dian-respati-ayu-s-si-m-biomed",
+      "slug_collision_index": 1,
+      "person_id": "mentor-dian-respati-ayu-s-si-m-biomed",
+      "secret_id": "mentor-secret-dian-respati-ayu-s-si-m-biomed",
+      "secret_path_token": "mentor-dian-respati-ayu-s-si-m-biomed",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-dian-respati-ayu-s-si-m-biomed"
+    },
+    {
+      "rowNumber": 30,
+      "selection_order": 20,
+      "display_name": "Dendi Krisna Nugraha, M.Sc., Ph.D.",
+      "role": "mentor",
+      "normalized_name": "Dendi Krisna Nugraha, M.Sc., Ph.D.",
+      "slug": "dendi-krisna-nugraha-m-sc-ph-d",
+      "base_slug": "dendi-krisna-nugraha-m-sc-ph-d",
+      "slug_collision_index": 1,
+      "person_id": "mentor-dendi-krisna-nugraha-m-sc-ph-d",
+      "secret_id": "mentor-secret-dendi-krisna-nugraha-m-sc-ph-d",
+      "secret_path_token": "mentor-dendi-krisna-nugraha-m-sc-ph-d",
+      "production_link": "https://absen-qr.rif42.workers.dev/mentor/mentor-dendi-krisna-nugraha-m-sc-ph-d"
+    }
+  ],
+  "skipped_rows": [
+    {
+      "rowNumber": 14,
+      "display_name": "Dewi Elliana, SKM, S.Tr.Keb, M.Kes",
+      "role": "student",
+      "normalized_name": "Dewi Elliana, SKM, S.Tr.Keb, M.Kes",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 16,
+      "display_name": "dr. Erwin, S.H., M.H",
+      "role": "student",
+      "normalized_name": "dr. Erwin, S.H., M.H",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 17,
+      "display_name": "Zain Arfin Utama, S.H., M.H.",
+      "role": "student",
+      "normalized_name": "Zain Arfin Utama, S.H., M.H.",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 20,
+      "display_name": "Lakna Tulas'un, S.Sos, M.I.Kom",
+      "role": "student",
+      "normalized_name": "Lakna Tulas'un, S.Sos, M.I.Kom",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 21,
+      "display_name": "Rif'atul Himmah, S.Sos. M.I.Kom.",
+      "role": "student",
+      "normalized_name": "Rif'atul Himmah, S.Sos. M.I.Kom.",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 22,
+      "display_name": "Yetty Yuliany K, S.E., M.M",
+      "role": "student",
+      "normalized_name": "Yetty Yuliany K, S.E., M.M",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 23,
+      "display_name": "Putri Aryo Jelang Fitri Khothimah, S.E., M.M.",
+      "role": "student",
+      "normalized_name": "Putri Aryo Jelang Fitri Khothimah, S.E., M.M.",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 24,
+      "display_name": "Randika Shafly Fawwaz, S.M., M.M",
+      "role": "student",
+      "normalized_name": "Randika Shafly Fawwaz, S.M., M.M",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 29,
+      "display_name": "Risky Chandra Satria Irawan S.Si, M.Biomed",
+      "role": "student",
+      "normalized_name": "Risky Chandra Satria Irawan S.Si, M.Biomed",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 31,
+      "display_name": "Nurul Hidayah S.Si, M.Biotech",
+      "role": "mentor",
+      "normalized_name": "Nurul Hidayah S.Si, M.Biotech",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 32,
+      "display_name": "Salindri Prawitasari, S.Si, M.Si.",
+      "role": "mentor",
+      "normalized_name": "Salindri Prawitasari, S.Si, M.Si.",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 33,
+      "display_name": "Dini Cahyani, S.Si, M.Biotech",
+      "role": "student",
+      "normalized_name": "Dini Cahyani, S.Si, M.Biotech",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 34,
+      "display_name": "Rudi Hermawan S.Kom",
+      "role": "student",
+      "normalized_name": "Rudi Hermawan S.Kom",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 35,
+      "display_name": "Panji Agung Pedekso, S.Hum",
+      "role": "mentor",
+      "normalized_name": "Panji Agung Pedekso, S.Hum",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 36,
+      "display_name": "Ridha Azahra, S.Pd",
+      "role": "student",
+      "normalized_name": "Ridha Azahra, S.Pd",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 37,
+      "display_name": "Claudea Winandyaz R, S.Pd, M.Pd.",
+      "role": "student",
+      "normalized_name": "Claudea Winandyaz R, S.Pd, M.Pd.",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 38,
+      "display_name": "Bela Pristiandani, S.Ak",
+      "role": "student",
+      "normalized_name": "Bela Pristiandani, S.Ak",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 39,
+      "display_name": "Alya Pramesty, S.Si",
+      "role": "student",
+      "normalized_name": "Alya Pramesty, S.Si",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 40,
+      "display_name": "Bondan Eko Suratno, M.Hum",
+      "role": "mentor",
+      "normalized_name": "Bondan Eko Suratno, M.Hum",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 41,
+      "display_name": "Rifky Ariya Pratama, S.Kom.",
+      "role": "mentor",
+      "normalized_name": "Rifky Ariya Pratama, S.Kom.",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 42,
+      "display_name": "Alya Namira Ikfinasulkha, S.IP.",
+      "role": "student",
+      "normalized_name": "Alya Namira Ikfinasulkha, S.IP.",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 43,
+      "display_name": "Daffa Restu Fadhillah, S.Kom",
+      "role": "mentor",
+      "normalized_name": "Daffa Restu Fadhillah, S.Kom",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 44,
+      "display_name": "Firda Rismadhani, S.M",
+      "role": "student",
+      "normalized_name": "Firda Rismadhani, S.M",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 45,
+      "display_name": "Rahmawati, S.A.B",
+      "role": "student",
+      "normalized_name": "Rahmawati, S.A.B",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 46,
+      "display_name": "Alvin Syaptia Pratama, S.I.Kom",
+      "role": "student",
+      "normalized_name": "Alvin Syaptia Pratama, S.I.Kom",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 47,
+      "display_name": "Galih Nanda Purnama , S.Ds",
+      "role": "student",
+      "normalized_name": "Galih Nanda Purnama , S.Ds",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 48,
+      "display_name": "Dina Haida Shofwa, A.Md.Keb.",
+      "role": "mentor",
+      "normalized_name": "Dina Haida Shofwa, A.Md.Keb.",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 49,
+      "display_name": "Labbra Pasaribu, S.M",
+      "role": "student",
+      "normalized_name": "Labbra Pasaribu, S.M",
+      "status": "skipped",
+      "reason": "over-quota-student"
+    },
+    {
+      "rowNumber": 50,
+      "display_name": "Ms Endah",
+      "role": "mentor",
+      "normalized_name": "Ms Endah",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 51,
+      "display_name": "Ms Waheni",
+      "role": "mentor",
+      "normalized_name": "Ms Waheni",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 52,
+      "display_name": "Mr Naufal Sebastian Anggoro",
+      "role": "mentor",
+      "normalized_name": "Mr Naufal Sebastian Anggoro",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 53,
+      "display_name": "Mr Faheem",
+      "role": "mentor",
+      "normalized_name": "Mr Faheem",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 54,
+      "display_name": "Mr Faris",
+      "role": "mentor",
+      "normalized_name": "Mr Faris",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 55,
+      "display_name": "Prof Yayuk",
+      "role": "mentor",
+      "normalized_name": "Prof Yayuk",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 56,
+      "display_name": "Ms Nina",
+      "role": "mentor",
+      "normalized_name": "Ms Nina",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 57,
+      "display_name": "Mr Adam",
+      "role": "mentor",
+      "normalized_name": "Mr Adam",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    },
+    {
+      "rowNumber": 58,
+      "display_name": "Mr Dendi",
+      "role": "mentor",
+      "normalized_name": "Mr Dendi",
+      "status": "skipped",
+      "reason": "over-quota-mentor"
+    }
+  ],
+  "summary": {
+    "total_rows": 57,
+    "selected_total": 20,
+    "skipped_total": 37,
+    "selected_students": 10,
+    "selected_mentors": 10,
+    "skipped_duplicates": 0,
+    "skipped_over_quota_students": 21,
+    "skipped_over_quota_mentors": 16
+  },
+  "d1": {
+    "binding": "DB",
+    "database_name": "absen-qr",
+    "config_path": "wrangler.jsonc"
+  },
+  "remote_apply": {
+    "changed": false,
+    "backups": {
+      "people": null,
+      "scan_records": null
+    },
+    "pre_apply_counts": {
+      "people": 20,
+      "scan_records": 0
+    },
+    "post_apply_counts_by_role": {},
+    "net_changes": {
+      "deleted_people": 0,
+      "deleted_scan_records": 0,
+      "inserted_people": 0,
+      "token_changes": 0
+    },
+    "rerun_summary": {
+      "already_canonical": true,
+      "skipped_apply": true
+    }
+  },
+  "commands": [
+    {
+      "args": [
+        "d1",
+        "execute",
+        "absen-qr",
+        "--remote",
+        "--config",
+        "wrangler.jsonc",
+        "--json",
+        "--command",
+        "SELECT name, type FROM sqlite_master WHERE type = 'table' AND name IN ('people', 'scan_records') ORDER BY name;"
+      ],
+      "started_at": "2026-04-17T06:27:11.639Z",
+      "completed_at": "2026-04-17T06:27:12.765Z",
+      "stdout": "[\n  {\n    \"results\": [\n      {\n        \"name\": \"people\",\n        \"type\": \"table\"\n      },\n      {\n        \"name\": \"scan_records\",\n        \"type\": \"table\"\n      }\n    ],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"APAC\",\n      \"served_by_colo\": \"SIN\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.1261\n      },\n      \"duration\": 0.1261,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 65536,\n      \"rows_read\": 16,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+      "stderr": "",
+      "parsed_json": [
+        {
+          "results": [
+            {
+              "name": "people",
+              "type": "table"
+            },
+            {
+              "name": "scan_records",
+              "type": "table"
+            }
+          ],
+          "success": true,
+          "meta": {
+            "served_by": "v3-prod",
+            "served_by_region": "APAC",
+            "served_by_colo": "SIN",
+            "served_by_primary": true,
+            "timings": {
+              "sql_duration_ms": 0.1261
+            },
+            "duration": 0.1261,
+            "changes": 0,
+            "last_row_id": 0,
+            "changed_db": false,
+            "size_after": 65536,
+            "rows_read": 16,
+            "rows_written": 0,
+            "total_attempts": 1
+          }
+        }
+      ]
+    },
+    {
+      "args": [
+        "d1",
+        "execute",
+        "absen-qr",
+        "--remote",
+        "--config",
+        "wrangler.jsonc",
+        "--json",
+        "--command",
+        "SELECT person_id, display_name, role, secret_id, secret_path_token FROM people ORDER BY person_id;"
+      ],
+      "started_at": "2026-04-17T06:27:12.765Z",
+      "completed_at": "2026-04-17T06:27:13.808Z",
+      "stdout": "[\n  {\n    \"results\": [\n      {\n        \"person_id\": \"mentor-anindya-putri-utami-s-m-m-m\",\n        \"display_name\": \"Anindya Putri Utami, S.M., M.M.\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-anindya-putri-utami-s-m-m-m\",\n        \"secret_path_token\": \"mentor-anindya-putri-utami-s-m-m-m\"\n      },\n      {\n        \"person_id\": \"mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb\",\n        \"display_name\": \"Bd. Mariza Mustika D, S.Tr.Keb., M.Tr.Keb\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-bd-mariza-mustika-d-s-tr-keb-m-tr-keb\",\n        \"secret_path_token\": \"mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb\"\n      },\n      {\n        \"person_id\": \"mentor-dendi-krisna-nugraha-m-sc-ph-d\",\n        \"display_name\": \"Dendi Krisna Nugraha, M.Sc., Ph.D.\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-dendi-krisna-nugraha-m-sc-ph-d\",\n        \"secret_path_token\": \"mentor-dendi-krisna-nugraha-m-sc-ph-d\"\n      },\n      {\n        \"person_id\": \"mentor-dian-respati-ayu-s-si-m-biomed\",\n        \"display_name\": \"Dian Respati Ayu, S.Si., M.Biomed\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-dian-respati-ayu-s-si-m-biomed\",\n        \"secret_path_token\": \"mentor-dian-respati-ayu-s-si-m-biomed\"\n      },\n      {\n        \"person_id\": \"mentor-dr-ir-agus-f-abdillah-mba-ermap\",\n        \"display_name\": \"Dr. Ir. Agus F. Abdillah, MBA, ERMAP\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-dr-ir-agus-f-abdillah-mba-ermap\",\n        \"secret_path_token\": \"mentor-dr-ir-agus-f-abdillah-mba-ermap\"\n      },\n      {\n        \"person_id\": \"mentor-eva-fachria-s-e-m-s-m\",\n        \"display_name\": \"Eva Fachria, S.E., M.S.M.\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-eva-fachria-s-e-m-s-m\",\n        \"secret_path_token\": \"mentor-eva-fachria-s-e-m-s-m\"\n      },\n      {\n        \"person_id\": \"mentor-mohammad-ariq-nazar-s-si-m-biomed\",\n        \"display_name\": \"Mohammad Ariq Nazar, S.Si, M.Biomed\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-mohammad-ariq-nazar-s-si-m-biomed\",\n        \"secret_path_token\": \"mentor-mohammad-ariq-nazar-s-si-m-biomed\"\n      },\n      {\n        \"person_id\": \"mentor-najmi-rizki-khairani-s-sos-m-i-kom\",\n        \"display_name\": \"Najmi Rizki Khairani, S.Sos., M.I.Kom\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-najmi-rizki-khairani-s-sos-m-i-kom\",\n        \"secret_path_token\": \"mentor-najmi-rizki-khairani-s-sos-m-i-kom\"\n      },\n      {\n        \"person_id\": \"mentor-naufal-sebastian-s-h-m-h\",\n        \"display_name\": \"Naufal Sebastian, S.H.,M.H.\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-naufal-sebastian-s-h-m-h\",\n        \"secret_path_token\": \"mentor-naufal-sebastian-s-h-m-h\"\n      },\n      {\n        \"person_id\": \"mentor-sutinnarto-s-i-kom-m-i-kom\",\n        \"display_name\": \"Sutinnarto, S.I.Kom., M.I.Kom\",\n        \"role\": \"mentor\",\n        \"secret_id\": \"mentor-secret-sutinnarto-s-i-kom-m-i-kom\",\n        \"secret_path_token\": \"mentor-sutinnarto-s-i-kom-m-i-kom\"\n      },\n      {\n        \"person_id\": \"student-bdn-sri-mularsih-s-sit-m-kes\",\n        \"display_name\": \"Bdn. Sri Mularsih, S.SiT, M.Kes\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-bdn-sri-mularsih-s-sit-m-kes\",\n        \"secret_path_token\": \"student-bdn-sri-mularsih-s-sit-m-kes\"\n      },\n      {\n        \"person_id\": \"student-bdn-titik-kurniawati-s-sit-m-kes-m-keb\",\n        \"display_name\": \"Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb\",\n        \"secret_path_token\": \"student-bdn-titik-kurniawati-s-sit-m-kes-m-keb\"\n      },\n      {\n        \"person_id\": \"student-diah-widyatun-s-s-t-m-tr-keb\",\n        \"display_name\": \"Diah Widyatun, S.S.T., M.Tr.Keb\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-diah-widyatun-s-s-t-m-tr-keb\",\n        \"secret_path_token\": \"student-diah-widyatun-s-s-t-m-tr-keb\"\n      },\n      {\n        \"person_id\": \"student-erna-setyaningsih-s-s-t-m-tr-keb\",\n        \"display_name\": \"Erna Setyaningsih, S.S.T.,M.Tr.Keb\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-erna-setyaningsih-s-s-t-m-tr-keb\",\n        \"secret_path_token\": \"student-erna-setyaningsih-s-s-t-m-tr-keb\"\n      },\n      {\n        \"person_id\": \"student-fauziah-novita-putri-rifai-s-si-m-biotech\",\n        \"display_name\": \"Fauziah Novita Putri Rifai, S.Si, M.Biotech\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-fauziah-novita-putri-rifai-s-si-m-biotech\",\n        \"secret_path_token\": \"student-fauziah-novita-putri-rifai-s-si-m-biotech\"\n      },\n      {\n        \"person_id\": \"student-muhamad-agung-s-s-sos-m-sos\",\n        \"display_name\": \"Muhamad Agung S, S.Sos., M.Sos\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-muhamad-agung-s-s-sos-m-sos\",\n        \"secret_path_token\": \"student-muhamad-agung-s-s-sos-m-sos\"\n      },\n      {\n        \"person_id\": \"student-nadya-audina-ns-s-si-m-biomed\",\n        \"display_name\": \"Nadya Audina NS. S.Si., M.Biomed\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-nadya-audina-ns-s-si-m-biomed\",\n        \"secret_path_token\": \"student-nadya-audina-ns-s-si-m-biomed\"\n      },\n      {\n        \"person_id\": \"student-qolbi-hanif-fadhlulloh-s-h-m-h\",\n        \"display_name\": \"Qolbi Hanif Fadhlulloh, S.H.,M.H.\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-qolbi-hanif-fadhlulloh-s-h-m-h\",\n        \"secret_path_token\": \"student-qolbi-hanif-fadhlulloh-s-h-m-h\"\n      },\n      {\n        \"person_id\": \"student-reni-nur-arifah-s-e-m-m\",\n        \"display_name\": \"Reni Nur Arifah, S.E., M.M.\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-reni-nur-arifah-s-e-m-m\",\n        \"secret_path_token\": \"student-reni-nur-arifah-s-e-m-m\"\n      },\n      {\n        \"person_id\": \"student-rizqitha-s-tr-keb-m-tr-keb\",\n        \"display_name\": \"Rizqitha, S.Tr.Keb., M.Tr.Keb\",\n        \"role\": \"student\",\n        \"secret_id\": \"student-secret-rizqitha-s-tr-keb-m-tr-keb\",\n        \"secret_path_token\": \"student-rizqitha-s-tr-keb-m-tr-keb\"\n      }\n    ],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"APAC\",\n      \"served_by_colo\": \"SIN\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.29\n      },\n      \"duration\": 0.29,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 65536,\n      \"rows_read\": 20,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+      "stderr": "",
+      "parsed_json": [
+        {
+          "results": [
+            {
+              "person_id": "mentor-anindya-putri-utami-s-m-m-m",
+              "display_name": "Anindya Putri Utami, S.M., M.M.",
+              "role": "mentor",
+              "secret_id": "mentor-secret-anindya-putri-utami-s-m-m-m",
+              "secret_path_token": "mentor-anindya-putri-utami-s-m-m-m"
+            },
+            {
+              "person_id": "mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+              "display_name": "Bd. Mariza Mustika D, S.Tr.Keb., M.Tr.Keb",
+              "role": "mentor",
+              "secret_id": "mentor-secret-bd-mariza-mustika-d-s-tr-keb-m-tr-keb",
+              "secret_path_token": "mentor-bd-mariza-mustika-d-s-tr-keb-m-tr-keb"
+            },
+            {
+              "person_id": "mentor-dendi-krisna-nugraha-m-sc-ph-d",
+              "display_name": "Dendi Krisna Nugraha, M.Sc., Ph.D.",
+              "role": "mentor",
+              "secret_id": "mentor-secret-dendi-krisna-nugraha-m-sc-ph-d",
+              "secret_path_token": "mentor-dendi-krisna-nugraha-m-sc-ph-d"
+            },
+            {
+              "person_id": "mentor-dian-respati-ayu-s-si-m-biomed",
+              "display_name": "Dian Respati Ayu, S.Si., M.Biomed",
+              "role": "mentor",
+              "secret_id": "mentor-secret-dian-respati-ayu-s-si-m-biomed",
+              "secret_path_token": "mentor-dian-respati-ayu-s-si-m-biomed"
+            },
+            {
+              "person_id": "mentor-dr-ir-agus-f-abdillah-mba-ermap",
+              "display_name": "Dr. Ir. Agus F. Abdillah, MBA, ERMAP",
+              "role": "mentor",
+              "secret_id": "mentor-secret-dr-ir-agus-f-abdillah-mba-ermap",
+              "secret_path_token": "mentor-dr-ir-agus-f-abdillah-mba-ermap"
+            },
+            {
+              "person_id": "mentor-eva-fachria-s-e-m-s-m",
+              "display_name": "Eva Fachria, S.E., M.S.M.",
+              "role": "mentor",
+              "secret_id": "mentor-secret-eva-fachria-s-e-m-s-m",
+              "secret_path_token": "mentor-eva-fachria-s-e-m-s-m"
+            },
+            {
+              "person_id": "mentor-mohammad-ariq-nazar-s-si-m-biomed",
+              "display_name": "Mohammad Ariq Nazar, S.Si, M.Biomed",
+              "role": "mentor",
+              "secret_id": "mentor-secret-mohammad-ariq-nazar-s-si-m-biomed",
+              "secret_path_token": "mentor-mohammad-ariq-nazar-s-si-m-biomed"
+            },
+            {
+              "person_id": "mentor-najmi-rizki-khairani-s-sos-m-i-kom",
+              "display_name": "Najmi Rizki Khairani, S.Sos., M.I.Kom",
+              "role": "mentor",
+              "secret_id": "mentor-secret-najmi-rizki-khairani-s-sos-m-i-kom",
+              "secret_path_token": "mentor-najmi-rizki-khairani-s-sos-m-i-kom"
+            },
+            {
+              "person_id": "mentor-naufal-sebastian-s-h-m-h",
+              "display_name": "Naufal Sebastian, S.H.,M.H.",
+              "role": "mentor",
+              "secret_id": "mentor-secret-naufal-sebastian-s-h-m-h",
+              "secret_path_token": "mentor-naufal-sebastian-s-h-m-h"
+            },
+            {
+              "person_id": "mentor-sutinnarto-s-i-kom-m-i-kom",
+              "display_name": "Sutinnarto, S.I.Kom., M.I.Kom",
+              "role": "mentor",
+              "secret_id": "mentor-secret-sutinnarto-s-i-kom-m-i-kom",
+              "secret_path_token": "mentor-sutinnarto-s-i-kom-m-i-kom"
+            },
+            {
+              "person_id": "student-bdn-sri-mularsih-s-sit-m-kes",
+              "display_name": "Bdn. Sri Mularsih, S.SiT, M.Kes",
+              "role": "student",
+              "secret_id": "student-secret-bdn-sri-mularsih-s-sit-m-kes",
+              "secret_path_token": "student-bdn-sri-mularsih-s-sit-m-kes"
+            },
+            {
+              "person_id": "student-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+              "display_name": "Bdn. Titik Kurniawati, S.SiT, M.Kes, M.Keb",
+              "role": "student",
+              "secret_id": "student-secret-bdn-titik-kurniawati-s-sit-m-kes-m-keb",
+              "secret_path_token": "student-bdn-titik-kurniawati-s-sit-m-kes-m-keb"
+            },
+            {
+              "person_id": "student-diah-widyatun-s-s-t-m-tr-keb",
+              "display_name": "Diah Widyatun, S.S.T., M.Tr.Keb",
+              "role": "student",
+              "secret_id": "student-secret-diah-widyatun-s-s-t-m-tr-keb",
+              "secret_path_token": "student-diah-widyatun-s-s-t-m-tr-keb"
+            },
+            {
+              "person_id": "student-erna-setyaningsih-s-s-t-m-tr-keb",
+              "display_name": "Erna Setyaningsih, S.S.T.,M.Tr.Keb",
+              "role": "student",
+              "secret_id": "student-secret-erna-setyaningsih-s-s-t-m-tr-keb",
+              "secret_path_token": "student-erna-setyaningsih-s-s-t-m-tr-keb"
+            },
+            {
+              "person_id": "student-fauziah-novita-putri-rifai-s-si-m-biotech",
+              "display_name": "Fauziah Novita Putri Rifai, S.Si, M.Biotech",
+              "role": "student",
+              "secret_id": "student-secret-fauziah-novita-putri-rifai-s-si-m-biotech",
+              "secret_path_token": "student-fauziah-novita-putri-rifai-s-si-m-biotech"
+            },
+            {
+              "person_id": "student-muhamad-agung-s-s-sos-m-sos",
+              "display_name": "Muhamad Agung S, S.Sos., M.Sos",
+              "role": "student",
+              "secret_id": "student-secret-muhamad-agung-s-s-sos-m-sos",
+              "secret_path_token": "student-muhamad-agung-s-s-sos-m-sos"
+            },
+            {
+              "person_id": "student-nadya-audina-ns-s-si-m-biomed",
+              "display_name": "Nadya Audina NS. S.Si., M.Biomed",
+              "role": "student",
+              "secret_id": "student-secret-nadya-audina-ns-s-si-m-biomed",
+              "secret_path_token": "student-nadya-audina-ns-s-si-m-biomed"
+            },
+            {
+              "person_id": "student-qolbi-hanif-fadhlulloh-s-h-m-h",
+              "display_name": "Qolbi Hanif Fadhlulloh, S.H.,M.H.",
+              "role": "student",
+              "secret_id": "student-secret-qolbi-hanif-fadhlulloh-s-h-m-h",
+              "secret_path_token": "student-qolbi-hanif-fadhlulloh-s-h-m-h"
+            },
+            {
+              "person_id": "student-reni-nur-arifah-s-e-m-m",
+              "display_name": "Reni Nur Arifah, S.E., M.M.",
+              "role": "student",
+              "secret_id": "student-secret-reni-nur-arifah-s-e-m-m",
+              "secret_path_token": "student-reni-nur-arifah-s-e-m-m"
+            },
+            {
+              "person_id": "student-rizqitha-s-tr-keb-m-tr-keb",
+              "display_name": "Rizqitha, S.Tr.Keb., M.Tr.Keb",
+              "role": "student",
+              "secret_id": "student-secret-rizqitha-s-tr-keb-m-tr-keb",
+              "secret_path_token": "student-rizqitha-s-tr-keb-m-tr-keb"
+            }
+          ],
+          "success": true,
+          "meta": {
+            "served_by": "v3-prod",
+            "served_by_region": "APAC",
+            "served_by_colo": "SIN",
+            "served_by_primary": true,
+            "timings": {
+              "sql_duration_ms": 0.29
+            },
+            "duration": 0.29,
+            "changes": 0,
+            "last_row_id": 0,
+            "changed_db": false,
+            "size_after": 65536,
+            "rows_read": 20,
+            "rows_written": 0,
+            "total_attempts": 1
+          }
+        }
+      ]
+    },
+    {
+      "args": [
+        "d1",
+        "execute",
+        "absen-qr",
+        "--remote",
+        "--config",
+        "wrangler.jsonc",
+        "--json",
+        "--command",
+        "SELECT COUNT(*) AS people_count FROM people;"
+      ],
+      "started_at": "2026-04-17T06:27:13.808Z",
+      "completed_at": "2026-04-17T06:27:15.023Z",
+      "stdout": "[\n  {\n    \"results\": [\n      {\n        \"people_count\": 20\n      }\n    ],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"APAC\",\n      \"served_by_colo\": \"SIN\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.1162\n      },\n      \"duration\": 0.1162,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 65536,\n      \"rows_read\": 20,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+      "stderr": "",
+      "parsed_json": [
+        {
+          "results": [
+            {
+              "people_count": 20
+            }
+          ],
+          "success": true,
+          "meta": {
+            "served_by": "v3-prod",
+            "served_by_region": "APAC",
+            "served_by_colo": "SIN",
+            "served_by_primary": true,
+            "timings": {
+              "sql_duration_ms": 0.1162
+            },
+            "duration": 0.1162,
+            "changes": 0,
+            "last_row_id": 0,
+            "changed_db": false,
+            "size_after": 65536,
+            "rows_read": 20,
+            "rows_written": 0,
+            "total_attempts": 1
+          }
+        }
+      ]
+    },
+    {
+      "args": [
+        "d1",
+        "execute",
+        "absen-qr",
+        "--remote",
+        "--config",
+        "wrangler.jsonc",
+        "--json",
+        "--command",
+        "SELECT COUNT(*) AS scan_records_count FROM scan_records;"
+      ],
+      "started_at": "2026-04-17T06:27:15.023Z",
+      "completed_at": "2026-04-17T06:27:15.890Z",
+      "stdout": "[\n  {\n    \"results\": [\n      {\n        \"scan_records_count\": 0\n      }\n    ],\n    \"success\": true,\n    \"meta\": {\n      \"served_by\": \"v3-prod\",\n      \"served_by_region\": \"APAC\",\n      \"served_by_colo\": \"SIN\",\n      \"served_by_primary\": true,\n      \"timings\": {\n        \"sql_duration_ms\": 0.1318\n      },\n      \"duration\": 0.1318,\n      \"changes\": 0,\n      \"last_row_id\": 0,\n      \"changed_db\": false,\n      \"size_after\": 65536,\n      \"rows_read\": 0,\n      \"rows_written\": 0,\n      \"total_attempts\": 1\n    }\n  }\n]\n",
+      "stderr": "",
+      "parsed_json": [
+        {
+          "results": [
+            {
+              "scan_records_count": 0
+            }
+          ],
+          "success": true,
+          "meta": {
+            "served_by": "v3-prod",
+            "served_by_region": "APAC",
+            "served_by_colo": "SIN",
+            "served_by_primary": true,
+            "timings": {
+              "sql_duration_ms": 0.1318
+            },
+            "duration": 0.1318,
+            "changes": 0,
+            "last_row_id": 0,
+            "changed_db": false,
+            "size_after": 65536,
+            "rows_read": 0,
+            "rows_written": 0,
+            "total_attempts": 1
+          }
+        }
+      ]
+    }
+  ]
+}
