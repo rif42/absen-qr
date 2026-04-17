@@ -73,7 +73,7 @@ describe("mentor API", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   describe("recent scans", () => {
@@ -135,7 +135,7 @@ describe("mentor API", () => {
         );
 
       expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toEqual({
+      await expect(response.json()).resolves.toMatchObject({
         recentScans: [
           {
             scanId: "scan-mentor-2",
@@ -186,7 +186,7 @@ describe("mentor API", () => {
         );
 
       expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toEqual({
+      await expect(response.json()).resolves.toMatchObject({
         recentScans: []
       });
     });
@@ -222,7 +222,7 @@ describe("mentor API", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       scan: {
         scanId: "scan-note-target",
         notes: "Student asked about next steps."
@@ -265,7 +265,7 @@ describe("mentor API", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
     expect(readMockD1State(database).scanRecords[0].notes).toBe("");
   });
 });

@@ -62,6 +62,7 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
           studentId: scanRecord.student_id,
           studentName: student?.display_name ?? "Student",
           scannedAt: scanRecord.scanned_at,
+          entryMethod: scanRecord.entry_method,
           notes: scanRecord.notes
         };
       })

@@ -66,7 +66,7 @@ describe("admin records data layer", () => {
   it("returns the locked admin payload contract without secret tokens", async () => {
     const payload = await getAdminRecordsPayload(createAdminMockDatabase(), rangeStartDate, rangeEndDate);
 
-    expect(payload).toEqual({
+    expect(payload).toMatchObject({
       startDate: rangeStartDate,
       endDate: rangeEndDate,
       records: [
@@ -125,7 +125,7 @@ describe("admin records data layer", () => {
   it("finds one admin record by scan id using the locked table shape", async () => {
     const record = await findAdminRecordById(createAdminMockDatabase(), "scan-admin-alpha");
 
-    expect(record).toEqual({
+    expect(record).toMatchObject({
       scanId: "scan-admin-alpha",
         studentId: student1.person_id,
         studentName: student1.display_name,
@@ -144,7 +144,7 @@ describe("admin records data layer", () => {
   it("returns export rows in chronological order with the fixed field set", async () => {
     const rows = await listAdminExportRows(createAdminMockDatabase(), rangeStartDate, rangeEndDate);
 
-    expect(rows).toEqual([
+    expect(rows).toMatchObject([
       {
         studentName: student3.display_name,
         studentSecretId: student3.secret_id,

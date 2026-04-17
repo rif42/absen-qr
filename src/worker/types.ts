@@ -38,6 +38,7 @@ export type ScanRecord = {
   mentor_id: string;
   event_date: string;
   scanned_at: string;
+  entry_method: "qr" | "fallback_code";
   notes: string;
   updated_at: string;
 };

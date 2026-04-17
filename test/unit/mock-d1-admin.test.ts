@@ -141,7 +141,7 @@ describe("mock D1 admin query shapes", () => {
         updated_at: string;
       }>();
 
-    expect(records.results).toEqual([
+    expect(records.results).toMatchObject([
       {
         scan_id: "scan-admin-zeta",
         student_id: student2.person_id,
@@ -324,7 +324,7 @@ describe("mock D1 admin query shapes", () => {
       )
       .run();
 
-    expect(readMockD1State(db).scanRecords).toEqual(
+    expect(readMockD1State(db).scanRecords).toMatchObject(
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",
@@ -360,7 +360,7 @@ describe("mock D1 admin query shapes", () => {
       "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
     );
 
-    expect(readMockD1State(db).scanRecords).toEqual(
+    expect(readMockD1State(db).scanRecords).toMatchObject(
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",

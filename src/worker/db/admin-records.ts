@@ -14,6 +14,7 @@ type AdminRecord = {
   mentorName: string;
   eventDate: string;
   scannedAt: string;
+  entryMethod: "qr" | "fallback_code";
   notes: string;
   updatedAt: string;
 };
@@ -51,6 +52,7 @@ type AdminRecordRow = {
   mentor_name: string;
   event_date: string;
   scanned_at: string;
+  entry_method: "qr" | "fallback_code";
   notes: string;
   updated_at: string;
 };
@@ -80,6 +82,7 @@ function mapAdminRecord(row: AdminRecordRow): AdminRecord {
     mentorName: row.mentor_name,
     eventDate: row.event_date,
     scannedAt: row.scanned_at,
+    entryMethod: row.entry_method,
     notes: row.notes,
     updatedAt: row.updated_at
   };
@@ -122,6 +125,7 @@ export async function listAdminRecords(
           mentor.display_name AS mentor_name,
           scan_records.event_date,
           scan_records.scanned_at,
+          scan_records.entry_method,
           scan_records.notes,
           scan_records.updated_at
         FROM scan_records
@@ -155,6 +159,7 @@ export async function findAdminRecordById(db: D1Database, scanId: string): Promi
           mentor.display_name AS mentor_name,
           scan_records.event_date,
           scan_records.scanned_at,
+          scan_records.entry_method,
           scan_records.notes,
           scan_records.updated_at
         FROM scan_records

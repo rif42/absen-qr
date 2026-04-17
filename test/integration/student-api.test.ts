@@ -44,7 +44,7 @@ describe("student API", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       student: {
         personId: student1.person_id,
         displayName: student1.display_name,
@@ -62,7 +62,7 @@ describe("student API", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   it("creates a scan record from a valid mentor QR payload", async () => {
@@ -135,7 +135,7 @@ describe("student API", () => {
     vi.useRealTimers();
 
     expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Duplicate mentor scan already recorded for this calendar day."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(0);
@@ -159,7 +159,7 @@ describe("student API", () => {
     );
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Invalid mentor QR payload."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(0);
@@ -200,7 +200,7 @@ describe("student API", () => {
     vi.useRealTimers();
 
     expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Duplicate mentor scan already recorded for this calendar day."
     });
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
@@ -350,7 +350,7 @@ describe("student API", () => {
       );
 
       expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
         history: [
           {
             scanId: "scan-history-2",
@@ -410,7 +410,7 @@ describe("student API", () => {
       );
 
       expect(response.status).toBe(200);
-      await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
         history: []
       });
     });

@@ -6,6 +6,7 @@ type CreateScanRecordInput = {
   mentorId: string;
   eventDate: string;
   scannedAt: string;
+  entryMethod?: ScanRecord["entry_method"];
 };
 
 export async function createScanRecord(
@@ -21,10 +22,11 @@ export async function createScanRecord(
           mentor_id,
           event_date,
           scanned_at,
+          entry_method,
           notes,
           updated_at
         )
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
       `
     )
     .bind(
@@ -33,6 +35,7 @@ export async function createScanRecord(
       input.mentorId,
       input.eventDate,
       input.scannedAt,
+      input.entryMethod ?? "qr",
       "",
       input.scannedAt
     )
@@ -44,6 +47,7 @@ export async function createScanRecord(
     mentor_id: input.mentorId,
     event_date: input.eventDate,
     scanned_at: input.scannedAt,
+    entry_method: input.entryMethod ?? "qr",
     notes: "",
     updated_at: input.scannedAt
   };
@@ -66,7 +70,7 @@ export async function listStudentHistory(
   const result = await db
     .prepare(
       `
-        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, entry_method, notes, updated_at
         FROM scan_records
         WHERE student_id = ?1 AND substr(scanned_at, 1, 10) = ?2
         ORDER BY scanned_at DESC
@@ -87,7 +91,7 @@ export async function findStudentMentorScanRecordByEventDate(
   const result = await db
     .prepare(
       `
-        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, entry_method, notes, updated_at
         FROM scan_records
         WHERE student_id = ?1 AND mentor_id = ?2 AND substr(scanned_at, 1, 10) = ?3
         LIMIT 1
@@ -107,7 +111,7 @@ export async function listMentorRecentScans(
   const result = await db
     .prepare(
       `
-        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, entry_method, notes, updated_at
         FROM scan_records
         WHERE mentor_id = ?1 AND substr(scanned_at, 1, 10) = ?2
         ORDER BY scanned_at DESC
@@ -127,7 +131,7 @@ export async function findMentorScanRecordById(
   const result = await db
     .prepare(
       `
-        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at
+        SELECT scan_id, student_id, mentor_id, event_date, scanned_at, entry_method, notes, updated_at
         FROM scan_records
         WHERE mentor_id = ?1 AND scan_id = ?2
         LIMIT 1
@@ -249,12 +253,12 @@ export async function auditAndBackfillEventDates(db: D1Database): Promise<Backfi
     await db
       .prepare(
         `
-          UPDATE scan_records
-          SET event_date = ?1
-          WHERE scan_id = ?2
-        `
-      )
-      .bind(derivedDay, row.scan_id)
+        UPDATE scan_records
+        SET event_date = ?1, entry_method = ?2
+        WHERE scan_id = ?3
+      `
+    )
+      .bind(derivedDay, "qr", row.scan_id)
       .run();
   }
 

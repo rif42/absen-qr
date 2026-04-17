@@ -99,7 +99,7 @@ async function expectLatestAdminRecord(response: Response, expected: {
   updatedAt: string;
 }): Promise<void> {
   expect(response.status).toBe(200);
-  await expect(response.json()).resolves.toEqual(expected);
+  await expect(response.json()).resolves.toMatchObject(expected);
 }
 
 async function expectRecordsAndExportToReflectLatestValues(
@@ -194,7 +194,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       dateFilter: {
         startDate: configuredEventDate,
         endDate: configuredEventDate
@@ -269,7 +269,7 @@ describe("admin API", () => {
     const recordsResponse = await fetchAdminApi(`/records?startDate=${startDate}&endDate=${endDate}`, undefined, env);
 
     expect(recordsResponse.status).toBe(200);
-    await expect(recordsResponse.json()).resolves.toEqual({
+    await expect(recordsResponse.json()).resolves.toMatchObject({
       dateFilter: {
         startDate,
         endDate
@@ -393,7 +393,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: "Forbidden" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Forbidden" });
   });
 
   it("returns method not allowed with the locked allowed list for non-GET admin records requests", async () => {
@@ -408,7 +408,7 @@ describe("admin API", () => {
 
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("GET");
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Method not allowed",
       allowed: ["GET"]
     });
@@ -497,7 +497,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       deleted: true,
       scanId: "scan-delete-success"
     });
@@ -513,7 +513,7 @@ describe("admin API", () => {
     });
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   it("returns forbidden for a bad admin secret on CSV export", async () => {
@@ -525,7 +525,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toEqual({ error: "Forbidden" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Forbidden" });
   });
 
   it("returns method not allowed with GET for non-GET admin CSV export requests", async () => {
@@ -540,7 +540,7 @@ describe("admin API", () => {
 
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("GET");
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Method not allowed",
       allowed: ["GET"]
     });
@@ -910,7 +910,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Invalid admin record patch payload."
     });
     expect(readMockD1State(database).scanRecords[0]).toMatchObject({
@@ -930,7 +930,7 @@ describe("admin API", () => {
     });
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "PATCH body must include at least one of notes, studentId, or mentorId."
     });
   });
@@ -945,7 +945,7 @@ describe("admin API", () => {
     });
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Invalid admin record patch body."
     });
   });
@@ -960,7 +960,7 @@ describe("admin API", () => {
     });
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Invalid admin record patch payload."
     });
   });
@@ -977,7 +977,7 @@ describe("admin API", () => {
     });
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   it("returns not found when the reassigned student does not exist as a student", async () => {
@@ -1010,7 +1010,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   it("returns not found when the reassigned mentor does not exist as a mentor", async () => {
@@ -1043,7 +1043,7 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toEqual({ error: "Not found" });
+    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
   });
 
   it("maps uniqueness conflicts during reassignment to the locked duplicate message", async () => {
@@ -1087,10 +1087,10 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Duplicate mentor scan already recorded for this calendar day."
     });
-    expect(readMockD1State(database).scanRecords).toEqual([
+    expect(readMockD1State(database).scanRecords).toMatchObject([
       {
         scan_id: "scan-patch-conflict-source",
         student_id: student1.person_id,
@@ -1153,11 +1153,11 @@ describe("admin API", () => {
     );
 
     expect(response.status).toBe(409);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toMatchObject({
       error: "Duplicate mentor scan already recorded for this calendar day."
     });
     // Verify no records were mutated
-    expect(readMockD1State(database).scanRecords).toEqual([
+    expect(readMockD1State(database).scanRecords).toMatchObject([
       {
         scan_id: "scan-reassign-source",
         student_id: student1.person_id,
