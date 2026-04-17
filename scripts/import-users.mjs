@@ -9,7 +9,7 @@ import { pathToFileURL } from "node:url";
 import { parse } from "csv-parse/sync";
 
 const ALLOWED_ROLES = new Set(["student", "mentor"]);
-const ROLE_LIMIT = 10;
+const ROLE_LIMIT = 9999;
 const OUTPUT_ENCODING = "utf8";
 const WRANGLER_CONFIG_PATH = "wrangler.jsonc";
 const execFile = promisify(execFileCallback);
@@ -44,11 +44,11 @@ function slugifyName(value) {
   return slug;
 }
 
-function createPersonIdentity(role, slug) {
+function createPersonIdentity(role, slug, token) {
   return {
     person_id: `${role}-${slug}`,
     secret_id: `${role}-secret-${slug}`,
-    secret_path_token: `${role}-${slug}`
+    secret_path_token: token
   };
 }
 
@@ -619,7 +619,8 @@ export function parseUserCsv(csvText) {
       display_name: displayName,
       role: normalizedRole,
       normalized_name: normalizedName,
-      normalized_key: `${normalizedRole}::${normalizedName.toLowerCase()}`
+      normalized_key: `${normalizedRole}::${normalizedName.toLowerCase()}`,
+      existing_token: typeof record["Secret Token"] === "string" ? record["Secret Token"].trim() : ""
     };
   });
 }
@@ -673,7 +674,17 @@ export function buildCanonicalRoster(rows, baseUrl) {
     slugCountsByRole.set(row.role, roleSlugCounts);
 
     const slug = nextSlugCount === 1 ? baseSlug : `${baseSlug}-${nextSlugCount}`;
-    const identity = createPersonIdentity(row.role, slug);
+
+    let token = row.existing_token;
+    if (!token || token.length !== 12 || !/^[a-z0-9]+$/i.test(token) || token.startsWith("mentor-") || token.startsWith("student-")) {
+      const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      token = "";
+      for (let i = 0; i < 12; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+    }
+
+    const identity = createPersonIdentity(row.role, slug, token);
     const selectionOrder = selectedRows.length + 1;
 
     selectedRows.push({

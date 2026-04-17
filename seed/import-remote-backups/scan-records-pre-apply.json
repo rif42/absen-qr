@@ -1,0 +1,44 @@
+{
+  "table": "scan_records",
+  "query": "SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;",
+  "row_count": 4,
+  "created_at": "2026-04-17T10:47:28.108Z",
+  "rows": [
+    {
+      "scan_id": "eb93d76d-6fc1-4b0b-a412-b9e332346063",
+      "student_id": "student-diah-widyatun-s-s-t-m-tr-keb",
+      "mentor_id": "mentor-sutinnarto-s-i-kom-m-i-kom",
+      "event_date": "2026-04-17",
+      "scanned_at": "2026-04-17T07:04:22.511Z",
+      "notes": "ahaaaaaaaaaaa",
+      "updated_at": "2026-04-17T07:04:33.751Z"
+    },
+    {
+      "scan_id": "5122e62f-ee9f-4044-99c7-04d99ae5abe5",
+      "student_id": "student-diah-widyatun-s-s-t-m-tr-keb",
+      "mentor_id": "mentor-mohammad-ariq-nazar-s-si-m-biomed",
+      "event_date": "2026-04-17",
+      "scanned_at": "2026-04-17T07:50:00.675Z",
+      "notes": "",
+      "updated_at": "2026-04-17T07:50:00.675Z"
+    },
+    {
+      "scan_id": "8322b315-5872-4520-bc3d-1d18315cdcc8",
+      "student_id": "student-diah-widyatun-s-s-t-m-tr-keb",
+      "mentor_id": "mentor-naufal-sebastian-s-h-m-h",
+      "event_date": "2026-04-17",
+      "scanned_at": "2026-04-17T07:53:58.099Z",
+      "notes": "",
+      "updated_at": "2026-04-17T07:53:58.099Z"
+    },
+    {
+      "scan_id": "ea1404a0-daf5-439f-99b0-be6e48aedd28",
+      "student_id": "student-bdn-sri-mularsih-s-sit-m-kes",
+      "mentor_id": "mentor-sutinnarto-s-i-kom-m-i-kom",
+      "event_date": "2026-04-17",
+      "scanned_at": "2026-04-17T08:25:55.298Z",
+      "notes": "ayayayyaa",
+      "updated_at": "2026-04-17T08:26:03.511Z"
+    }
+  ]
+}

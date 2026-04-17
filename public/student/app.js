@@ -3,7 +3,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 (function () {
   const elements = {
     status: document.getElementById('status-banner'),
-identitySuccess: document.getElementById('identity-success'),
+    identitySuccess: document.getElementById('identity-success'),
     identityError: document.getElementById('identity-error'),
     studentName: document.getElementById('student-name'),
     studentMeta: document.getElementById('student-meta'),
@@ -13,11 +13,11 @@ identitySuccess: document.getElementById('identity-success'),
     scannerPlaceholder: document.getElementById('scanner-placeholder'),
     scannerPlaceholderTitle: document.getElementById('scanner-placeholder-title'),
     scannerPlaceholderCopy: document.getElementById('scanner-placeholder-copy'),
-scannerFeedback: document.getElementById('scanner-feedback'),
+    scannerFeedback: document.getElementById('scanner-feedback'),
     scannerFeedbackTitle: document.getElementById('scanner-feedback-title'),
     scannerFeedbackCopy: document.getElementById('scanner-feedback-copy'),
     scannerToggleButton: document.getElementById('scanner-toggle-button'),
-historyError: document.getElementById('history-error'),
+    historyError: document.getElementById('history-error'),
     historyErrorMessage: document.getElementById('history-error-message'),
     historyEmpty: document.getElementById('history-empty'),
     historyList: document.getElementById('history-list'),
@@ -93,7 +93,7 @@ historyError: document.getElementById('history-error'),
   }
 
   async function loadHistory() {
-elements.historyError.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
 
@@ -153,22 +153,22 @@ elements.historyError.classList.add('hidden');
   }
 
   function renderIdentitySuccess(student) {
-elements.identityError.classList.add('hidden');
+    elements.identityError.classList.add('hidden');
     elements.identitySuccess.classList.remove('hidden');
-elements.historyError.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
 
     elements.studentName.textContent = student.displayName;
-    elements.studentMeta.textContent = `Secret id: ${student.secretId}`;
+    // elements.studentMeta.textContent = `Secret id: ${student.secretId}`;
     elements.status.textContent = 'Identity loaded. Loading today’s mentor history...';
     elements.status.className = 'status status-loading';
     document.title = `${student.displayName} • Student Attendance`;
   }
 
   function renderHistorySuccess(history) {
-elements.historyError.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
 
     if (history.length === 0) {
       elements.historyEmpty.classList.remove('hidden');
@@ -207,7 +207,7 @@ elements.historyError.classList.add('hidden');
     elements.errorMessage.textContent = message;
     elements.status.textContent = 'Identity load failed.';
     elements.status.className = 'status status-error';
-elements.historyError.classList.add('hidden');
+    elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
@@ -215,7 +215,7 @@ elements.historyError.classList.add('hidden');
   }
 
   function showHistoryError(message) {
-elements.historyEmpty.classList.add('hidden');
+    elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
     elements.historyList.replaceChildren();
     elements.historyErrorMessage.textContent = message;
@@ -225,9 +225,9 @@ elements.historyEmpty.classList.add('hidden');
   }
 
   function setState(state) {
-elements.identitySuccess.classList.add('hidden');
+    elements.identitySuccess.classList.add('hidden');
     elements.identityError.classList.toggle('hidden', state !== 'error');
-if (state === 'loading') {
+    if (state === 'loading') {
       elements.historyError.classList.add('hidden');
       elements.historyEmpty.classList.add('hidden');
       elements.historyList.classList.add('hidden');
@@ -477,7 +477,7 @@ if (state === 'loading') {
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton('Starting camera…', true, disableButton);
+    setScannerButton('Starting camera…', true, disableButton);
   }
 
   function setScannerStarting(title, copy, disableButton) {
@@ -485,28 +485,28 @@ setScannerButton('Starting camera…', true, disableButton);
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton('Opening camera…', true, disableButton);
+    setScannerButton('Opening camera…', true, disableButton);
   }
 
   function setScannerScanning(title, copy, disableButton) {
     updateScannerStage(true);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton('Stop scanner', false, disableButton);
+    setScannerButton('Stop scanner', false, disableButton);
   }
 
   function setScannerProcessing(title, copy, disableButton) {
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton('Scanner paused', true, disableButton);
+    setScannerButton('Scanner paused', true, disableButton);
   }
 
   function setScannerStopped(copy, buttonText, disableButton) {
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Scanner stopped';
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton(buttonText, true, disableButton);
+    setScannerButton(buttonText, true, disableButton);
   }
 
   function setScannerUnavailable(copy, disableButton) {
@@ -514,7 +514,7 @@ setScannerButton(buttonText, true, disableButton);
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Camera unavailable';
     elements.scannerPlaceholderCopy.textContent = copy;
-setPageStatus('error', 'Camera unavailable.');
+    setPageStatus('error', 'Camera unavailable.');
     setScannerButton('Start scanner', true, disableButton);
   }
 
@@ -523,7 +523,7 @@ setPageStatus('error', 'Camera unavailable.');
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = 'Camera permission denied';
     elements.scannerPlaceholderCopy.textContent = copy;
-setPageStatus('error', 'Camera permission denied.');
+    setPageStatus('error', 'Camera permission denied.');
     setScannerButton('Start scanner', false, disableButton);
   }
 
@@ -532,7 +532,7 @@ setPageStatus('error', 'Camera permission denied.');
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setPageStatus('error', title);
+    setPageStatus('error', title);
     setScannerButton('Start scanner', false, disableButton);
   }
 
@@ -541,7 +541,7 @@ setPageStatus('error', title);
     updateScannerStage(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
-setScannerButton('Start scanner', true, true);
+    setScannerButton('Start scanner', true, true);
   }
 
   function setScannerPill(tone, text) {

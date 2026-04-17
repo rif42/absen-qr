@@ -1,18 +1,18 @@
-﻿const POLL_INTERVAL_MS = 10_000;
+const POLL_INTERVAL_MS = 10_000;
 const COPY_RESET_MS = 1_500;
 
 (function () {
   const elements = {
     status: document.getElementById("status-banner"),
-mentorSuccess: document.getElementById("mentor-success"),
+    mentorSuccess: document.getElementById("mentor-success"),
     mentorError: document.getElementById("mentor-error"),
     mentorName: document.getElementById("mentor-name"),
     mentorMeta: document.getElementById("mentor-meta"),
     mentorErrorMessage: document.getElementById("mentor-error-message"),
     retryButton: document.getElementById("retry-button"),
-qrDisplay: document.getElementById("qr-display"),
+    qrDisplay: document.getElementById("qr-display"),
     qrCopy: document.getElementById("qr-copy"),
-recentScansEmpty: document.getElementById("recent-scans-empty"),
+    recentScansEmpty: document.getElementById("recent-scans-empty"),
     recentScansError: document.getElementById("recent-scans-error"),
     recentScansErrorMessage: document.getElementById("recent-scans-error-message"),
     recentScansList: document.getElementById("recent-scans-list"),
@@ -32,6 +32,7 @@ recentScansEmpty: document.getElementById("recent-scans-empty"),
   const draftNotes = new Map();
   const scanMessages = new Map();
   const savingScanIds = new Set();
+  const editingScanIds = new Set();
 
   if (!mentorPath) {
     showIdentityError("Invalid mentor link. Open this page from a /mentor/:secretToken URL.");
@@ -78,18 +79,16 @@ recentScansEmpty: document.getElementById("recent-scans-empty"),
   function resetPageState() {
     elements.status.textContent = "Loading mentor identity…";
     elements.status.className = "status status-loading";
-elements.mentorSuccess.classList.add("hidden");
+    elements.mentorSuccess.classList.add("hidden");
     elements.mentorError.classList.add("hidden");
 
-elements.qrDisplay.classList.add("hidden");
+    elements.qrDisplay.classList.add("hidden");
     elements.qrDisplay.replaceChildren();
     elements.qrCopy.classList.add("hidden");
     elements.qrCopy.disabled = true;
     elements.qrCopy.textContent = "Copy QR payload";
 
-elements.recentScansEmpty.classList.add("hidden");
-    elements.status.textContent = "Identity loaded. Polling for scans…";
-    elements.status.className = "status status-success";
+    elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansError.classList.add("hidden");
     elements.recentScansList.classList.add("hidden");
     elements.recentScansList.replaceChildren();
@@ -100,6 +99,7 @@ elements.recentScansEmpty.classList.add("hidden");
     draftNotes.clear();
     scanMessages.clear();
     savingScanIds.clear();
+    editingScanIds.clear();
   }
 
   async function loadMentorIdentity() {
@@ -146,10 +146,8 @@ elements.recentScansEmpty.classList.add("hidden");
     if (showLoading && !state.recentScansLoaded) {
       elements.status.textContent = "Loading recent scans…";
       elements.status.className = "status status-loading";
-elements.recentScansError.classList.add("hidden");
-      elements.status.textContent = "Failed to load recent scans.";
-    elements.status.className = "status status-error";
-    elements.recentScansEmpty.classList.add("hidden");
+      elements.recentScansError.classList.add("hidden");
+      elements.recentScansEmpty.classList.add("hidden");
       elements.recentScansList.classList.add("hidden");
     }
 
@@ -239,15 +237,15 @@ elements.recentScansError.classList.add("hidden");
   }
 
   function renderMentorIdentity(mentor) {
-elements.mentorError.classList.add("hidden");
+    elements.mentorError.classList.add("hidden");
     elements.mentorSuccess.classList.remove("hidden");
     elements.mentorName.textContent = mentor.displayName;
-    elements.mentorMeta.textContent = `Secret id: ${mentor.secretId} · Person id: ${mentor.personId}`;
+    // elements.mentorMeta.textContent = `Secret id: ${mentor.secretId} · Person id: ${mentor.personId}`;
     document.title = `${mentor.displayName} • Mentor attendance`;
   }
 
   function renderQrCode(mentor) {
-elements.qrDisplay.innerHTML = mentor.qrSvg;
+    elements.qrDisplay.innerHTML = mentor.qrSvg;
     elements.qrDisplay.classList.remove("hidden");
     elements.qrCopy.classList.remove("hidden");
     elements.qrCopy.disabled = !mentor.qrPayload;
@@ -277,7 +275,9 @@ elements.qrDisplay.innerHTML = mentor.qrSvg;
   }
 
   function renderRecentScans(scans) {
-elements.recentScansError.classList.add("hidden");
+    elements.recentScansError.classList.add("hidden");
+    elements.status.textContent = "Identity loaded. Polling for scans…";
+    elements.status.className = "status status-success";
 
     if (scans.length === 0) {
       elements.recentScansList.classList.add("hidden");
@@ -286,8 +286,6 @@ elements.recentScansError.classList.add("hidden");
       return;
     }
 
-    elements.status.textContent = "Failed to load recent scans.";
-    elements.status.className = "status status-error";
     elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansList.classList.remove("hidden");
 
@@ -310,6 +308,7 @@ elements.recentScansError.classList.add("hidden");
         draftNotes.delete(key);
         scanMessages.delete(key);
         savingScanIds.delete(key);
+        editingScanIds.delete(key);
       }
     }
   }
@@ -357,7 +356,12 @@ elements.recentScansError.classList.add("hidden");
     saveMessage.className = "scan-save-message";
     saveMessage.setAttribute("aria-live", "polite");
 
-    actions.append(saveButton, saveMessage);
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "button scan-edit-button";
+    editButton.textContent = "Edit notes";
+
+    actions.append(editButton, saveButton, saveMessage);
 
     item.append(header, noteState, label, textarea, actions);
 
@@ -365,7 +369,9 @@ elements.recentScansError.classList.add("hidden");
       studentName,
       scanMeta,
       noteState,
+      label,
       textarea,
+      editButton,
       saveButton,
       saveMessage,
     };
@@ -373,6 +379,11 @@ elements.recentScansError.classList.add("hidden");
     textarea.addEventListener("input", () => {
       draftNotes.set(scan.scanId, textarea.value);
       scanMessages.delete(scan.scanId);
+      updateRecentScanItem(scan);
+    });
+
+    editButton.addEventListener("click", () => {
+      editingScanIds.add(scan.scanId);
       updateRecentScanItem(scan);
     });
 
@@ -389,21 +400,25 @@ elements.recentScansError.classList.add("hidden");
     const draft = draftNotes.has(scan.scanId) ? draftNotes.get(scan.scanId) : undefined;
     const displayNotes = draft !== undefined ? draft : savedNotes;
 
+    const isEditing = editingScanIds.has(scan.scanId) || !savedNotes;
+
     refs.studentName.textContent = scan.studentName;
     refs.scanMeta.textContent = scan.scannedAt
       ? `Scanned ${formatTimestamp(scan.scannedAt)}`
       : "Recorded for this event day.";
-    refs.noteState.textContent = draft !== undefined
-      ? `Draft note: ${draft || "(empty)"}`
-      : savedNotes
-        ? `Saved note: ${savedNotes}`
-        : "No notes saved yet.";
+    refs.noteState.textContent = displayNotes || "No notes saved yet.";
 
     if (refs.textarea.value !== displayNotes && !draftNotes.has(scan.scanId)) {
       refs.textarea.value = displayNotes;
     }
 
     const isSaving = savingScanIds.has(scan.scanId);
+
+    refs.noteState.classList.toggle("hidden", isEditing);
+    refs.label.classList.toggle("hidden", !isEditing);
+    refs.textarea.classList.toggle("hidden", !isEditing);
+    refs.editButton.classList.toggle("hidden", isEditing);
+    refs.saveButton.classList.toggle("hidden", !isEditing);
     refs.textarea.disabled = isSaving;
     refs.saveButton.disabled = isSaving;
     refs.saveButton.textContent = isSaving ? "Saving…" : "Save notes";
@@ -469,6 +484,7 @@ elements.recentScansError.classList.add("hidden");
       }
 
       draftNotes.delete(scanId);
+      editingScanIds.delete(scanId);
       scanMessages.set(scanId, { text: "Notes saved.", tone: "success" });
       updateRecentScanItem(findRecentScan(scanId));
     } catch (error) {
@@ -488,26 +504,29 @@ elements.recentScansError.classList.add("hidden");
   }
 
   function showIdentityError(message) {
-elements.mentorSuccess.classList.add("hidden");
+    elements.mentorSuccess.classList.add("hidden");
     elements.mentorError.classList.remove("hidden");
     elements.mentorErrorMessage.textContent = message;
 
-elements.qrDisplay.classList.add("hidden");
+    elements.qrDisplay.classList.add("hidden");
     elements.qrDisplay.replaceChildren();
     elements.qrCopy.classList.add("hidden");
 
-elements.recentScansEmpty.classList.add("hidden");
-    elements.status.textContent = "Identity loaded. Polling for scans…";
-    elements.status.className = "status status-success";
+    elements.recentScansEmpty.classList.add("hidden");
+    elements.status.textContent = "Identity load failed.";
+    elements.status.className = "status status-error";
     elements.recentScansError.classList.add("hidden");
     elements.recentScansList.classList.add("hidden");
     elements.recentScansList.replaceChildren();
   }
 
   function showRecentScansError(message) {
-elements.recentScansEmpty.classList.add("hidden");
+    elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansError.classList.remove("hidden");
     elements.recentScansErrorMessage.textContent = message;
+
+    elements.status.textContent = "Identity loaded, but failed to load recent scans.";
+    elements.status.className = "status status-error";
 
     if (state.recentScans.length > 0) {
       elements.recentScansList.classList.remove("hidden");
