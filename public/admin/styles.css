@@ -167,7 +167,8 @@ button:disabled {
 }
 
 #export-csv-button {
-  align-self: flex-start;
+  align-self: center;
+  width: 100%;
 }
 
 #records-table {
@@ -291,7 +292,7 @@ button:focus {
 
 @media (max-width: 720px) {
   .shell {
-    padding: 14px 12px 24px;
+    padding: 12px 8px 24px;
   }
 
   .page-header {
@@ -314,23 +315,106 @@ button:focus {
     text-align: center;
   }
 
-  #records-table {
+  .filter-card {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .filter-card input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .buttons-filter {
+    width: 100%;
+    flex-direction: column;
+    margin-top: 8px;
+  }
+
+  #records-table,
+  #records-table tbody,
+  #records-table tr,
+  #records-table td {
     display: block;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    width: 100%;
   }
 
-  #records-table thead th,
+  #records-table thead {
+    display: none;
+  }
+
+  #records-table tbody tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #records-table tbody tr.row-locked {
+    background: rgba(71, 85, 105, 0.04);
+  }
+
+  #records-table tbody tr.row-editing {
+    background: rgba(22, 163, 74, 0.06);
+  }
+
   #records-table tbody td {
-    min-width: 150px;
+    padding: 0;
+    border: none;
+    background: transparent;
   }
 
-  #records-table thead th:nth-child(3),
-  #records-table tbody td:nth-child(3) {
-    min-width: 210px;
+  #records-table tbody td:first-child,
+  #records-table tbody td:last-child {
+    border: none;
+    border-radius: 0;
+  }
+
+  #records-table tbody td:nth-child(1)::before {
+    content: "Student name";
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  #records-table tbody td:nth-child(2)::before {
+    content: "Mentor name";
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  #records-table tbody td:nth-child(3)::before {
+    content: "Notes";
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
   }
 
   .record-actions {
-    min-width: 124px;
+    margin-top: 4px;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .record-actions button {
+    flex: 1;
+    padding: 12px 10px;
   }
 }
