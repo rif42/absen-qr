@@ -190,6 +190,55 @@ describe("mentor API", () => {
         recentScans: []
       });
     });
+
+    it("includes entryMethod for fallback-created records in recent scans", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-fallback-recent",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: nonTodayEventDate,
+            scanned_at: `${runtimeUtcDate}T09:00:00.000Z`,
+            entry_method: "fallback_code",
+            notes: "Fallback scan note",
+            updated_at: `${runtimeUtcDate}T09:00:00.000Z`
+          },
+          {
+            scan_id: "scan-qr-recent",
+            student_id: student2.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: nonTodayEventDate,
+            scanned_at: `${runtimeUtcDate}T08:00:00.000Z`,
+            entry_method: "qr",
+            notes: "QR scan note",
+            updated_at: `${runtimeUtcDate}T08:00:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
+        createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        recentScans: [
+          {
+            scanId: "scan-fallback-recent",
+            entryMethod: "fallback_code",
+            notes: "Fallback scan note"
+          },
+          {
+            scanId: "scan-qr-recent",
+            entryMethod: "qr",
+            notes: "QR scan note"
+          }
+        ]
+      });
+    });
   });
 
   it("saves mentor notes to a scan owned by that mentor", async () => {

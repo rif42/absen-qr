@@ -544,7 +544,7 @@ describe("admin API", () => {
       error: "Method not allowed",
       allowed: ["GET"]
     });
-  });
+});
 
   it("updates only notes for a valid PATCH request and reflects the change in records plus CSV", async () => {
     const updatedAt = `${configuredEventDate}T11:30:00.000Z`;
@@ -560,7 +560,7 @@ describe("admin API", () => {
           updated_at: `${configuredEventDate}T08:05:00.000Z`
         }
       ]
-    });
+});
     const env = createEnv(database);
 
     const response = await withFrozenTime(updatedAt, () =>
@@ -1347,6 +1347,147 @@ describe("admin API", () => {
           exportLine(student1, mentor1, configuredEventDate, "In explicit range")
         ].join("\n")
       );
+    });
+  });
+
+  describe("entryMethod in records and CSV", () => {
+    it("returns entryMethod in records JSON for each record", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-qr",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            entry_method: "qr",
+            notes: "QR scan",
+            updated_at: `${configuredEventDate}T08:05:00.000Z`
+          },
+          {
+            scan_id: "scan-fallback",
+            student_id: student2.person_id,
+            mentor_id: mentor2.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+            entry_method: "fallback_code",
+            notes: "Fallback scan",
+            updated_at: `${configuredEventDate}T09:05:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+        fetchHandler(
+          new Request("https://example.com/admin/local-admin-secret-token/api/records") as WorkerRequest,
+          createEnv(database),
+          {} as WorkerContext
+        )
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        records: [
+          {
+            scanId: "scan-fallback",
+            entryMethod: "fallback_code"
+          },
+          {
+            scanId: "scan-qr",
+            entryMethod: "qr"
+          }
+        ]
+      });
+    });
+
+    it("exports CSV with the locked header and row shape without entryMethod", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-export-method",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            entry_method: "fallback_code",
+            notes: "Fallback note",
+            updated_at: `${configuredEventDate}T08:05:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await withFrozenTime(`${configuredEventDate}T12:00:00.000Z`, () =>
+        fetchHandler(
+          new Request("https://example.com/admin/local-admin-secret-token/api/export.csv") as WorkerRequest,
+          createEnv(database),
+          {} as WorkerContext
+        )
+      );
+
+      expect(response.status).toBe(200);
+      const csvText = await response.text();
+      const lines = csvText.split("\n");
+      // Header must be exactly the locked contract
+      expect(lines[0]).toBe("student name,secret id,mentor scanned,date,notes");
+      // Row must match expected format without entryMethod
+      expect(lines[1]).toBe(exportLine(student1, mentor1, configuredEventDate, "Fallback note"));
+    });
+
+    it("admin edit/delete/reassign still work for fallback-created records", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-fallback-edit",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            entry_method: "fallback_code",
+            notes: "Original fallback note",
+            updated_at: `${configuredEventDate}T08:05:00.000Z`
+          }
+        ]
+      });
+      const env = createEnv(database);
+      const fallbackUpdatedAt = `${configuredEventDate}T11:00:00.000Z`;
+
+      // Edit notes on fallback record with frozen time matching the record's date
+      await withFrozenTime(fallbackUpdatedAt, async () => {
+        // First patch - update the record
+        const patchResponse = await fetchAdminApi(
+          "/records/scan-fallback-edit",
+          {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ notes: "Edited fallback note" })
+          },
+          env
+        );
+
+        expect(patchResponse.status).toBe(200);
+        await expect(patchResponse.json()).resolves.toMatchObject({
+          scanId: "scan-fallback-edit",
+          notes: "Edited fallback note",
+          entryMethod: "fallback_code"
+        });
+
+        // Verify record still appears in records - must use date filter
+        const recordsResponse = await fetchAdminApi(
+          `/records?startDate=${configuredEventDate}&endDate=${configuredEventDate}`,
+          undefined,
+          env
+        );
+        expect(recordsResponse.status).toBe(200);
+        await expect(recordsResponse.json()).resolves.toMatchObject({
+          records: [
+            {
+              scanId: "scan-fallback-edit",
+              notes: "Edited fallback note",
+              entryMethod: "fallback_code"
+            }
+          ]
+        });
+      });
     });
   });
 });

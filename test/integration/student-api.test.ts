@@ -686,5 +686,123 @@ describe("student API", () => {
         history: []
       });
     });
+
+    it("includes fallback-created records in student history", async () => {
+      const database = createMockD1Database({
+        scanRecords: [
+          {
+            scan_id: "scan-fallback-history",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            entry_method: "fallback_code",
+            notes: "Fallback from code",
+            updated_at: `${configuredEventDate}T08:00:00.000Z`
+          },
+          {
+            scan_id: "scan-qr-history",
+            student_id: student1.person_id,
+            mentor_id: mentor2.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T09:00:00.000Z`,
+            entry_method: "qr",
+            notes: "QR scan",
+            updated_at: `${configuredEventDate}T09:00:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/history`) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        history: [
+          {
+            scanId: "scan-qr-history",
+            mentorId: mentor2.person_id,
+            notes: "QR scan"
+          },
+          {
+            scanId: "scan-fallback-history",
+            mentorId: mentor1.person_id,
+            notes: "Fallback from code"
+          }
+        ]
+      });
+    });
+  });
+
+  describe("race condition handling", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(`${configuredEventDate}T12:00:00.000Z`));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("handles sequential redemption attempts - first succeeds, second fails with duplicate", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-race",
+            mentor_id: mentor1.person_id,
+            code_value: "12345678",
+            created_at: `${configuredEventDate}T11:55:00.000Z`,
+            expires_at: `${configuredEventDate}T12:05:00.000Z`,
+            consumed_at: null,
+            consumed_by_student_id: null,
+            consumed_scan_id: null
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+
+      // First redemption request should succeed
+      const response1 = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "12345678" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response1.status).toBe(201);
+
+      // Second redemption request with same code should fail (duplicate scan) - but code is already consumed
+      const response2 = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "12345678" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      // Second attempt fails because code is consumed
+      expect(response2.status).toBe(400);
+      await expect(response2.json()).resolves.toMatchObject({
+        error: "Invalid or expired fallback code."
+      });
+
+      // Verify only one scan record was created
+      const state = readMockD1State(database);
+      const scanRecords = state.scanRecords;
+      expect(scanRecords).toHaveLength(1);
+      expect(scanRecords[0]).toMatchObject({
+        student_id: student1.person_id,
+        mentor_id: mentor1.person_id,
+        entry_method: "fallback_code"
+      });
+    });
   });
 });

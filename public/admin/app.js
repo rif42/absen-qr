@@ -286,6 +286,7 @@
       mentorName: normalizeString(record.mentorName ?? record.mentor_name),
       eventDate: normalizeString(record.eventDate ?? record.event_date),
       scannedAt: normalizeString(record.scannedAt ?? record.scanned_at),
+      entryMethod: record.entryMethod === "fallback_code" ? "fallback_code" : "qr",
       notes: normalizeString(record.notes),
       updatedAt: normalizeString(record.updatedAt ?? record.updated_at),
     };
@@ -319,8 +320,13 @@
     const mentorCell = document.createElement("td");
     const mentorText = document.createElement("span");
     mentorText.className = "record-text";
+    const mentorFallbackBadge = document.createElement("span");
+    mentorFallbackBadge.id = "fallback-badge";
+    mentorFallbackBadge.className = "fallback-badge";
+    mentorFallbackBadge.textContent = "fallback";
+    mentorFallbackBadge.style.display = "none";
     const mentorSelect = document.createElement("select");
-    mentorCell.append(mentorText);
+    mentorCell.append(mentorText, mentorFallbackBadge);
 
     const notesCell = document.createElement("td");
     const notesText = document.createElement("span");
@@ -371,6 +377,7 @@
       actionCell,
       studentText,
       mentorText,
+      mentorFallbackBadge,
       notesText,
       studentSelect,
       mentorSelect,
@@ -416,13 +423,18 @@
       rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorText);
       rowState.refs.notesCell.replaceChildren(rowState.refs.notesText);
       rowState.refs.actionWrap.replaceChildren(rowState.refs.editButton, rowState.refs.deleteButton);
+      // Show fallback badge only for fallback_code records
+      const isFallback = rowState.record.entryMethod === "fallback_code";
+      rowState.refs.mentorFallbackBadge.style.display = isFallback ? "inline" : "none";
       return;
     }
 
     rowState.refs.studentCell.replaceChildren(rowState.refs.studentSelect);
-    rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorSelect);
+    rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorSelect, rowState.refs.mentorFallbackBadge);
     rowState.refs.notesCell.replaceChildren(rowState.refs.notesTextarea);
     rowState.refs.actionWrap.replaceChildren(rowState.refs.saveButton, rowState.refs.deleteButton);
+    // Hide badge in edit mode
+    rowState.refs.mentorFallbackBadge.style.display = "none";
   }
 
   function populateSelect(select, people, selectedId, selectedName) {
