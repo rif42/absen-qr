@@ -81,3 +81,23 @@ export async function getFallbackCodeByValue(
 
   return result ?? null;
 }
+
+export async function consumeFallbackCode(
+  db: D1Database,
+  fallbackCodeId: string,
+  studentId: string,
+  scanId: string
+): Promise<void> {
+  const consumedAt = new Date().toISOString();
+
+  await db
+    .prepare(
+      `
+      UPDATE mentor_fallback_codes
+      SET consumed_at = ?1, consumed_by_student_id = ?2, consumed_scan_id = ?3
+      WHERE fallback_code_id = ?4
+      `
+    )
+    .bind(consumedAt, studentId, scanId, fallbackCodeId)
+    .run();
+}

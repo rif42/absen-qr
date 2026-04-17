@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import worker from "../../src/worker/index";
+import { resetFallbackCodeThrottle } from "../../src/worker/routes/student";
 import { createMockD1Database, readMockD1State } from "../support/mock-d1";
 import { REAL_MENTORS, REAL_STUDENTS } from "../support/real-roster";
 
@@ -289,6 +290,277 @@ describe("student API", () => {
 
     expect(secondResponse.status).toBe(201);
     expect(readMockD1State(database).scanRecords).toHaveLength(2);
+  });
+
+  describe("fallback code redemption", () => {
+    const validCode = "12345678";
+    const expiredCode = "87654321";
+    const consumedCode = "11223344";
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
+      resetFallbackCodeThrottle();
+    });
+
+    afterEach(() => {
+      resetFallbackCodeThrottle();
+      vi.useRealTimers();
+    });
+
+    it("redeems a valid fallback code and creates a scan record with entry_method=fallback_code", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-valid",
+            mentor_id: mentor1.person_id,
+            code_value: validCode,
+            created_at: "2026-01-15T08:00:00.000Z",
+            expires_at: "2026-01-15T23:59:59.000Z"
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: validCode })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(201);
+      await expect(response.json()).resolves.toMatchObject({
+        success: true,
+        scan: {
+          mentorName: mentor1.display_name
+        }
+      });
+
+      const state = readMockD1State(database);
+      expect(state.scanRecords).toHaveLength(1);
+      expect(state.scanRecords[0]).toMatchObject({
+        student_id: student1.person_id,
+        mentor_id: mentor1.person_id,
+        entry_method: "fallback_code"
+      });
+      expect(state.fallback_codes[0].consumed_at).not.toBeNull();
+    });
+
+    it("strips spaces from the code string", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-spaces",
+            mentor_id: mentor1.person_id,
+            code_value: validCode,
+            created_at: "2026-01-15T08:00:00.000Z",
+            expires_at: "2026-01-15T23:59:59.000Z"
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "1234 5678" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(201);
+    });
+
+    it("rejects an expired code with generic error", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-expired",
+            mentor_id: mentor1.person_id,
+            code_value: expiredCode,
+            created_at: "2026-01-14T08:00:00.000Z",
+            expires_at: "2026-01-14T23:59:59.000Z"
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: expiredCode })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toMatchObject({
+        error: "Invalid or expired fallback code."
+      });
+
+      const state = readMockD1State(database);
+      expect(state.scanRecords).toHaveLength(0);
+    });
+
+    it("rejects an already-consumed code with generic error", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-consumed",
+            mentor_id: mentor1.person_id,
+            code_value: consumedCode,
+            created_at: "2026-01-15T08:00:00.000Z",
+            expires_at: "2026-01-15T23:59:59.000Z",
+            consumed_at: "2026-01-15T09:00:00.000Z",
+            consumed_by_student_id: student1.person_id,
+            consumed_scan_id: "already-consumed-scan"
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: consumedCode })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toMatchObject({
+        error: "Invalid or expired fallback code."
+      });
+    });
+
+    it("rejects a malformed code with generic error", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+
+      // Too short
+      const shortResponse = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "1234567" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+      expect(shortResponse.status).toBe(400);
+      await expect(shortResponse.json()).resolves.toMatchObject({
+        error: "Invalid or expired fallback code."
+      });
+
+      // Too long
+      const longResponse = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "123456789" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+      expect(longResponse.status).toBe(400);
+
+      // Non-digits
+      const nonDigitResponse = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "1234abcd" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+      expect(nonDigitResponse.status).toBe(400);
+    });
+
+    it("rejects duplicate same-day redemption without consuming the code", async () => {
+      const database = createMockD1Database({
+        fallback_codes: [
+          {
+            fallback_code_id: "fc-dup",
+            mentor_id: mentor1.person_id,
+            code_value: validCode,
+            created_at: "2026-01-15T08:00:00.000Z",
+            expires_at: "2026-01-15T23:59:59.000Z"
+          }
+        ],
+        scanRecords: [
+          {
+            scan_id: "existing-scan",
+            student_id: student1.person_id,
+            mentor_id: mentor1.person_id,
+            event_date: configuredEventDate,
+            scanned_at: `${configuredEventDate}T08:00:00.000Z`,
+            notes: "",
+            updated_at: `${configuredEventDate}T08:00:00.000Z`
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: validCode })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(409);
+      await expect(response.json()).resolves.toMatchObject({
+        error: "Duplicate mentor scan already recorded for this calendar day."
+      });
+
+      // Code should NOT be consumed
+      const state = readMockD1State(database);
+      expect(state.fallback_codes[0].consumed_at).toBeNull();
+    });
+
+    it("throttles after 5 failed attempts", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+
+      // Make 5 failed attempts (invalid codes)
+      for (let i = 0; i < 5; i++) {
+        const response = await fetchHandler(
+          new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ code: "00000000" })
+          }) as WorkerRequest,
+          createEnv(database),
+          {} as WorkerContext
+        );
+        expect(response.status).toBe(400);
+      }
+
+      // 6th attempt should be throttled
+      const throttledResponse = await fetchHandler(
+        new Request(`https://example.com/student/${student1.secret_path_token}/api/redeem-code`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ code: "00000000" })
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(throttledResponse.status).toBe(429);
+      await expect(throttledResponse.json()).resolves.toMatchObject({
+        error: "Too many failed redemption attempts. Please wait before trying again."
+      });
+    });
   });
 
   describe("history", () => {
