@@ -268,4 +268,137 @@ describe("mentor API", () => {
     await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
     expect(readMockD1State(database).scanRecords[0].notes).toBe("");
   });
+
+  describe("fallback code", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("generates a new fallback code with 201 and returns 8-digit code with 5-min expiry", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/fallback-code`, {
+          method: "POST"
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(201);
+      const responseBody = (await response.json()) as Record<string, unknown>;
+
+      expect(responseBody.code).toHaveLength(8);
+      expect(responseBody.code).toMatch(/^\d{8}$/);
+      expect(responseBody.expiresAt).toBe("2026-01-15T12:05:00.000Z");
+      expect(responseBody.remainingSeconds).toBe(300);
+    });
+
+    it("GET returns correct shape for hasActiveCode=false when no code exists", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/fallback-code`) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ hasActiveCode: false });
+    });
+
+    it("GET returns same code and decreasing remainingSeconds for active code", async () => {
+      const database = createMockD1Database({
+        mentor_fallback_codes: [
+          {
+            fallback_code_id: "fallback-1",
+            mentor_id: mentor1.person_id,
+            code_value: "12345678",
+            created_at: "2026-01-15T12:00:00.000Z",
+            expires_at: "2026-01-15T12:05:00.000Z",
+            consumed_at: null,
+            consumed_by_student_id: null,
+            consumed_scan_id: null
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/fallback-code`) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        hasActiveCode: true,
+        code: "12345678",
+        expiresAt: "2026-01-15T12:05:00.000Z",
+        remainingSeconds: 300
+      });
+    });
+
+    it("POST returns 409 conflict when active code already exists", async () => {
+      const database = createMockD1Database({
+        mentor_fallback_codes: [
+          {
+            fallback_code_id: "fallback-1",
+            mentor_id: mentor1.person_id,
+            code_value: "12345678",
+            created_at: "2026-01-15T12:00:00.000Z",
+            expires_at: "2026-01-15T12:05:00.000Z",
+            consumed_at: null,
+            consumed_by_student_id: null,
+            consumed_scan_id: null
+          }
+        ]
+      });
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/fallback-code`, {
+          method: "POST"
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(409);
+      await expect(response.json()).resolves.toMatchObject({ error: "Active fallback code already exists." });
+
+      const state = readMockD1State(database);
+      expect(state.mentor_fallback_codes).toHaveLength(1);
+      expect(state.mentor_fallback_codes[0].code_value).toBe("12345678");
+    });
+
+    it("student token calling GET returns 404", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${student1.secret_path_token}/api/fallback-code`) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(404);
+    });
+
+    it("student token calling POST returns 404", async () => {
+      const database = createMockD1Database();
+      const fetchHandler = worker.fetch as FetchHandler;
+      const response = await fetchHandler(
+        new Request(`https://example.com/mentor/${student1.secret_path_token}/api/fallback-code`, {
+          method: "POST"
+        }) as WorkerRequest,
+        createEnv(database),
+        {} as WorkerContext
+      );
+
+      expect(response.status).toBe(404);
+    });
+  });
 });

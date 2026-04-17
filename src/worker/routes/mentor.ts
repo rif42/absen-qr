@@ -1,7 +1,8 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
+import { createFallbackCode, getActiveFallbackCodeForMentor } from "../db/fallback-codes";
 import { findMentorScanRecordById, listMentorRecentScans, updateScanRecordNotes } from "../db/scan-records";
 import { getCurrentUtcDate } from "../services/event-day";
-import { badRequest, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
+import { badRequest, conflict, created, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { renderMentorQrSvg } from "../services/mentor-qr-svg";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { isValidNotes } from "../validation/scan-records";
@@ -127,6 +128,62 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
         notes: updatedRecord.notes
       }
     });
+  }
+
+  if (apiPath === "/fallback-code") {
+    const mentor = await findPersonBySecretToken(env.DB, "mentor", secretToken);
+
+    if (!mentor) {
+      return notFound();
+    }
+
+    if (request.method === "GET") {
+      const activeCode = await getActiveFallbackCodeForMentor(env.DB, mentor.person_id);
+
+      if (!activeCode) {
+        return json({ hasActiveCode: false });
+      }
+
+      const expiresAt = new Date(activeCode.expires_at);
+      const now = new Date();
+      const remainingSeconds = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
+
+      return json({
+        hasActiveCode: true,
+        code: activeCode.code_value,
+        expiresAt: activeCode.expires_at,
+        remainingSeconds
+      });
+    }
+
+    if (request.method === "POST") {
+      const existingCode = await getActiveFallbackCodeForMentor(env.DB, mentor.person_id);
+
+      if (existingCode) {
+        return conflict("Active fallback code already exists.");
+      }
+
+      const now = new Date();
+      const createdAt = now.toISOString();
+      const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
+
+      const randomValues = new Uint32Array(1);
+      crypto.getRandomValues(randomValues);
+      const codeValue = (randomValues[0] % 100000000).toString().padStart(8, "0");
+
+      const createdCode = await createFallbackCode(env.DB, mentor.person_id, codeValue, createdAt, expiresAt);
+
+      const expiresDate = new Date(createdCode.expires_at);
+      const remainingSeconds = Math.floor((expiresDate.getTime() - now.getTime()) / 1000);
+
+      return created({
+        code: createdCode.code_value,
+        expiresAt: createdCode.expires_at,
+        remainingSeconds
+      });
+    }
+
+    return methodNotAllowed(["GET", "POST"]);
   }
 
   return notImplemented("mentor api route placeholder", { secretToken, apiPath });
