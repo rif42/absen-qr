@@ -17,6 +17,11 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     scannerFeedbackTitle: document.getElementById('scanner-feedback-title'),
     scannerFeedbackCopy: document.getElementById('scanner-feedback-copy'),
     scannerToggleButton: document.getElementById('scanner-toggle-button'),
+    fallbackRevealBtn: document.getElementById('fallback-reveal-btn'),
+    fallbackForm: document.getElementById('fallback-form'),
+    fallbackCodeInput: document.getElementById('fallback-code-input'),
+    fallbackSubmitBtn: document.getElementById('fallback-submit-btn'),
+    fallbackCancelBtn: document.getElementById('fallback-cancel-btn'),
     historyError: document.getElementById('history-error'),
     historyErrorMessage: document.getElementById('history-error-message'),
     historyEmpty: document.getElementById('history-empty'),
@@ -42,6 +47,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   elements.retryButton.addEventListener('click', loadIdentity);
   elements.historyRetryButton.addEventListener('click', loadIdentity);
   elements.scannerToggleButton.addEventListener('click', toggleScanner);
+  elements.fallbackRevealBtn.addEventListener('click', showFallbackForm);
+  elements.fallbackCancelBtn.addEventListener('click', hideFallbackForm);
+  elements.fallbackSubmitBtn.addEventListener('click', submitFallbackCode);
   window.addEventListener('pagehide', destroyScanner);
   loadIdentity();
 
@@ -577,6 +585,92 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     elements.scannerFeedback.classList.remove('is-success', 'is-error');
     elements.scannerFeedbackTitle.textContent = '';
     elements.scannerFeedbackCopy.textContent = '';
+  }
+
+  function showFallbackForm() {
+    elements.fallbackForm.classList.remove('hidden');
+    elements.fallbackCodeInput.value = '';
+    hideScanFeedback();
+  }
+
+  function hideFallbackForm() {
+    elements.fallbackForm.classList.add('hidden');
+    elements.fallbackCodeInput.value = '';
+  }
+
+  async function submitFallbackCode() {
+    const rawCode = elements.fallbackCodeInput.value || '';
+    const code = rawCode.replace(/\s/g, '');
+
+    if (!code || !/^\d{8}$/.test(code)) {
+      showFallbackError('Please enter a valid 8-digit code.');
+      return;
+    }
+
+    elements.fallbackSubmitBtn.disabled = true;
+    hideScanFeedback();
+
+    try {
+      const response = await fetch(`${studentPath}/api/redeem-code`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const responseBody = await readJson(response);
+
+      if (!response.ok) {
+        throw buildFallbackError(response.status, responseBody);
+      }
+
+      setScanFeedback(
+        'success',
+        'Code accepted',
+        'Your mentor scan was recorded. Refreshing today\u2019s history now.'
+      );
+
+      await loadHistory();
+      hideFallbackForm();
+      await stopScanner(true);
+      setPageStatus('success', 'Mentor scan recorded. Today\u2019s history has been refreshed.');
+      setScannerStopped('Scanner stopped. Tap Start scanner to scan another mentor QR code.', 'Start scanner', false);
+    } catch (error) {
+      const feedbackTitle = error instanceof Error && typeof error.title === 'string' ? error.title : 'Code submission failed';
+      const feedbackCopy = error instanceof Error ? error.message : 'The one-time code could not be redeemed.';
+
+      showFallbackError(feedbackCopy);
+    } finally {
+      elements.fallbackSubmitBtn.disabled = false;
+    }
+  }
+
+  function showFallbackError(message) {
+    setScanFeedback('error', 'Code rejected', message);
+  }
+
+  function buildFallbackError(status, payload) {
+    const detail = getPayloadMessage(payload);
+
+    if (status === 400) {
+      return createScanError('Invalid or expired fallback code.', detail || 'Invalid or expired fallback code.');
+    }
+
+    if (status === 409) {
+      return createScanError('Duplicate scan', detail || 'Duplicate mentor scan already recorded for this calendar day.');
+    }
+
+    if (status === 429) {
+      return createScanError('Too many attempts', detail || 'Too many failed redemption attempts. Please wait a moment and try again.');
+    }
+
+    if (status === 401 || status === 403) {
+      return createScanError('Submission blocked', detail || 'This student link is not allowed to submit codes right now.');
+    }
+
+    return createScanError('Code submission failed', detail || `Code submission failed with status ${status}.`);
   }
 
   function normalizeDecodedPayload(result) {

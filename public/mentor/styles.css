@@ -177,7 +177,8 @@ body {
 
 .qr-card,
 .recent-scans-card,
-.identity-card {
+.identity-card,
+.fallback-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -303,6 +304,48 @@ body {
 
 .scan-item.is-saving {
   opacity: 0.95;
+}
+
+.fallback-code-display {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.fallback-code-value {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+}
+
+.fallback-countdown {
+  margin: 8px 0 0;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--warm);
+}
+
+.fallback-helper {
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.fallback-error {
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  color: var(--danger);
+  line-height: 1.5;
+}
+
+.fallback-generate-button {
+  width: 100%;
 }
 
 .hidden {

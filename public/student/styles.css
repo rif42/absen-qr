@@ -364,3 +364,88 @@ body {
     width: 100%;
   }
 }
+
+.fallback-reveal-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 4px;
+}
+
+.fallback-reveal-btn:hover {
+  color: var(--text);
+  filter: none;
+}
+
+.fallback-form {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.fallback-copy {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.fallback-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.fallback-code-input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 9px 12px;
+  text-align: center;
+}
+
+.fallback-code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+.fallback-submit-btn {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.fallback-cancel-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.fallback-cancel-btn:hover {
+  color: var(--text);
+}

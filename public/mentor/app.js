@@ -12,6 +12,12 @@ const COPY_RESET_MS = 1_500;
     retryButton: document.getElementById("retry-button"),
     qrDisplay: document.getElementById("qr-display"),
     qrCopy: document.getElementById("qr-copy"),
+    fallbackCodeCard: document.getElementById("fallback-code-card"),
+    fallbackGenerateBtn: document.getElementById("fallback-generate-btn"),
+    fallbackCodeDisplay: document.getElementById("fallback-code-display"),
+    fallbackCountdown: document.getElementById("fallback-countdown"),
+    fallbackHelper: document.getElementById("fallback-helper"),
+    fallbackError: document.getElementById("fallback-error"),
     recentScansEmpty: document.getElementById("recent-scans-empty"),
     recentScansError: document.getElementById("recent-scans-error"),
     recentScansErrorMessage: document.getElementById("recent-scans-error-message"),
@@ -28,6 +34,9 @@ const COPY_RESET_MS = 1_500;
     pollTimer: null,
     copyResetTimer: null,
     scanItems: new Map(),
+    fallbackCode: null,
+    fallbackExpiresAt: null,
+    fallbackCountdownTimer: null,
   };
   const draftNotes = new Map();
   const scanMessages = new Map();
@@ -47,6 +56,9 @@ const COPY_RESET_MS = 1_500;
   });
   elements.qrCopy.addEventListener("click", () => {
     void copyQrPayload();
+  });
+  elements.fallbackGenerateBtn.addEventListener("click", () => {
+    void generateFallbackCode();
   });
   window.addEventListener("pagehide", cleanup);
 
@@ -74,6 +86,11 @@ const COPY_RESET_MS = 1_500;
       window.clearTimeout(state.copyResetTimer);
       state.copyResetTimer = null;
     }
+
+    if (state.fallbackCountdownTimer) {
+      window.clearInterval(state.fallbackCountdownTimer);
+      state.fallbackCountdownTimer = null;
+    }
   }
 
   function resetPageState() {
@@ -88,6 +105,14 @@ const COPY_RESET_MS = 1_500;
     elements.qrCopy.disabled = true;
     elements.qrCopy.textContent = "Copy QR payload";
 
+    elements.fallbackCodeCard.classList.add("hidden");
+    elements.fallbackCodeDisplay.classList.add("hidden");
+    elements.fallbackGenerateBtn.classList.add("hidden");
+    elements.fallbackHelper.textContent = "";
+    elements.fallbackError.textContent = "";
+    elements.fallbackError.classList.add("hidden");
+    elements.fallbackCountdown.textContent = "";
+
     elements.recentScansEmpty.classList.add("hidden");
     elements.recentScansError.classList.add("hidden");
     elements.recentScansList.classList.add("hidden");
@@ -96,6 +121,8 @@ const COPY_RESET_MS = 1_500;
     state.recentScans = [];
     state.recentScansLoaded = false;
     state.scanItems = new Map();
+    state.fallbackCode = null;
+    state.fallbackExpiresAt = null;
     draftNotes.clear();
     scanMessages.clear();
     savingScanIds.clear();
@@ -127,6 +154,7 @@ const COPY_RESET_MS = 1_500;
       state.mentor = mentor;
       renderMentorIdentity(mentor);
       renderQrCode(mentor);
+      await loadFallbackCodeState();
       await loadRecentScans({ showLoading: true });
       startPollingRecentScans();
     } catch (error) {
@@ -189,6 +217,139 @@ const COPY_RESET_MS = 1_500;
     state.pollTimer = window.setInterval(() => {
       void loadRecentScans({ showLoading: false });
     }, POLL_INTERVAL_MS);
+  }
+
+  async function loadFallbackCodeState() {
+    if (!state.mentor) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${mentorPath}/api/fallback-code`, {
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = await response.json();
+
+      if (payload.hasActiveCode) {
+        state.fallbackCode = payload.code;
+        state.fallbackExpiresAt = payload.expiresAt;
+        renderFallbackCode(payload.code, payload.expiresAt);
+        startFallbackCountdown();
+      } else {
+        renderFallbackCodeEmpty();
+      }
+    } catch {
+      // Silent fail - fallback is optional.
+    }
+  }
+
+  function renderFallbackCode(code, expiresAt) {
+    elements.fallbackCodeCard.classList.remove("hidden");
+    elements.fallbackCodeDisplay.classList.remove("hidden");
+    elements.fallbackGenerateBtn.classList.add("hidden");
+    elements.fallbackHelper.textContent = "A new code can be generated after this one expires.";
+    elements.fallbackHelper.classList.remove("hidden");
+    elements.fallbackError.classList.add("hidden");
+
+    const codeEl = elements.fallbackCodeDisplay.querySelector(".fallback-code-value");
+    if (codeEl) {
+      codeEl.textContent = code;
+    }
+  }
+
+  function renderFallbackCodeEmpty() {
+    elements.fallbackCodeCard.classList.remove("hidden");
+    elements.fallbackCodeDisplay.classList.add("hidden");
+    elements.fallbackGenerateBtn.classList.remove("hidden");
+    elements.fallbackHelper.textContent = "";
+    elements.fallbackHelper.classList.add("hidden");
+    elements.fallbackError.classList.add("hidden");
+    elements.fallbackCountdown.textContent = "";
+  }
+
+  function startFallbackCountdown() {
+    if (state.fallbackCountdownTimer) {
+      window.clearInterval(state.fallbackCountdownTimer);
+    }
+
+    state.fallbackCountdownTimer = window.setInterval(() => {
+      updateFallbackCountdown();
+    }, 1000);
+  }
+
+  function updateFallbackCountdown() {
+    if (!state.fallbackExpiresAt) {
+      return;
+    }
+
+    const expires = new Date(state.fallbackExpiresAt).getTime();
+    const now = Date.now();
+    const remaining = Math.max(0, Math.floor((expires - now) / 1000));
+
+    if (remaining <= 0) {
+      if (state.fallbackCountdownTimer) {
+        window.clearInterval(state.fallbackCountdownTimer);
+        state.fallbackCountdownTimer = null;
+      }
+
+      void loadFallbackCodeState();
+      return;
+    }
+
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    elements.fallbackCountdown.textContent = `${minutes}m ${seconds}s remaining`;
+  }
+
+  async function generateFallbackCode() {
+    if (!state.mentor) {
+      return;
+    }
+
+    elements.fallbackGenerateBtn.disabled = true;
+    elements.fallbackGenerateBtn.textContent = "Generating…";
+    elements.fallbackError.classList.add("hidden");
+
+    try {
+      const response = await fetch(`${mentorPath}/api/fallback-code`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          elements.fallbackError.textContent = "Active fallback code already exists.";
+          elements.fallbackError.classList.remove("hidden");
+          elements.fallbackGenerateBtn.disabled = false;
+          elements.fallbackGenerateBtn.textContent = "Generate one-time code";
+          return;
+        }
+
+        throw new Error(await getResponseErrorMessage(response, `Generate failed with status ${response.status}.`));
+      }
+
+      const payload = await response.json();
+
+      state.fallbackCode = payload.code;
+      state.fallbackExpiresAt = payload.expiresAt;
+      renderFallbackCode(payload.code, payload.expiresAt);
+      startFallbackCountdown();
+    } catch (error) {
+      elements.fallbackError.textContent = error instanceof Error ? error.message : "Failed to generate code.";
+      elements.fallbackError.classList.remove("hidden");
+      elements.fallbackGenerateBtn.disabled = false;
+      elements.fallbackGenerateBtn.textContent = "Generate one-time code";
+    }
   }
 
   function normalizeMentor(payload) {

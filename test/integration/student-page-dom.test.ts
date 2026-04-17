@@ -44,11 +44,52 @@ describe("student page DOM contract", () => {
       "history-empty",
       "history-list",
       "retry-button",
-      "history-retry-button"
+      "history-retry-button",
+      "fallback-reveal-btn",
+      "fallback-form",
+      "fallback-code-input",
+      "fallback-submit-btn",
+      "fallback-cancel-btn",
     ];
 
     for (const id of requiredIds) {
       expect(studentPageHtml).toContain(`id="${id}"`);
     }
+  });
+
+  describe("fallback code entry", () => {
+    it("has a fallback reveal button below the scanner controls", () => {
+      const revealBtnIndex = studentPageHtml.indexOf('id="fallback-reveal-btn"');
+      const scannerHintIndex = studentPageHtml.indexOf('scanner-hint');
+
+      expect(revealBtnIndex).toBeGreaterThan(-1);
+      expect(revealBtnIndex).toBeGreaterThan(scannerHintIndex);
+    });
+
+    it("has a hidden fallback form with input, submit, and cancel elements", () => {
+      expect(studentPageHtml).toContain('id="fallback-form"');
+      expect(studentPageHtml).toContain('id="fallback-code-input"');
+      expect(studentPageHtml).toContain('id="fallback-submit-btn"');
+      expect(studentPageHtml).toContain('id="fallback-cancel-btn"');
+
+      // Form should be hidden by default
+      const formClassIndex = studentPageHtml.indexOf('id="fallback-form"');
+      const hiddenClassBeforeClose = studentPageHtml.lastIndexOf('hidden', formClassIndex + 20);
+      const formOpenTag = studentPageHtml.indexOf('>', formClassIndex);
+      expect(hiddenClassBeforeClose).toBeGreaterThan(-1);
+      expect(hiddenClassBeforeClose).toBeLessThan(formOpenTag);
+    });
+
+    it("has helper copy explaining the one-time code expiry", () => {
+      expect(studentPageHtml).toMatch(/expires in 5 minutes/i);
+    });
+
+    it("does not auto-expand the fallback form on page load", () => {
+      // The fallback form should have the hidden class and not have it removed
+      // by any auto-behavior scripts in the HTML
+      const fallbackFormMatch = studentPageHtml.match(/id="fallback-form"[^>]*class="([^"]*)"/);
+      expect(fallbackFormMatch).not.toBeNull();
+      expect(fallbackFormMatch![1]).toContain('hidden');
+    });
   });
 });

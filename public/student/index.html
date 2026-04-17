@@ -51,6 +51,7 @@
             <p class="scanner-placeholder-copy" id="scanner-placeholder-copy">
               Your student identity must load before the camera can start.
             </p>
+            <p class="scanner-status" id="scanner-status"></p>
           </div>
         </div>
 
@@ -61,6 +62,34 @@
           <p class="scanner-hint">
             Scan your mentor's QR code
           </p>
+          <button type="button" class="fallback-reveal-btn" id="fallback-reveal-btn">
+            Camera not working? Use one-time code
+          </button>
+        </div>
+
+        <div id="fallback-form" class="fallback-form hidden">
+          <p class="fallback-copy">
+            Ask your mentor to generate a one-time code. It expires in 5 minutes.
+          </p>
+          <div class="fallback-input-row">
+            <input
+              type="text"
+              id="fallback-code-input"
+              class="fallback-code-input"
+              inputmode="numeric"
+              pattern="[0-9 ]*"
+              maxlength="11"
+              placeholder="8-digit code"
+              autocomplete="off"
+              aria-label="Enter the 8-digit one-time code from your mentor"
+            />
+            <button type="button" class="button fallback-submit-btn" id="fallback-submit-btn">
+              Submit
+            </button>
+          </div>
+          <button type="button" class="fallback-cancel-btn" id="fallback-cancel-btn">
+            Cancel
+          </button>
         </div>
 
         <div id="scanner-feedback" class="scan-feedback hidden" aria-live="polite">
@@ -71,6 +100,8 @@
 
       <article class="card history-card">
         <h2 class="card-label">History</h2>
+
+        <div id="history-loading" class="muted-block">Loading mentor history…</div>
 
         <div id="history-error" class="error-panel hidden" role="alert">
           <p class="error-title">We could not load today’s mentor history.</p>

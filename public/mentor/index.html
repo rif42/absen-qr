@@ -37,12 +37,28 @@
         </div>
       </article>
 
-      <article class="card qr-card">
+<article class="card qr-card">
         <h2>Mentor QR code</h2>
 
 <div id="qr-display" class="qr-display hidden" role="img" aria-label="Mentor QR code"></div>
 
         <button type="button" class="button qr-copy-button hidden" id="qr-copy">Copy QR payload</button>
+      </article>
+
+      <article class="card fallback-card hidden" id="fallback-code-card">
+        <h2>Fallback code</h2>
+
+        <div id="fallback-code-display" class="fallback-code-display hidden">
+          <p class="fallback-code-value"></p>
+          <p class="fallback-countdown" id="fallback-countdown"></p>
+        </div>
+
+        <button type="button" class="button fallback-generate-button" id="fallback-generate-btn">
+          Generate one-time code
+        </button>
+
+        <p class="fallback-helper" id="fallback-helper"></p>
+        <p class="fallback-error" id="fallback-error"></p>
       </article>
 
       <article class="card recent-scans-card">
