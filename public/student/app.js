@@ -30,6 +30,25 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     historyRetryButton: document.getElementById('history-retry-button'),
   };
 
+  function isDevHostname(hostname) {
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1') {
+      return true;
+    }
+    const parts = hostname.split('.');
+    if (parts.length === 4) {
+      const octets = parts.map(Number);
+      if (octets.every(n => !isNaN(n) && n >= 0 && n <= 255)) {
+        // 10.x.x.x
+        if (octets[0] === 10) return true;
+        // 172.16-31.x.x
+        if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
+        // 192.168.x.x
+        if (octets[0] === 192 && octets[1] === 168) return true;
+      }
+    }
+    return false;
+  }
+
   const studentPath = getStudentPath();
   let qrScanner = null;
   let scannerAvailability = 'unknown';
@@ -247,7 +266,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       return;
     }
 
-    if (!window.isSecureContext) {
+    if (!window.isSecureContext && !isDevHostname(location.hostname)) {
       setScannerUnavailable('Camera scanning requires HTTPS or localhost. Open the page in a secure context to continue.', true);
       return;
     }
