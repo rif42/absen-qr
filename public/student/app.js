@@ -433,10 +433,14 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       setScanFeedback(
         'success',
         'Scan recorded',
-        'Your mentor scan was accepted. Refreshing today’s history now.'
+        'Your mentor scan was accepted. Refreshing today\'s history now.'
       );
 
       await loadHistory();
+
+      // Show dialog on successful scan
+      alert('SCAN SUCCESSFUL! ' + (responseBody.mentor?.displayName || 'Mentor'));
+
       setPageStatus('success', 'Mentor scan recorded. Today’s history has been refreshed.');
       setScannerStopped('Scanner stopped. Tap Start scanner to scan another mentor QR code.', 'Start scanner', false);
     } catch (error) {
@@ -633,6 +637,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       );
 
       await loadHistory();
+
+      // Show dialog on successful scan
+      alert('SCAN SUCCESSFUL! ' + (responseBody.scan?.mentorName || 'Mentor'));
       hideFallbackForm();
       await stopScanner(true);
       setPageStatus('success', 'Mentor scan recorded. Today\u2019s history has been refreshed.');
