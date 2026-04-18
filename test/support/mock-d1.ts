@@ -19,6 +19,7 @@ type MockState = {
   fallback_codes: MentorFallbackCodeRecord[];
   mentor_fallback_codes: MentorFallbackCodeRecord[];
   insertScanRecordErrorMessage: string | null;
+  missingScanRecordsEntryMethodColumn: boolean;
 };
 
 type MockScanRecordSeed = Omit<ScanRecord, "entry_method"> & Partial<Pick<ScanRecord, "entry_method">>;
@@ -47,6 +48,7 @@ type MockStateSeed = {
   fallback_codes?: MockFallbackCodeSeed[];
   mentor_fallback_codes?: MockFallbackCodeSeed[];
   insertScanRecordErrorMessage?: string | null;
+  missingScanRecordsEntryMethodColumn?: boolean;
 };
 
 type MockD1Database = D1Database & {
@@ -91,7 +93,8 @@ function cloneState(seed?: Partial<MockStateSeed>): MockState {
     scanRecords: (seed?.scanRecords ?? []).map(cloneScanRecord),
     fallback_codes: fallbackCodes,
     mentor_fallback_codes: fallbackCodes,
-    insertScanRecordErrorMessage: seed?.insertScanRecordErrorMessage ?? null
+    insertScanRecordErrorMessage: seed?.insertScanRecordErrorMessage ?? null,
+    missingScanRecordsEntryMethodColumn: seed?.missingScanRecordsEntryMethodColumn ?? false
   };
 }
 
@@ -470,6 +473,14 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
           throw new Error(`Unsupported first() SQL in mock D1: ${sql}`);
         },
         async all<T>(): Promise<QueryResult<T>> {
+          if (
+            state.missingScanRecordsEntryMethodColumn &&
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("scan_records.entry_method")
+          ) {
+            throw new Error("D1_ERROR: no such column: scan_records.entry_method");
+          }
+
           if (
             normalizedSql.includes("from people") &&
             normalizedSql.includes("where role = ?1") &&

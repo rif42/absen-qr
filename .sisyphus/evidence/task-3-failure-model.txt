@@ -1,0 +1,5 @@
+Remote repro: GET /admin/admin-secret-2026/api/records?startDate=2026-04-17&endDate=2026-04-19 returns HTTP 500 / Cloudflare 1101.
+Remote schema: PRAGMA table_info(scan_records) shows scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at; entry_method absent.
+Remote migrations: wrangler d1 migrations list absen-qr --remote shows 0002_backfill_event_dates.sql and 0003_fallback_codes.sql unapplied.
+Failure model: /admin/{secret}/api/records calls getAdminRecordsPayload() -> listAdminRecords(), whose SELECT references scan_records.entry_method. On legacy remote schema this throws no such column: scan_records.entry_method before JSON response generation.
+Regression target: test/integration/admin-api.test.ts; route-level test proving explicit ranged /records still returns 200 and defaults entryMethod to qr when scan_records.entry_method is missing remotely.

@@ -1,11 +1,12 @@
-# Graph Report - .  (2026-04-17)
+# Graph Report - .  (2026-04-18)
 
 ## Corpus Check
-- Corpus is ~48,501 words - fits in a single context window. You may not need a graph.
+- 44 files · ~55,293 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 344 nodes · 687 edges · 34 communities detected
-- Extraction: 79% EXTRACTED · 21% INFERRED · 0% AMBIGUOUS · INFERRED: 144 edges (avg confidence: 0.8)
+- 376 nodes · 765 edges · 34 communities detected
+- Extraction: 79% EXTRACTED · 21% INFERRED · 0% AMBIGUOUS · INFERRED: 161 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -46,23 +47,23 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `e` - 37 edges
-2. `json()` - 25 edges
+2. `json()` - 28 edges
 3. `handleAdminApi()` - 21 edges
-4. `handleStudentApi()` - 16 edges
-5. `loadRecords()` - 14 edges
-6. `startScanner()` - 13 edges
-7. `handleMentorApi()` - 13 edges
-8. `loadMentorIdentity()` - 11 edges
+4. `handleStudentApi()` - 19 edges
+5. `handleMentorApi()` - 18 edges
+6. `loadRecords()` - 14 edges
+7. `startScanner()` - 13 edges
+8. `loadMentorIdentity()` - 12 edges
 9. `loadIdentity()` - 11 edges
 10. `handleScanDecoded()` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `handleAdminApi()` --calls--> `listAdminExportRows()`  [INFERRED]
-  src\worker\routes\admin.ts → src\worker\db\admin-records.ts
-- `expectLatestAdminRecord()` --calls--> `json()`  [INFERRED]
-  test\integration\admin-api.test.ts → src\worker\services\http.ts
-- `Student Page Full UI` --references--> `Student Role`  [EXTRACTED]
-  student-page-full.png → README.md
+- `listAdminExportRows()` --calls--> `handleAdminApi()`  [INFERRED]
+  src\worker\db\admin-records.ts → src\worker\routes\admin.ts
+- `json()` --calls--> `expectLatestAdminRecord()`  [INFERRED]
+  src\worker\services\http.ts → test\integration\admin-api.test.ts
+- `Student Role` --references--> `Student Page Full UI`  [EXTRACTED]
+  README.md → student-page-full.png
 - `Mobile-First Student Design` --rationale_for--> `Student Page Mobile UI`  [INFERRED]
   AGENTS.md → student-mobile-redesign.png
 - `Sequential Student Flow` --rationale_for--> `Student Page Mobile UI`  [INFERRED]
@@ -76,48 +77,48 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (33): handleAdminApi(), handleAdminPage(), isAuthorizedAdminSecret(), isPatchPayloadRecord(), parseAdminRecordPatchPayload(), resolveAdminDateRange(), serializeAdminExportCsv(), getConfiguredEventDate() (+25 more)
+Cohesion: 0.07
+Nodes (38): handleAdminApi(), handleAdminPage(), isAuthorizedAdminSecret(), isPatchPayloadRecord(), parseAdminRecordPatchPayload(), resolveAdminDateRange(), serializeAdminExportCsv(), getConfiguredEventDate() (+30 more)
 
 ### Community 1 - "Community 1"
+Cohesion: 0.12
+Nodes (30): FakeElement, buildDateRangeSearch(), buildExportUrl(), buildPatchPayload(), buildRecordsUrl(), createRecentScanItem(), createRecordRow(), deleteRecord() (+22 more)
+
+### Community 2 - "Community 2"
+Cohesion: 0.14
+Nodes (32): applyRecentScanItemState(), cleanup(), findRecentScan(), formatTimestamp(), generateFallbackCode(), getResponseErrorMessage(), hideScanFeedback(), loadFallbackCodeState() (+24 more)
+
+### Community 3 - "Community 3"
 Cohesion: 0.11
 Nodes (1): e
 
-### Community 2 - "Community 2"
+### Community 4 - "Community 4"
 Cohesion: 0.15
-Nodes (27): applyRecentScanItemState(), cleanup(), findRecentScan(), formatTimestamp(), getResponseErrorMessage(), hideScanFeedback(), loadHistory(), loadIdentity() (+19 more)
+Nodes (34): buildFallbackError(), buildScanError(), createScanError(), destroyScanner(), getPayloadMessage(), handleScanDecoded(), handleScanDecodeError(), hideFallbackForm() (+26 more)
 
-### Community 3 - "Community 3"
+### Community 5 - "Community 5"
 Cohesion: 0.07
 Nodes (33): Absen QR System, Admin APIs, Admin Page UI, Admin Role, Cloudflare Workers + D1, CSV Export, Duplicate Scan Prevention, Implementation Plan v1 (+25 more)
 
-### Community 4 - "Community 4"
-Cohesion: 0.2
-Nodes (28): buildScanError(), createScanError(), destroyScanner(), getPayloadMessage(), handleScanDecoded(), handleScanDecodeError(), isCameraUnavailableError(), isPermissionDeniedError() (+20 more)
-
-### Community 5 - "Community 5"
-Cohesion: 0.13
-Nodes (25): buildApplySql(), buildArtifact(), buildCanonicalRoster(), buildProductionLink(), countTokenChanges(), createPersonIdentity(), defaultRunCommand(), executeLoggedCommand() (+17 more)
-
 ### Community 6 - "Community 6"
-Cohesion: 0.18
-Nodes (25): buildDateRangeSearch(), buildExportUrl(), buildPatchPayload(), buildRecordsUrl(), deleteRecord(), handleApplyFilters(), handleExport(), isEventDate() (+17 more)
+Cohesion: 0.13
+Nodes (26): buildApplySql(), buildArtifact(), buildCanonicalRoster(), buildProductionLink(), countTokenChanges(), createPersonIdentity(), defaultRunCommand(), executeLoggedCommand() (+18 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.13
-Nodes (9): createAdminDom(), createDocument(), FakeClassList, FakeElement, loadAdminPageApp(), createRecentScanItem(), createRecordRow(), populateSelect() (+1 more)
+Nodes (17): createAdminMockDatabase(), createAdminMockDatabase(), applyAdminScanRecordUpdate(), applyFallbackCodeUpdate(), buildAdminJoinedRow(), cloneFallbackCode(), cloneFallbackCodeState(), cloneState() (+9 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.15
-Nodes (11): createAdminMockDatabase(), createAdminMockDatabase(), applyAdminScanRecordUpdate(), buildAdminJoinedRow(), cloneState(), createMockD1Database(), createStatement(), extractPlaceholderIndex() (+3 more)
+Cohesion: 0.21
+Nodes (14): buildAdminRecordSelectQuery(), deleteAdminRecord(), findAdminRecordById(), getAdminRecordsPayload(), isMissingScanRecordsEntryMethodColumnError(), listAdminExportRows(), listAdminMentorOptions(), listAdminRecords() (+6 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.24
-Nodes (10): deleteAdminRecord(), findAdminRecordById(), getAdminRecordsPayload(), listAdminExportRows(), listAdminMentorOptions(), listAdminRecords(), listAdminStudentOptions(), mapAdminRecord() (+2 more)
-
-### Community 10 - "Community 10"
 Cohesion: 0.21
 Nodes (6): createAssetFetcher(), createEnv(), expectLatestAdminRecord(), expectRecordsAndExportToBeEmpty(), expectRecordsAndExportToReflectLatestValues(), fetchAdminApi()
+
+### Community 10 - "Community 10"
+Cohesion: 0.24
+Nodes (4): createAdminDom(), createDocument(), FakeClassList, loadAdminPageApp()
 
 ### Community 11 - "Community 11"
 Cohesion: 0.33
@@ -252,3 +253,21 @@ Nodes (1): Phase 5 Hardening
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 33`** (1 nodes): `Phase 5 Hardening`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+
+## Suggested Questions
+_Questions this graph is uniquely positioned to answer:_
+
+- **Why does `json()` connect `Community 0` to `Community 1`, `Community 2`, `Community 4`, `Community 9`?**
+  _High betweenness centrality (0.275) - this node is a cross-community bridge._
+- **Why does `handleStudentApi()` connect `Community 0` to `Community 7`?**
+  _High betweenness centrality (0.150) - this node is a cross-community bridge._
+- **Why does `handleMentorApi()` connect `Community 0` to `Community 6`?**
+  _High betweenness centrality (0.150) - this node is a cross-community bridge._
+- **Are the 19 inferred relationships involving `json()` (e.g. with `loadRecords()` and `saveRecord()`) actually correct?**
+  _`json()` has 19 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 16 inferred relationships involving `handleAdminApi()` (e.g. with `forbidden()` and `methodNotAllowed()`) actually correct?**
+  _`handleAdminApi()` has 16 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 17 inferred relationships involving `handleStudentApi()` (e.g. with `methodNotAllowed()` and `findPersonBySecretToken()`) actually correct?**
+  _`handleStudentApi()` has 17 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 17 inferred relationships involving `handleMentorApi()` (e.g. with `methodNotAllowed()` and `findPersonBySecretToken()`) actually correct?**
+  _`handleMentorApi()` has 17 INFERRED edges - model-reasoned connections that need verification._

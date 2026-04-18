@@ -98,6 +98,76 @@ function mapAdminExportRow(row: AdminExportRowRecord): AdminExportRow {
   };
 }
 
+function isMissingScanRecordsEntryMethodColumnError(error: unknown): boolean {
+  return error instanceof Error && /no such column:\s*(?:scan_records\.)?entry_method/i.test(error.message);
+}
+
+function buildAdminRecordSelectQuery(entryMethodExpression: string, whereClause: string, orderClause: string): string {
+  return `
+        SELECT
+          scan_records.scan_id,
+          scan_records.student_id,
+          student.display_name AS student_name,
+          student.secret_id AS student_secret_id,
+          scan_records.mentor_id,
+          mentor.display_name AS mentor_name,
+          scan_records.event_date,
+          scan_records.scanned_at,
+          ${entryMethodExpression} AS entry_method,
+          scan_records.notes,
+          scan_records.updated_at
+        FROM scan_records
+        JOIN people AS student
+          ON student.person_id = scan_records.student_id
+         AND student.role = 'student'
+        JOIN people AS mentor
+          ON mentor.person_id = scan_records.mentor_id
+         AND mentor.role = 'mentor'
+        ${whereClause}
+        ${orderClause}
+      `;
+}
+
+async function queryAdminRecords(
+  db: D1Database,
+  startDate: string,
+  endDate: string,
+  entryMethodExpression: string
+): Promise<AdminRecord[]> {
+  const result = await db
+    .prepare(
+      buildAdminRecordSelectQuery(
+        entryMethodExpression,
+        `WHERE scan_records.event_date >= ?1
+          AND scan_records.event_date <= ?2`,
+        `ORDER BY scan_records.scanned_at DESC, scan_records.scan_id DESC`
+      )
+    )
+    .bind(startDate, endDate)
+    .all<AdminRecordRow>();
+
+  return result.results.map(mapAdminRecord);
+}
+
+async function queryAdminRecordById(
+  db: D1Database,
+  scanId: string,
+  entryMethodExpression: string
+): Promise<AdminRecord | null> {
+  const result = await db
+    .prepare(
+      buildAdminRecordSelectQuery(
+        entryMethodExpression,
+        `WHERE scan_records.scan_id = ?1`,
+        `LIMIT 1`
+      )
+    )
+    .bind(scanId)
+    .first<AdminRecordRow>();
+
+  return result ? mapAdminRecord(result) : null;
+}
+
 export async function listAdminStudentOptions(db: D1Database): Promise<AdminPersonOption[]> {
   const students = await listPeopleByRole(db, "student");
   return students.map(mapAdminPersonOption);
@@ -113,70 +183,27 @@ export async function listAdminRecords(
   startDate: string,
   endDate = startDate
 ): Promise<AdminRecord[]> {
-  const result = await db
-    .prepare(
-      `
-        SELECT
-          scan_records.scan_id,
-          scan_records.student_id,
-          student.display_name AS student_name,
-          student.secret_id AS student_secret_id,
-          scan_records.mentor_id,
-          mentor.display_name AS mentor_name,
-          scan_records.event_date,
-          scan_records.scanned_at,
-          scan_records.entry_method,
-          scan_records.notes,
-          scan_records.updated_at
-        FROM scan_records
-        JOIN people AS student
-          ON student.person_id = scan_records.student_id
-         AND student.role = 'student'
-        JOIN people AS mentor
-          ON mentor.person_id = scan_records.mentor_id
-         AND mentor.role = 'mentor'
-        WHERE scan_records.event_date >= ?1
-          AND scan_records.event_date <= ?2
-        ORDER BY scan_records.scanned_at DESC, scan_records.scan_id DESC
-      `
-    )
-    .bind(startDate, endDate)
-    .all<AdminRecordRow>();
+  try {
+    return await queryAdminRecords(db, startDate, endDate, "scan_records.entry_method");
+  } catch (error) {
+    if (!isMissingScanRecordsEntryMethodColumnError(error)) {
+      throw error;
+    }
 
-  return result.results.map(mapAdminRecord);
+    return queryAdminRecords(db, startDate, endDate, "'qr'");
+  }
 }
 
 export async function findAdminRecordById(db: D1Database, scanId: string): Promise<AdminRecord | null> {
-  const result = await db
-    .prepare(
-      `
-        SELECT
-          scan_records.scan_id,
-          scan_records.student_id,
-          student.display_name AS student_name,
-          student.secret_id AS student_secret_id,
-          scan_records.mentor_id,
-          mentor.display_name AS mentor_name,
-          scan_records.event_date,
-          scan_records.scanned_at,
-          scan_records.entry_method,
-          scan_records.notes,
-          scan_records.updated_at
-        FROM scan_records
-        JOIN people AS student
-          ON student.person_id = scan_records.student_id
-         AND student.role = 'student'
-        JOIN people AS mentor
-          ON mentor.person_id = scan_records.mentor_id
-         AND mentor.role = 'mentor'
-        WHERE scan_records.scan_id = ?1
-        LIMIT 1
-      `
-    )
-    .bind(scanId)
-    .first<AdminRecordRow>();
+  try {
+    return await queryAdminRecordById(db, scanId, "scan_records.entry_method");
+  } catch (error) {
+    if (!isMissingScanRecordsEntryMethodColumnError(error)) {
+      throw error;
+    }
 
-  return result ? mapAdminRecord(result) : null;
+    return queryAdminRecordById(db, scanId, "'qr'");
+  }
 }
 
 export async function updateAdminRecord(db: D1Database, input: UpdateAdminRecordInput): Promise<AdminRecord | null> {

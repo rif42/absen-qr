@@ -316,6 +316,48 @@ describe("admin API", () => {
     );
   });
 
+  it("returns ranged admin records when scan_records.entry_method is missing remotely", async () => {
+    const startDate = "2026-01-14";
+    const endDate = configuredEventDate;
+    const database = createMockD1Database({
+      missingScanRecordsEntryMethodColumn: true,
+      scanRecords: [
+        {
+          scan_id: "scan-legacy-range",
+          student_id: student1.person_id,
+          mentor_id: mentor1.person_id,
+          event_date: endDate,
+          scanned_at: `${endDate}T08:00:00.000Z`,
+          notes: "Legacy schema record",
+          updated_at: `${endDate}T08:05:00.000Z`
+        }
+      ]
+    });
+    const env = createEnv(database);
+
+    const response = await fetchAdminApi(`/records?startDate=${startDate}&endDate=${endDate}`, undefined, env);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      dateFilter: {
+        startDate,
+        endDate
+      },
+      records: [
+        {
+          scanId: "scan-legacy-range",
+          studentId: student1.person_id,
+          mentorId: mentor1.person_id,
+          eventDate: endDate,
+          notes: "Legacy schema record",
+          entryMethod: "qr"
+        }
+      ],
+      students: studentOptions(),
+      mentors: mentorOptions()
+    });
+  });
+
   it("falls back to the current UTC day when the admin range is partial, malformed, or reversed", async () => {
     const database = createMockD1Database({
       scanRecords: [
