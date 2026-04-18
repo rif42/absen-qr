@@ -1,2 +1,0 @@
-Command failed: node ./scripts/import-users.mjs --csv .sisyphus/evidence/task-2-invalid-fixture.csv --base-url https://absen-qr.rif42.workers.dev --dry-run --output .sisyphus/evidence/task-2-invalid-out.json
-Quote Not Closed: the parsing is finished with an opening quote at line 4
