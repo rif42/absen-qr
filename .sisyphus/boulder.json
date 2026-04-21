@@ -1,8 +1,8 @@
 {
-  "active_plan": null,
-  "started_at": null,
+  "active_plan": "D:/work/absen-qr/.sisyphus/plans/show-teacher-notes.md",
+  "started_at": "2026-04-21T08:58:00Z",
   "session_ids": [],
-  "plan_name": null,
+  "plan_name": "show-teacher-notes",
   "session_origins": {},
   "task_sessions": {}
 }

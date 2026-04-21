@@ -329,6 +329,14 @@ body {
   line-height: 1.5;
 }
 
+.history-notes {
+  color: var(--muted);
+  font-style: italic;
+  word-break: break-word;
+  margin-top: 4px;
+  font-size: 0.85em;
+}
+
 .hidden {
   display: none !important;
 }

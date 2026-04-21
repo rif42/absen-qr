@@ -57,6 +57,8 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   let scannerProcessing = false;
   let scanHandled = false;
   let studentReady = false;
+  let historyPollTimer = null;
+  let historyLoading = false;
 
   if (!studentPath) {
     showIdentityError('Invalid student link. Open this page from a /student/:secretToken URL.');
@@ -69,7 +71,17 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   elements.fallbackRevealBtn.addEventListener('click', showFallbackForm);
   elements.fallbackCancelBtn.addEventListener('click', hideFallbackForm);
   elements.fallbackSubmitBtn.addEventListener('click', submitFallbackCode);
-  window.addEventListener('pagehide', destroyScanner);
+  window.addEventListener('pagehide', () => {
+    stopHistoryPoll();
+    destroyScanner();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopHistoryPoll();
+    } else {
+      startHistoryPoll();
+    }
+  });
   loadIdentity();
 
   function getStudentPath() {
@@ -120,6 +132,11 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   async function loadHistory() {
+    if (historyLoading) {
+      return;
+    }
+    historyLoading = true;
+
     elements.historyError.classList.add('hidden');
     elements.historyEmpty.classList.add('hidden');
     elements.historyList.classList.add('hidden');
@@ -139,6 +156,28 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       renderHistorySuccess(normalizeHistory(payload));
     } catch (error) {
       showHistoryError(error instanceof Error ? error.message : 'History request failed.');
+    } finally {
+      historyLoading = false;
+    }
+  }
+
+  function startHistoryPoll() {
+    if (historyPollTimer) {
+      return;
+    }
+    historyPollTimer = setInterval(async () => {
+      try {
+        await loadHistory();
+      } catch (_e) {
+        // Swallow poll errors silently
+      }
+    }, 10000);
+  }
+
+  function stopHistoryPoll() {
+    if (historyPollTimer) {
+      clearInterval(historyPollTimer);
+      historyPollTimer = null;
     }
   }
 
@@ -176,6 +215,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       mentorName:
         entry.mentorName || entry.mentor_name || entry.displayName || entry.display_name || entry.name || 'Mentor',
       scannedAt: entry.scannedAt || entry.scanned_at || entry.updatedAt || entry.updated_at || '',
+      notes: entry.notes || '',
     }));
   }
 
@@ -221,12 +261,22 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
           ? `Scanned at ${formatTimestamp(entry.scannedAt)}`
           : 'Recorded for this event day.';
 
-        item.append(mentorName, meta);
+        const children = [mentorName, meta];
+
+        if (entry.notes) {
+          const notesSpan = document.createElement('span');
+          notesSpan.className = 'history-notes';
+          notesSpan.textContent = entry.notes;
+          children.push(notesSpan);
+        }
+
+        item.append(...children);
         return item;
       })
     );
     elements.status.textContent = 'Identity and history loaded.';
     elements.status.className = 'status status-success';
+    startHistoryPoll();
   }
 
   function showIdentityError(message) {
