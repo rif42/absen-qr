@@ -13,7 +13,8 @@
 <body>
   <main class="shell">
     <header class="page-header" aria-labelledby="page-title">
-      <h1 id="page-title">Student Attendance</h1>
+      <h2 id="page-title">Student Attendance</h2>
+      <img src="../apu.webp" style="width: 50px;" />
     </header>
 
     <div class="status status-loading" id="status-banner" role="status" aria-live="polite" style="margin-bottom: 20px;">
@@ -41,7 +42,8 @@
 
       <article class="card scanner-card">
         <h2 class="card-label">Camera scanner</h2>
-        <button type="button" id="scanner-permission-retry-button" class="button scanner-permission-retry-button hidden">
+        <button type="button" id="scanner-permission-retry-button"
+          class="button scanner-permission-retry-button hidden">
           Retry camera permission
         </button>
 
@@ -75,17 +77,9 @@
             Ask your mentor to generate a one-time code. It expires in 5 minutes.
           </p>
           <div class="fallback-input-row">
-            <input
-              type="text"
-              id="fallback-code-input"
-              class="fallback-code-input"
-              inputmode="numeric"
-              pattern="[0-9 ]*"
-              maxlength="11"
-              placeholder="8-digit code"
-              autocomplete="off"
-              aria-label="Enter the 8-digit one-time code from your mentor"
-            />
+            <input type="text" id="fallback-code-input" class="fallback-code-input" inputmode="numeric"
+              pattern="[0-9 ]*" maxlength="11" placeholder="8-digit code" autocomplete="off"
+              aria-label="Enter the 8-digit one-time code from your mentor" />
             <button type="button" class="button fallback-submit-btn" id="fallback-submit-btn">
               Submit
             </button>
