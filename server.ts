@@ -52,6 +52,7 @@ const localEnv = {
 
 export default {
   port: process.env.PORT || 3042,
+  hostname: "0.0.0.0",
   async fetch(req: Request) {
     try {
       const start = Date.now();

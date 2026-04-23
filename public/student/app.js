@@ -59,6 +59,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   let studentReady = false;
   let historyPollTimer = null;
   let historyLoading = false;
+  let previousHistory = [];
 
   if (!studentPath) {
     showIdentityError('Invalid student link. Open this page from a /student/:secretToken URL.');
@@ -82,6 +83,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       startHistoryPoll();
     }
   });
+  requestNotificationPermission();
   loadIdentity();
 
   function getStudentPath() {
@@ -153,7 +155,13 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       }
 
       const payload = await response.json();
-      renderHistorySuccess(normalizeHistory(payload));
+      const normalized = normalizeHistory(payload);
+      const newNotes = detectNewNotes(previousHistory, normalized);
+      for (const entry of newNotes) {
+        showNoteNotification(entry.mentorName, entry.notes);
+      }
+      previousHistory = normalized;
+      renderHistorySuccess(normalized);
     } catch (error) {
       showHistoryError(error instanceof Error ? error.message : 'History request failed.');
     } finally {
@@ -299,6 +307,38 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     elements.historyError.classList.remove('hidden');
     elements.status.textContent = 'Identity loaded, but mentor history could not be loaded.';
     elements.status.className = 'status status-error';
+  }
+
+  function showNoteNotification(mentorName, notes) {
+    if (window.Notification && Notification.permission === 'granted') {
+      new Notification(`Note from ${mentorName}`, {
+        body: notes,
+        icon: '/favicon.ico',
+      });
+    } else {
+      alert(`New note from ${mentorName}:\n\n${notes}`);
+    }
+  }
+
+  function detectNewNotes(previous, current) {
+    const previousMap = new Map(previous.map((e) => [e.scannedAt + e.mentorName, e.notes]));
+    const newNotes = [];
+    for (const entry of current) {
+      const key = entry.scannedAt + entry.mentorName;
+      const prevNotes = previousMap.get(key);
+      if (entry.notes && prevNotes !== entry.notes) {
+        newNotes.push(entry);
+      }
+    }
+    return newNotes;
+  }
+
+  async function requestNotificationPermission() {
+    if (window.Notification && Notification.permission === 'default') {
+      try {
+        await Notification.requestPermission();
+      } catch (_e) { }
+    }
   }
 
   function setState(state) {
