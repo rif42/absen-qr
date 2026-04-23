@@ -1,0 +1,5 @@
+- : The DOM/runtime contract is still red until task 2 adds the dedicated scanner-permission-retry-button markup and wires it into the student scanner UI.
+- : The focused runtime harness now reaches real state assertions, but it still depends on production wiring that is intentionally out of scope for this task.
+- 2026-04-23 06:25 UTC: The DOM/runtime contract is still red until task 2 adds the dedicated scanner-permission-retry-button markup and wires it into the student scanner UI.
+- 2026-04-23 06:25 UTC: The focused runtime harness now reaches real state assertions, but it still depends on production wiring that is intentionally out of scope for this task.
+- 2026-04-23 06:45 UTC: The scanner permission CTA must stay hidden in loading, starting, scanning, processing, stopped, unavailable, locked, and generic error states; only the permission-denied path should reveal it.

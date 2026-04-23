@@ -38,6 +38,7 @@ describe("student page DOM contract", () => {
       "scanner-feedback-title",
       "scanner-feedback-copy",
       "scanner-toggle-button",
+      "scanner-permission-retry-button",
       "history-loading",
       "history-error",
       "history-error-message",
@@ -55,6 +56,21 @@ describe("student page DOM contract", () => {
     for (const id of requiredIds) {
       expect(studentPageHtml).toContain(`id="${id}"`);
     }
+  });
+
+  it("places the dedicated camera permission retry button between the scanner heading and stage", () => {
+    const headingIndex = studentPageHtml.indexOf('<h2 class="card-label">Camera scanner</h2>');
+    const retryButtonIndex = studentPageHtml.indexOf('id="scanner-permission-retry-button"');
+    const stageIndex = studentPageHtml.indexOf('id="scanner-stage"');
+
+    expect(headingIndex).toBeGreaterThan(-1);
+    expect(retryButtonIndex).toBeGreaterThan(-1);
+    expect(stageIndex).toBeGreaterThan(-1);
+    expect(retryButtonIndex).toBeGreaterThan(headingIndex);
+    expect(retryButtonIndex).toBeLessThan(stageIndex);
+    expect(studentPageHtml).toMatch(
+      /<button[^>]*id="scanner-permission-retry-button"[^>]*class="[^"]*hidden[^"]*"[^>]*>\s*Retry camera permission\s*<\/button>/i
+    );
   });
 
   describe("fallback code entry", () => {

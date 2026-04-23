@@ -1,0 +1,5 @@
+- : Reworked the student runtime test to eval public/student/app.js from source instead of importing it directly, because Vitest/Vite blocks public-asset imports before the assertions run.
+- : setScannerPermissionDenied() keeps the scanner in a ready state; the retry CTA must re-enter startScanner() and stay hidden in normal scanner states.
+- 2026-04-23 06:25 UTC: Reworked the student runtime test to eval public/student/app.js from source instead of importing it directly, because Vitest/Vite blocks public-asset imports before the assertions run.
+- 2026-04-23 06:25 UTC: setScannerPermissionDenied() keeps the scanner in a ready state; the retry CTA must re-enter startScanner() and stay hidden in normal scanner states.
+- 2026-04-23 06:45 UTC: The dedicated retry CTA belongs directly under the Camera scanner heading and should be toggled from every scanner state setter so permission-denied is the only visible state.

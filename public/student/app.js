@@ -17,6 +17,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     scannerFeedbackTitle: document.getElementById('scanner-feedback-title'),
     scannerFeedbackCopy: document.getElementById('scanner-feedback-copy'),
     scannerToggleButton: document.getElementById('scanner-toggle-button'),
+    scannerPermissionRetryButton: document.getElementById('scanner-permission-retry-button'),
     fallbackRevealBtn: document.getElementById('fallback-reveal-btn'),
     fallbackForm: document.getElementById('fallback-form'),
     fallbackCodeInput: document.getElementById('fallback-code-input'),
@@ -50,6 +51,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   const studentPath = getStudentPath();
+  const historyStorageKey = `student-history:${studentPath}`;
   let qrScanner = null;
   let scannerAvailability = 'unknown';
   let scannerActive = false;
@@ -59,7 +61,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   let studentReady = false;
   let historyPollTimer = null;
   let historyLoading = false;
-  let previousHistory = [];
+  let previousHistory = loadStoredHistory();
 
   if (!studentPath) {
     showIdentityError('Invalid student link. Open this page from a /student/:secretToken URL.');
@@ -69,6 +71,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   elements.retryButton.addEventListener('click', loadIdentity);
   elements.historyRetryButton.addEventListener('click', loadIdentity);
   elements.scannerToggleButton.addEventListener('click', toggleScanner);
+  elements.scannerPermissionRetryButton.addEventListener('click', startScanner);
   elements.fallbackRevealBtn.addEventListener('click', showFallbackForm);
   elements.fallbackCancelBtn.addEventListener('click', hideFallbackForm);
   elements.fallbackSubmitBtn.addEventListener('click', submitFallbackCode);
@@ -161,6 +164,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
         showNoteNotification(entry.mentorName, entry.notes);
       }
       previousHistory = normalized;
+      storeHistory(normalized);
       renderHistorySuccess(normalized);
     } catch (error) {
       showHistoryError(error instanceof Error ? error.message : 'History request failed.');
@@ -225,6 +229,36 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       scannedAt: entry.scannedAt || entry.scanned_at || entry.updatedAt || entry.updated_at || '',
       notes: entry.notes || '',
     }));
+  }
+
+  function loadStoredHistory() {
+    if (!window.sessionStorage || !studentPath) {
+      return [];
+    }
+
+    try {
+      const rawHistory = window.sessionStorage.getItem(historyStorageKey);
+
+      if (!rawHistory) {
+        return [];
+      }
+
+      return normalizeHistory(JSON.parse(rawHistory));
+    } catch (_error) {
+      return [];
+    }
+  }
+
+  function storeHistory(history) {
+    if (!window.sessionStorage || !studentPath) {
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(historyStorageKey, JSON.stringify(history));
+    } catch (_error) {
+      return;
+    }
   }
 
   function renderIdentitySuccess(student) {
@@ -596,6 +630,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerLoading(title, copy, disableButton) {
     scannerAvailability = 'loading';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton('Starting camera…', true, disableButton);
@@ -604,6 +639,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerStarting(title, copy, disableButton) {
     scannerAvailability = 'ready';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton('Opening camera…', true, disableButton);
@@ -611,6 +647,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 
   function setScannerScanning(title, copy, disableButton) {
     updateScannerStage(true);
+    setScannerPermissionRetryVisible(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton('Stop scanner', false, disableButton);
@@ -618,6 +655,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 
   function setScannerProcessing(title, copy, disableButton) {
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(false);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton('Scanner paused', true, disableButton);
@@ -625,6 +663,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 
   function setScannerStopped(copy, buttonText, disableButton) {
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(false);
     elements.scannerPlaceholderTitle.textContent = 'Scanner stopped';
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton(buttonText, true, disableButton);
@@ -633,6 +672,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerUnavailable(copy, disableButton) {
     scannerAvailability = 'unavailable';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(true);
     elements.scannerPlaceholderTitle.textContent = 'Camera unavailable';
     elements.scannerPlaceholderCopy.textContent = copy;
     setPageStatus('error', 'Camera unavailable.');
@@ -642,6 +682,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerPermissionDenied(copy, disableButton) {
     scannerAvailability = 'ready';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(true);
     elements.scannerPlaceholderTitle.textContent = 'Camera permission denied';
     elements.scannerPlaceholderCopy.textContent = copy;
     setPageStatus('error', 'Camera permission denied.');
@@ -651,6 +692,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerErrorState(title, copy, disableButton) {
     scannerAvailability = 'ready';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(true);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setPageStatus('error', title);
@@ -660,6 +702,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function setScannerLockedState(title, copy, tone) {
     scannerAvailability = 'unknown';
     updateScannerStage(false);
+    setScannerPermissionRetryVisible(true);
     elements.scannerPlaceholderTitle.textContent = title;
     elements.scannerPlaceholderCopy.textContent = copy;
     setScannerButton('Start scanner', true, true);
@@ -677,6 +720,10 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     if (!disableButton && restart) {
       elements.scannerToggleButton.disabled = false;
     }
+  }
+
+  function setScannerPermissionRetryVisible(isVisible) {
+    elements.scannerPermissionRetryButton.classList.toggle('hidden', !isVisible);
   }
 
   function updateScannerStage(active) {

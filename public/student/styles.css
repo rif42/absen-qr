@@ -275,6 +275,11 @@ body {
   align-self: flex-start;
 }
 
+.scanner-permission-retry-button {
+  align-self: flex-start;
+  margin: -2px 0 2px;
+}
+
 .scanner-hint {
   font-size: 0.9rem;
 }
@@ -369,6 +374,10 @@ body {
   }
 
   .scanner-toggle-button {
+    width: 100%;
+  }
+
+  .scanner-permission-retry-button {
     width: 100%;
   }
 }

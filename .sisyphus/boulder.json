@@ -1,8 +1,22 @@
 {
-  "active_plan": "D:/work/absen-qr/.sisyphus/plans/show-teacher-notes.md",
-  "started_at": "2026-04-21T08:58:00Z",
-  "session_ids": [],
-  "plan_name": "show-teacher-notes",
-  "session_origins": {},
-  "task_sessions": {}
+  "active_plan": "D:/work/absen-qr/.sisyphus/plans/retry-camera-permission-button.md",
+  "started_at": "2026-04-23T06:06:52.834Z",
+  "session_ids": [
+    "ses_247667e41ffePOMUKTgAzN6sRx"
+  ],
+  "plan_name": "retry-camera-permission-button",
+  "session_origins": {
+    "ses_247667e41ffePOMUKTgAzN6sRx": "direct"
+  },
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "Lock the new student scanner DOM/runtime contract",
+      "session_id": "ses_24706f06fffeps8ziWDQ65fw0Q",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-04-23T06:17:02.231Z"
+    }
+  }
 }
