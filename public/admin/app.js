@@ -8,6 +8,7 @@
     exportButton: document.getElementById("export-csv-button"),
     startDate: document.getElementById("startDate"),
     endDate: document.getElementById("endDate"),
+    sortDate: document.getElementById("date-sort"),
     applyButton: document.getElementById("apply-filters-button"),
   };
 
@@ -17,6 +18,7 @@
       startDate: "",
       endDate: "",
     },
+    sortDate: "none",
     records: [],
     students: [],
     mentors: [],
@@ -32,6 +34,7 @@
 
   elements.exportButton.addEventListener("click", handleExport);
   elements.applyButton.addEventListener("click", handleApplyFilters);
+  elements.sortDate?.addEventListener("change", handleSortDateChange);
   void loadRecords();
 
   function getAdminPath() {
@@ -92,12 +95,13 @@
       state.students = normalized.students;
       state.mentors = normalized.mentors;
       syncDateFilterInputs(activeFilter);
+      syncSortDateInput();
 
       if (syncUrl || !requestFilter) {
         replaceUrlForDateFilter(activeFilter);
       }
 
-      renderRecords(normalized.records);
+      renderRecords();
 
       setLoading(false);
 
@@ -158,6 +162,12 @@
     }
 
     setStatus("error", "CSV export is unavailable in this browser.");
+  }
+
+  function handleSortDateChange() {
+    state.sortDate = normalizeSortDate(elements.sortDate?.value);
+    syncSortDateInput();
+    renderRecords();
   }
 
   function normalizePayload(payload) {
@@ -239,6 +249,14 @@
     elements.endDate.value = filter.endDate;
   }
 
+  function syncSortDateInput() {
+    if (!elements.sortDate) {
+      return;
+    }
+
+    elements.sortDate.value = state.sortDate;
+  }
+
   function replaceUrlForDateFilter(filter) {
     if (!window.history || typeof window.history.replaceState !== "function") {
       return;
@@ -292,14 +310,85 @@
     };
   }
 
-  function renderRecords(records) {
+  function renderRecords() {
     elements.body.replaceChildren();
     state.rowsByScanId.clear();
 
-    for (const record of records) {
+    for (const record of getVisibleRecords()) {
       const row = createRecordRow(record);
       elements.body.appendChild(row);
     }
+  }
+
+  function getVisibleRecords() {
+    const records = [...state.records];
+
+    if (state.sortDate !== "recent") {
+      return records;
+    }
+
+    return records.sort(compareRecordsByRecentScan);
+  }
+
+  function compareRecordsByRecentScan(left, right) {
+    const leftTime = parseSortableScanTime(left);
+    const rightTime = parseSortableScanTime(right);
+
+    if (leftTime !== rightTime) {
+      return rightTime - leftTime;
+    }
+
+    return right.scanId.localeCompare(left.scanId);
+  }
+
+  function parseSortableScanTime(record) {
+    const time = Date.parse(record.scannedAt);
+
+    if (!Number.isNaN(time)) {
+      return time;
+    }
+
+    const fallback = Date.parse(`${record.eventDate}T00:00:00.000Z`);
+    return Number.isNaN(fallback) ? Number.NEGATIVE_INFINITY : fallback;
+  }
+
+  function normalizeSortDate(value) {
+    return value === "recent" ? "recent" : "none";
+  }
+
+  function formatScannedDate(record) {
+    if (record.scannedAt) {
+      const scannedDate = new Date(record.scannedAt);
+
+      if (!Number.isNaN(scannedDate.getTime())) {
+        return formatUtcTimestamp(scannedDate);
+      }
+    }
+
+    return formatEventDate(record.eventDate);
+  }
+
+  function formatUtcTimestamp(date) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const month = months[date.getUTCMonth()] || "";
+    const year = date.getUTCFullYear();
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  }
+
+  function formatEventDate(value) {
+    if (!isEventDate(value)) {
+      return value;
+    }
+
+    const [year, month, day] = value.split("-").map(Number);
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthLabel = months[(month || 1) - 1] || "";
+
+    return `${String(day).padStart(2, "0")} ${monthLabel} ${year}`;
   }
 
   function createRecordRow(record) {
@@ -335,6 +424,11 @@
     notesTextarea.value = record.notes;
     notesCell.append(notesText);
 
+    const scannedDateCell = document.createElement("td");
+    const scannedDateText = document.createElement("span");
+    scannedDateText.className = "record-text record-date-text";
+    scannedDateCell.append(scannedDateText);
+
     const actionCell = document.createElement("td");
     const actionWrap = document.createElement("div");
     actionWrap.className = "record-actions";
@@ -342,17 +436,17 @@
     actionWrap.style.flexDirection = "row";
     const editButton = document.createElement("button");
     editButton.type = "button";
-    editButton.textContent = "✏️";
+    editButton.textContent = "✏️"; //DO NOT EDIT THIS
     editButton.className = "action-secondary";
 
     const saveButton = document.createElement("button");
     saveButton.type = "button";
-    saveButton.textContent = "💾";
+    saveButton.textContent = "💾"; //DO NOT EDIT THIS
     saveButton.className = "action-primary";
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.textContent = "❌";
+    deleteButton.textContent = "❌"; //DO NOT EDIT THIS
     deleteButton.className = "action-danger";
     actionWrap.append(editButton, deleteButton);
     actionCell.appendChild(actionWrap);
@@ -369,16 +463,18 @@
       void deleteRecord(record.scanId, row);
     });
 
-    row.append(studentCell, mentorCell, notesCell, actionCell);
+    row.append(studentCell, mentorCell, notesCell, scannedDateCell, actionCell);
     row._refs = {
       studentCell,
       mentorCell,
       notesCell,
+      scannedDateCell,
       actionCell,
       studentText,
       mentorText,
       mentorFallbackBadge,
       notesText,
+      scannedDateText,
       studentSelect,
       mentorSelect,
       notesTextarea,
@@ -405,6 +501,7 @@
     rowState.refs.studentText.textContent = rowState.record.studentName || rowState.record.studentId;
     rowState.refs.mentorText.textContent = rowState.record.mentorName || rowState.record.mentorId;
     rowState.refs.notesText.textContent = rowState.record.notes || "";
+    rowState.refs.scannedDateText.textContent = formatScannedDate(rowState.record);
 
     populateSelect(rowState.refs.studentSelect, state.students, rowState.record.studentId, rowState.record.studentName);
     populateSelect(rowState.refs.mentorSelect, state.mentors, rowState.record.mentorId, rowState.record.mentorName);
@@ -422,6 +519,7 @@
       rowState.refs.studentCell.replaceChildren(rowState.refs.studentText);
       rowState.refs.mentorCell.replaceChildren(rowState.refs.mentorText);
       rowState.refs.notesCell.replaceChildren(rowState.refs.notesText);
+      rowState.refs.scannedDateCell.replaceChildren(rowState.refs.scannedDateText);
       rowState.refs.actionWrap.replaceChildren(rowState.refs.editButton, rowState.refs.deleteButton);
       // Show fallback badge only for fallback_code records
       const isFallback = rowState.record.entryMethod === "fallback_code";

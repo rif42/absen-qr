@@ -63,6 +63,7 @@ class FakeElement {
   type = "";
   role = "";
   ariaLive = "";
+  style: Record<string, string> = {};
 
   constructor(tagName: string, id = "") {
     this.tagName = tagName.toUpperCase();
@@ -172,6 +173,7 @@ function createAdminDom() {
     exportButton: new FakeElement("button", "export-csv-button"),
     startDate: new FakeElement("input", "startDate"),
     endDate: new FakeElement("input", "endDate"),
+    sortDate: new FakeElement("select", "date-sort"),
     applyButton: new FakeElement("button", "apply-filters-button"),
   };
 
@@ -186,6 +188,7 @@ function createAdminDom() {
     "export-csv-button": elements.exportButton,
     startDate: elements.startDate,
     endDate: elements.endDate,
+    "date-sort": elements.sortDate,
     "apply-filters-button": elements.applyButton,
   });
 
@@ -277,7 +280,7 @@ afterEach(() => {
 });
 
 describe("admin page app", () => {
-  it("renders each record as four compact cells and swaps controls in edit mode", async () => {
+  it("renders each record as five compact cells and swaps controls in edit mode", async () => {
     const payload = {
       records: [
         {
@@ -311,11 +314,12 @@ describe("admin page app", () => {
     const row = elements.body.children[0];
     const refs = (row as unknown as { _refs: Record<string, FakeElement> })._refs;
     expect(elements.body.children).toHaveLength(1);
-    expect(row.children).toHaveLength(4);
+    expect(row.children).toHaveLength(5);
     expect(row.dataset.rowState).toBe("locked");
     expect(refs.studentText.textContent).toContain("Student Local 01");
     expect(refs.mentorText.textContent).toContain("Mentor Local 01");
     expect(refs.notesText.textContent).toContain("Initial notes");
+    expect(refs.scannedDateText.textContent).toBe("11 Apr 2026, 08:00 UTC");
     expect(collectByTag(row, "select")).toHaveLength(0);
     expect(collectByTag(row, "textarea")).toHaveLength(0);
     expect(collectByTag(row, "button")).toHaveLength(2);
@@ -334,6 +338,65 @@ describe("admin page app", () => {
     expect(refs.actionCell.children[0].className).toBe("record-actions");
     expect(collectByTag(row, "button")[0].textContent).toBe("Save");
     expect(collectByTag(row, "button")[1].textContent).toBe("Delete");
+  });
+
+  it("preserves backend order for none and sorts newest-first for recent", async () => {
+    const payload = {
+      records: [
+        {
+          scanId: "scan-older",
+          studentId: "student-001",
+          studentName: "Student Local 01",
+          mentorId: "mentor-001",
+          mentorName: "Mentor Local 01",
+          notes: "Older notes",
+          eventDate: "2026-04-11",
+          scannedAt: "2026-04-11T08:00:00.000Z",
+          updatedAt: "2026-04-11T08:00:00.000Z",
+        },
+        {
+          scanId: "scan-newer",
+          studentId: "student-002",
+          studentName: "Student Local 02",
+          mentorId: "mentor-002",
+          mentorName: "Mentor Local 02",
+          notes: "Newer notes",
+          eventDate: "2026-04-11",
+          scannedAt: "2026-04-11T09:00:00.000Z",
+          updatedAt: "2026-04-11T09:00:00.000Z",
+        },
+      ],
+      students: [
+        { personId: "student-001", displayName: "Student Local 01" },
+        { personId: "student-002", displayName: "Student Local 02" },
+      ],
+      mentors: [
+        { personId: "mentor-001", displayName: "Mentor Local 01" },
+        { personId: "mentor-002", displayName: "Mentor Local 02" },
+      ],
+      dateFilter: { startDate: "2026-04-11", endDate: "2026-04-11" },
+    };
+
+    const { elements } = await loadAdminPageApp("/admin/admin-secret-token/", [mockResponse(payload)]);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(elements.sortDate.value).toBe("none");
+    expect(elements.body.children[0].dataset.scanId).toBe("scan-older");
+    expect(elements.body.children[1].dataset.scanId).toBe("scan-newer");
+
+    elements.sortDate.value = "recent";
+    await elements.sortDate.dispatch("change");
+
+    expect(elements.body.children[0].dataset.scanId).toBe("scan-newer");
+    expect(elements.body.children[1].dataset.scanId).toBe("scan-older");
+
+    elements.sortDate.value = "none";
+    await elements.sortDate.dispatch("change");
+
+    expect(elements.body.children[0].dataset.scanId).toBe("scan-older");
+    expect(elements.body.children[1].dataset.scanId).toBe("scan-newer");
   });
 
   it("loads the active date range from the URL and keeps export aligned", async () => {

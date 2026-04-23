@@ -37,6 +37,13 @@
 
       <section id="records-card" class="card" aria-labelledby="records-card-title">
         <h2 id="records-card-title">Records</h2>
+        <div class="records-toolbar">
+          <label for="date-sort">Sort by</label>
+          <select id="date-sort" name="dateSort">
+            <option value="recent">Recent</option>
+            <option value="none" selected>None</option>
+          </select>
+        </div>
         <div id="records-loading">Loading records…</div>
         <p id="records-empty-state">No records available yet.</p>
         <table id="records-table">
@@ -45,6 +52,7 @@
               <th scope="col">Student name</th>
               <th scope="col">Mentor name</th>
               <th scope="col">Notes</th>
+              <th scope="col">Scanned date</th>
               <th scope="col">Action</th>
             </tr>
           </thead>

@@ -141,6 +141,7 @@ body {
 }
 
 button,
+input,
 select,
 textarea {
   font: inherit;
@@ -328,16 +329,13 @@ button:focus {
   }
 
   .filter-card {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 8px;
     align-items: stretch;
   }
 
-  .filter-card input[type="date"] {
+  .records-toolbar {
     width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
   }
 
   .buttons-filter {
@@ -411,6 +409,26 @@ button:focus {
 
   #records-table tbody td:nth-child(3)::before {
     content: "Notes";
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  #records-table tbody td:nth-child(4)::before {
+    content: "Scanned date";
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  #records-table tbody td:nth-child(5)::before {
+    content: "Action";
     display: block;
     font-size: 0.76rem;
     font-weight: 700;
