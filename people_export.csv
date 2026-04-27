@@ -77,4 +77,6 @@ test-student-06,Test Student 06,student,test-student-secret-06,test-student-06,h
 test-student-07,Test Student 07,student,test-student-secret-07,test-student-07,https://absen-qr.rif42.workers.dev/student/test-student-07
 test-student-08,Test Student 08,student,test-student-secret-08,test-student-08,https://absen-qr.rif42.workers.dev/student/test-student-08
 test-student-09,Test Student 09,student,test-student-secret-09,test-student-09,https://absen-qr.rif42.workers.dev/student/test-student-09
-test-student-10,Test Student 10,student,test-student-secret-10,test-student-10,https://absen-qr.rif42.workers.dev/student/test-student-10
+test-student-10,Test Student 10,student,test-student-secret-10,test-student-10,https://absen-qr.rif42.workers.dev/student/test-student-10,
+mentor-prof-dr-denny-nugroho-sugianto-s-t-m-si,"Prof. Dr. Denny Nugroho Sugianto, S.T., M.Si.",mentor,mentor-secret-prof-dr-denny-nugroho-sugianto-s-t-m-si,07mu7bizojt9,https://absen-qr.rif42.workers.dev/mentor/07mu7bizojt9
+mentor-prof-dr-diana-nur-afifah-s-tp-m-si,"Prof. Dr. Diana Nur Afifah, S.TP., M.Si.",mentor,mentor-secret-prof-dr-diana-nur-afifah-s-tp-m-si,egrbb3jgibo1,https://absen-qr.rif42.workers.dev/mentor/egrbb3jgibo1
