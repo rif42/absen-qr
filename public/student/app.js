@@ -29,6 +29,14 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     historyList: document.getElementById('history-list'),
     retryButton: document.getElementById('retry-button'),
     historyRetryButton: document.getElementById('history-retry-button'),
+    modeToggle: document.getElementById('mode-toggle'),
+    modeScanBtn: document.getElementById('mode-scan'),
+    modeShowBtn: document.getElementById('mode-show'),
+    scannerView: document.getElementById('scanner-view'),
+    qrView: document.getElementById('qr-view'),
+    qrSvgContainer: document.getElementById('qr-svg-container'),
+    qrCopyBtn: document.getElementById('qr-copy-btn'),
+    qrCopyFeedback: document.getElementById('qr-copy-feedback'),
   };
 
   function isDevHostname(hostname) {
@@ -62,6 +70,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   let historyPollTimer = null;
   let historyLoading = false;
   let previousHistory = loadStoredHistory();
+  let currentMode = 'scan'; // 'scan' or 'show'
+  let studentQrPayload = '';
+  let studentQrSvg = '';
 
   if (!studentPath) {
     showIdentityError('Invalid student link. Open this page from a /student/:secretToken URL.');
@@ -86,6 +97,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       startHistoryPoll();
     }
   });
+  elements.modeScanBtn.addEventListener('click', () => switchMode('scan'));
+  elements.modeShowBtn.addEventListener('click', () => switchMode('show'));
+  elements.qrCopyBtn.addEventListener('click', copyQrPayload);
   requestNotificationPermission();
   loadIdentity();
 
@@ -128,11 +142,62 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       renderIdentitySuccess(student);
       await loadHistory();
       studentReady = true;
+      studentQrPayload = payload.qrPayload || '';
+      studentQrSvg = payload.qrSvg || '';
       await prepareScanner();
     } catch (error) {
       studentReady = false;
+      studentQrPayload = '';
+      studentQrSvg = '';
       await stopScanner(true);
       showIdentityError(error instanceof Error ? error.message : 'Identity request failed.');
+    }
+  }
+
+  function switchMode(mode) {
+    if (mode === currentMode) return;
+    currentMode = mode;
+    
+    elements.modeScanBtn.classList.toggle('mode-btn-active', mode === 'scan');
+    elements.modeShowBtn.classList.toggle('mode-btn-active', mode === 'show');
+    
+    if (mode === 'scan') {
+      elements.scannerView.classList.remove('hidden');
+      elements.qrView.classList.add('hidden');
+      if (studentReady && scannerAvailability === 'ready') {
+        setScannerStopped('Scanner stopped. Tap Start scanner to read a mentor QR code.', 'Start scanner', false);
+      }
+    } else {
+      elements.scannerView.classList.add('hidden');
+      elements.qrView.classList.remove('hidden');
+      renderQrDisplay();
+      stopScanner(true);
+    }
+  }
+  
+  function renderQrDisplay() {
+    if (studentQrSvg) {
+      elements.qrSvgContainer.innerHTML = studentQrSvg;
+    } else {
+      elements.qrSvgContainer.innerHTML = '<p class="muted-block">QR code not available.</p>';
+    }
+  }
+  
+  async function copyQrPayload() {
+    if (!studentQrPayload) return;
+    try {
+      await navigator.clipboard.writeText(studentQrPayload);
+      elements.qrCopyFeedback.classList.remove('hidden');
+      setTimeout(() => {
+        elements.qrCopyFeedback.classList.add('hidden');
+      }, 1500);
+    } catch {
+      elements.qrCopyFeedback.textContent = 'Copy failed';
+      elements.qrCopyFeedback.classList.remove('hidden');
+      setTimeout(() => {
+        elements.qrCopyFeedback.classList.add('hidden');
+        elements.qrCopyFeedback.textContent = 'Copied!';
+      }, 1500);
     }
   }
 
@@ -271,7 +336,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
 
     elements.studentName.textContent = student.displayName;
     // elements.studentMeta.textContent = `Secret id: ${student.secretId}`;
-    elements.status.textContent = 'Identity loaded. Loading today’s mentor history...';
+    elements.status.textContent = 'Identity loaded. Tap "Show QR" to display your code, or use the scanner below.';
     elements.status.className = 'status status-loading';
     document.title = `${student.displayName} • Student Attendance`;
   }

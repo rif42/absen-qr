@@ -207,6 +207,14 @@ function createStudentDom() {
     scannerFeedbackCopy: new FakeElement("p", "scanner-feedback-copy"),
     scannerToggleButton: new FakeElement("button", "scanner-toggle-button"),
     scannerPermissionRetryButton: new FakeElement("button", "scanner-permission-retry-button"),
+    modeToggle: new FakeElement("div", "mode-toggle"),
+    modeScanBtn: new FakeElement("button", "mode-scan"),
+    modeShowBtn: new FakeElement("button", "mode-show"),
+    scannerView: new FakeElement("div", "scanner-view"),
+    qrView: new FakeElement("div", "qr-view"),
+    qrSvgContainer: new FakeElement("div", "qr-svg-container"),
+    qrCopyBtn: new FakeElement("button", "qr-copy-btn"),
+    qrCopyFeedback: new FakeElement("p", "qr-copy-feedback"),
     fallbackRevealBtn: new FakeElement("button", "fallback-reveal-btn"),
     fallbackForm: new FakeElement("div", "fallback-form"),
     fallbackCodeInput: new FakeElement("input", "fallback-code-input"),
@@ -221,6 +229,7 @@ function createStudentDom() {
   };
 
   elements.scannerPermissionRetryButton.classList.add("hidden");
+  elements.qrView.classList.add("hidden");
 
   const document = createDocument({
     "status-banner": elements.status,
@@ -252,6 +261,14 @@ function createStudentDom() {
     "history-list": elements.historyList,
     "retry-button": elements.retryButton,
     "history-retry-button": elements.historyRetryButton,
+    "mode-toggle": elements.modeToggle,
+    "mode-scan": elements.modeScanBtn,
+    "mode-show": elements.modeShowBtn,
+    "scanner-view": elements.scannerView,
+    "qr-view": elements.qrView,
+    "qr-svg-container": elements.qrSvgContainer,
+    "qr-copy-btn": elements.qrCopyBtn,
+    "qr-copy-feedback": elements.qrCopyFeedback,
   });
 
   return { elements, document };

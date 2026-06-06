@@ -13,7 +13,7 @@
 <body>
   <main class="shell">
     <header class="page-header" aria-labelledby="page-title">
-      <h2 id="page-title">Mentor attendance</h2>
+      <h1 id="page-title">Mentor attendance</h1>
       <img src="../apu.webp" style="width:60px;" />
     </header>
 
@@ -41,9 +41,47 @@
       <article class="card qr-card">
         <h2>Mentor QR code</h2>
 
-        <div id="qr-display" class="qr-display hidden" role="img" aria-label="Mentor QR code"></div>
+        <div class="mode-toggle" id="mode-toggle">
+          <button type="button" class="mode-btn" id="mode-scan" data-mode="scan">Scan QR</button>
+          <button type="button" class="mode-btn mode-btn-active" id="mode-show" data-mode="show">Show QR</button>
+        </div>
 
-        <button type="button" class="button qr-copy-button hidden" id="qr-copy">Copy QR payload</button>
+        <div id="qr-view" class="qr-view">
+          <div id="qr-display" class="qr-display hidden" role="img" aria-label="Mentor QR code"></div>
+          <button type="button" class="button qr-copy-button hidden" id="qr-copy">Copy QR payload</button>
+        </div>
+
+        <div id="scanner-view" class="scanner-view hidden">
+          <button type="button" id="scanner-permission-retry-button" class="button scanner-permission-retry-button hidden">
+            Retry camera permission
+          </button>
+
+          <div class="scanner-stage" id="scanner-stage">
+            <video id="scanner-video" class="scanner-video" muted playsinline aria-label="Student QR camera preview"></video>
+
+            <div id="scanner-placeholder" class="scanner-placeholder">
+              <p class="scanner-placeholder-title" id="scanner-placeholder-title">Preparing scanner…</p>
+              <p class="scanner-placeholder-copy" id="scanner-placeholder-copy">
+                Tap Start scanner to begin scanning a student's QR code.
+              </p>
+              <p class="scanner-status" id="scanner-status"></p>
+            </div>
+          </div>
+
+          <div class="scanner-actions">
+            <button type="button" class="button scanner-toggle-button" id="scanner-toggle-button" disabled>
+              Start scanner
+            </button>
+            <p class="scanner-hint">
+              Scan a student's QR code
+            </p>
+          </div>
+
+          <div id="scanner-feedback" class="scan-feedback hidden" aria-live="polite">
+            <p class="scan-feedback-title" id="scanner-feedback-title"></p>
+            <p class="scan-feedback-copy" id="scanner-feedback-copy"></p>
+          </div>
+        </div>
       </article>
 
       <article class="card fallback-card hidden" id="fallback-code-card">

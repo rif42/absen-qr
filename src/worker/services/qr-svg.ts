@@ -1,6 +1,6 @@
 import QRCode from "qrcode-svg";
 
-export function renderMentorQrSvg(qrPayload: string): string {
+export function renderQrSvg(qrPayload: string): string {
   return new QRCode({
     content: qrPayload,
     padding: 2,

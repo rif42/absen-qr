@@ -3,7 +3,8 @@ import { createFallbackCode, getActiveFallbackCodeForMentor } from "../db/fallba
 import { findMentorScanRecordById, listMentorRecentScans, updateScanRecordNotes } from "../db/scan-records";
 import { getCurrentUtcDate } from "../services/event-day";
 import { badRequest, conflict, created, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
-import { renderMentorQrSvg } from "../services/mentor-qr-svg";
+import { renderQrSvg } from "../services/qr-svg";
+import { submitScan } from "../services/scan-submission";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import { isValidNotes } from "../validation/scan-records";
 import type { Env } from "../types";
@@ -36,8 +37,51 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
           secretId: mentor.secret_id
         },
         qrPayload,
-        qrSvg: renderMentorQrSvg(qrPayload)
+        qrSvg: renderQrSvg(qrPayload)
       });
+  }
+
+  if (apiPath === "/scan") {
+    if (request.method !== "POST") {
+      return methodNotAllowed(["POST"]);
+    }
+
+    const mentor = await findPersonBySecretToken(env.DB, "mentor", secretToken);
+
+    if (!mentor) {
+      return notFound();
+    }
+
+    let requestBody: unknown;
+
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      return badRequest(error instanceof Error ? error.message : "Invalid scan request body.");
+    }
+
+    const qrPayload =
+      typeof requestBody === "object" && requestBody !== null && "qrPayload" in requestBody
+        ? requestBody.qrPayload
+        : null;
+
+    if (typeof qrPayload !== "string") {
+      return badRequest("Invalid QR payload.");
+    }
+
+    const result = await submitScan(env.DB, mentor, qrPayload);
+
+    if (result instanceof Response) {
+      return result;
+    }
+
+    return json(
+      {
+        scan: result.scan,
+        scannedPerson: result.scannedPerson
+      },
+      { status: 201 }
+    );
   }
 
   if (apiPath === "/recent-scans") {

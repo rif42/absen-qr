@@ -11,7 +11,9 @@ import {
 } from "../db/scan-records";
 import { getCurrentUtcDate, getUtcDayKey } from "../services/event-day";
 import { badRequest, conflict, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
-import { parseMentorQrPayload } from "../services/mentor-qr";
+import { parseQrPayload } from "../services/qr-payload";
+import { renderQrSvg } from "../services/qr-svg";
+import { submitScan } from "../services/scan-submission";
 import { fetchAssetWithRedirectFallback, getRolePageAssetPath } from "../services/secret-links";
 import type { Env } from "../types";
 
@@ -60,12 +62,16 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return notFound();
     }
 
+    const qrPayload = `absenqr:v1:student:${student.person_id}`;
+
     return json({
       student: {
         personId: student.person_id,
         displayName: student.display_name,
         secretId: student.secret_id
-      }
+      },
+      qrPayload,
+      qrSvg: renderQrSvg(qrPayload)
     });
   }
 
@@ -97,63 +103,23 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return badRequest("Invalid mentor QR payload.");
     }
 
-    const mentorQr = parseMentorQrPayload(qrPayload);
+    const result = await submitScan(env.DB, student, qrPayload);
 
-    if (!mentorQr) {
-      return badRequest("Invalid mentor QR payload.");
-    }
-
-    const mentor = await findPersonById(env.DB, "mentor", mentorQr.mentorId);
-
-    if (!mentor) {
-      return badRequest("Invalid mentor QR payload.");
-    }
-
-    const scannedAt = new Date().toISOString();
-    const eventDate = getUtcDayKey(scannedAt);
-
-    const existingScan = await findStudentMentorScanRecordByEventDate(
-      env.DB,
-      student.person_id,
-      mentor.person_id,
-      eventDate
-    );
-
-    if (existingScan) {
-      return conflict("Duplicate mentor scan already recorded for this calendar day.");
-    }
-
-    let scan;
-
-    try {
-      scan = await createScanRecord(env.DB, {
-        scanId: crypto.randomUUID(),
-        studentId: student.person_id,
-        mentorId: mentor.person_id,
-        eventDate,
-        scannedAt
-      });
-    } catch (error) {
-      if (isDuplicateScanRecordError(error)) {
+    if (result instanceof Response) {
+      // Map submitScan generic messages back to student-specific backward-compatible messages
+      if (result.status === 400) {
+        return badRequest("Invalid mentor QR payload.");
+      }
+      if (result.status === 409) {
         return conflict("Duplicate mentor scan already recorded for this calendar day.");
       }
-
-      return internalServerError("Could not create scan record.");
+      return result;
     }
 
     return json(
       {
-        scan: {
-          scanId: scan.scan_id,
-          studentId: scan.student_id,
-          mentorId: scan.mentor_id,
-          eventDate: scan.event_date,
-          scannedAt: scan.scanned_at
-        },
-        mentor: {
-          personId: mentor.person_id,
-          displayName: mentor.display_name
-        }
+        scan: result.scan,
+        mentor: result.scannedPerson
       },
       { status: 201 }
     );

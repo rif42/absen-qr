@@ -389,3 +389,160 @@ body {
     width: 100%;
   }
 }
+
+/* Mode toggle */
+.mode-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid #16a34a;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: #ffffff;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.mode-btn:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+.mode-btn:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.mode-btn-active {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.mode-btn:hover:not(.mode-btn-active) {
+  background: #f0fdf4;
+}
+
+/* QR view wrapper */
+.qr-view {
+  /* inherits existing styles, no special rules needed */
+}
+
+/* Scanner view (similar to student page) */
+.scanner-view {
+  /* no special base styles needed */
+}
+
+.scanner-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #f8fafc;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.scanner-stage.is-active {
+  background: #000000;
+}
+
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.scanner-stage.is-active .scanner-video {
+  display: block;
+}
+
+.scanner-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.scanner-stage.is-active .scanner-placeholder {
+  display: none;
+}
+
+.scanner-placeholder-title {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.scanner-placeholder-copy {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.scanner-status {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.scanner-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.scanner-toggle-button {
+  min-width: 160px;
+}
+
+.scanner-hint {
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+}
+
+.scanner-permission-retry-button {
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* Scan feedback */
+.scan-feedback {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.scan-feedback.is-success {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.scan-feedback.is-error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.scan-feedback-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.scan-feedback-copy {
+  font-size: 14px;
+}

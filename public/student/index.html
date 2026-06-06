@@ -13,7 +13,7 @@
 <body>
   <main class="shell">
     <header class="page-header" aria-labelledby="page-title">
-      <h2 id="page-title">Student Attendance</h2>
+      <h1 id="page-title">Student attendance</h1>
       <img src="../apu.webp" style="width:60px;" />
     </header>
 
@@ -42,6 +42,11 @@
 
       <article class="card scanner-card">
         <h2 class="card-label">Camera scanner</h2>
+        <div class="mode-toggle" id="mode-toggle">
+          <button type="button" class="mode-btn mode-btn-active" id="mode-scan" data-mode="scan">Scan QR</button>
+          <button type="button" class="mode-btn" id="mode-show" data-mode="show">Show QR</button>
+        </div>
+        <div id="scanner-view" class="scanner-view">
         <button type="button" id="scanner-permission-retry-button"
           class="button scanner-permission-retry-button hidden">
           Retry camera permission
@@ -92,6 +97,14 @@
         <div id="scanner-feedback" class="scan-feedback hidden" aria-live="polite">
           <p class="scan-feedback-title" id="scanner-feedback-title"></p>
           <p class="scan-feedback-copy" id="scanner-feedback-copy"></p>
+        </div>
+        </div>
+
+        <div id="qr-view" class="qr-view hidden">
+          <div id="qr-svg-container" class="qr-svg-container"></div>
+          <button type="button" class="button qr-copy-btn" id="qr-copy-btn">Copy payload</button>
+          <p id="qr-copy-feedback" class="qr-copy-feedback hidden">Copied!</p>
+          <p class="qr-hint">Show this QR code to a mentor so they can scan you.</p>
         </div>
       </article>
 
