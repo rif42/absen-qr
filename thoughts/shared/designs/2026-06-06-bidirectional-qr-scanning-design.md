@@ -73,7 +73,6 @@ On **student page** (existing, preserved):
 On **student page** (new):
 - Fetch QR SVG from `/api/me` response
 - Render SVG in a styled container (same styling as mentor page)
-- Copy payload button with "Copied" feedback
 - Hidden by default (default mode is Scan QR)
 
 On **mentor page** (existing, preserved):
@@ -128,7 +127,6 @@ Response: { scan: ScanRecord, scannedPerson: { personId, displayName } }
 3. `/api/me` returns identity + `qrPayload` + `qrSvg`
 4. Student toggles to "Show QR"
 5. QR SVG renders in the display area
-6. Copy payload button is available
 7. Mentor scans the displayed QR code
 
 ### Mentor Scans Student (New Flow)
