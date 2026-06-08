@@ -83,9 +83,7 @@ const COPY_RESET_MS = 1_500;
   elements.recentScansRetryButton.addEventListener("click", () => {
     void loadRecentScans({ showLoading: !state.recentScansLoaded });
   });
-  elements.qrCopy.addEventListener("click", () => {
-    void copyQrPayload();
-  });
+
   elements.fallbackGenerateBtn.addEventListener("click", () => {
     void generateFallbackCode();
   });
@@ -480,28 +478,6 @@ const COPY_RESET_MS = 1_500;
     elements.qrCopy.classList.remove("hidden");
     elements.qrCopy.disabled = !mentor.qrPayload;
     elements.qrCopy.textContent = mentor.qrPayload ? "Copy QR payload" : "QR payload unavailable";
-  }
-
-  async function copyQrPayload() {
-    if (!state.mentor?.qrPayload) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(state.mentor.qrPayload);
-      elements.qrCopy.textContent = "Copied";
-
-      if (state.copyResetTimer) {
-        window.clearTimeout(state.copyResetTimer);
-      }
-
-      state.copyResetTimer = window.setTimeout(() => {
-        elements.qrCopy.textContent = "Copy QR payload";
-        state.copyResetTimer = null;
-      }, COPY_RESET_MS);
-    } catch {
-      elements.qrCopy.textContent = "Copy failed";
-    }
   }
 
   function renderRecentScans(scans) {

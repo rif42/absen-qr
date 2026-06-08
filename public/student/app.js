@@ -102,7 +102,6 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   });
   elements.modeScanBtn.addEventListener('click', () => switchMode('scan'));
   elements.modeShowBtn.addEventListener('click', () => switchMode('show'));
-  elements.qrCopyBtn.addEventListener('click', copyQrPayload);
   requestNotificationPermission();
 
   if (elements.helpButton && elements.helpModal && elements.helpModalClose) {
@@ -179,10 +178,10 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   function switchMode(mode) {
     if (mode === currentMode) return;
     currentMode = mode;
-    
+
     elements.modeScanBtn.classList.toggle('mode-btn-active', mode === 'scan');
     elements.modeShowBtn.classList.toggle('mode-btn-active', mode === 'show');
-    
+
     if (mode === 'scan') {
       elements.scannerView.classList.remove('hidden');
       elements.qrView.classList.add('hidden');
@@ -196,30 +195,12 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       stopScanner(true);
     }
   }
-  
+
   function renderQrDisplay() {
     if (studentQrSvg) {
       elements.qrSvgContainer.innerHTML = studentQrSvg;
     } else {
       elements.qrSvgContainer.innerHTML = '<p class="muted-block">QR code not available.</p>';
-    }
-  }
-  
-  async function copyQrPayload() {
-    if (!studentQrPayload) return;
-    try {
-      await navigator.clipboard.writeText(studentQrPayload);
-      elements.qrCopyFeedback.classList.remove('hidden');
-      setTimeout(() => {
-        elements.qrCopyFeedback.classList.add('hidden');
-      }, 1500);
-    } catch {
-      elements.qrCopyFeedback.textContent = 'Copy failed';
-      elements.qrCopyFeedback.classList.remove('hidden');
-      setTimeout(() => {
-        elements.qrCopyFeedback.classList.add('hidden');
-        elements.qrCopyFeedback.textContent = 'Copied!';
-      }, 1500);
     }
   }
 
@@ -1016,4 +997,3 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     }).format(date);
   }
 })();
-
