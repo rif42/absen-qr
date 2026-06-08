@@ -105,7 +105,7 @@ const COPY_RESET_MS = 1_500;
 
   window.addEventListener("pagehide", cleanup);
 
-  if (elements.helpButton && elements.helpModal) {
+  if (elements.helpButton && elements.helpModal && elements.helpModalClose) {
     elements.helpButton.addEventListener("click", () => {
       elements.helpModal.classList.remove("hidden");
     });

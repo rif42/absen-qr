@@ -105,7 +105,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   elements.qrCopyBtn.addEventListener('click', copyQrPayload);
   requestNotificationPermission();
 
-  if (elements.helpButton && elements.helpModal) {
+  if (elements.helpButton && elements.helpModal && elements.helpModalClose) {
     elements.helpButton.addEventListener('click', () => {
       elements.helpModal.classList.remove('hidden');
     });
