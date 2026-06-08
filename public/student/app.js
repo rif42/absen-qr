@@ -37,6 +37,9 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     qrSvgContainer: document.getElementById('qr-svg-container'),
     qrCopyBtn: document.getElementById('qr-copy-btn'),
     qrCopyFeedback: document.getElementById('qr-copy-feedback'),
+    helpButton: document.getElementById('help-button'),
+    helpModal: document.getElementById('help-modal'),
+    helpModalClose: document.getElementById('help-modal-close'),
   };
 
   function isDevHostname(hostname) {
@@ -101,6 +104,25 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   elements.modeShowBtn.addEventListener('click', () => switchMode('show'));
   elements.qrCopyBtn.addEventListener('click', copyQrPayload);
   requestNotificationPermission();
+
+  if (elements.helpButton && elements.helpModal) {
+    elements.helpButton.addEventListener('click', () => {
+      elements.helpModal.classList.remove('hidden');
+    });
+    elements.helpModalClose.addEventListener('click', () => {
+      elements.helpModal.classList.add('hidden');
+    });
+    elements.helpModal.addEventListener('click', (e) => {
+      if (e.target === elements.helpModal) {
+        elements.helpModal.classList.add('hidden');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !elements.helpModal.classList.contains('hidden')) {
+        elements.helpModal.classList.add('hidden');
+      }
+    });
+  }
   loadIdentity();
 
   function getStudentPath() {

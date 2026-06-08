@@ -546,3 +546,120 @@ body {
 .scan-feedback-copy {
   font-size: 14px;
 }
+
+/* Help button and modal */
+.help-button {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.help-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.help-button:active {
+  transform: scale(0.95);
+}
+
+.help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.help-modal.hidden {
+  display: none;
+}
+
+.help-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.help-modal-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.help-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.help-modal-close:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.help-modal-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  max-height: 90vh;
+}
+
+@media (max-width: 640px) {
+  .help-modal-content {
+    max-height: 85vh;
+    border-radius: 12px;
+  }
+
+  .help-modal-image {
+    max-height: 85vh;
+  }
+
+  .help-button {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    top: 8px;
+    left: 8px;
+  }
+}

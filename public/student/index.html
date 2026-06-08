@@ -12,6 +12,20 @@
 
 <body>
   <main class="shell">
+    <button type="button" id="help-button" class="help-button" aria-label="How to use this app">
+      ?
+    </button>
+
+    <div id="help-modal" class="help-modal hidden" role="dialog" aria-modal="true" aria-label="How to use">
+      <div class="help-modal-overlay"></div>
+      <div class="help-modal-content">
+        <button type="button" id="help-modal-close" class="help-modal-close" aria-label="Close help">
+          &times;
+        </button>
+        <img src="../absen-qr-how-to-use.jpg" alt="How to use English Collab App" class="help-modal-image" />
+      </div>
+    </div>
+
     <header class="page-header" aria-labelledby="page-title">
       <h1 id="page-title">Student attendance</h1>
       <img src="../apu.webp" style="width:60px;" />

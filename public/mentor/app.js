@@ -41,6 +41,9 @@ const COPY_RESET_MS = 1_500;
     scannerToggleButton: document.getElementById("scanner-toggle-button"),
     scannerPermissionRetryButton: document.getElementById("scanner-permission-retry-button"),
     scannerStatus: document.getElementById("scanner-status"),
+    helpButton: document.getElementById("help-button"),
+    helpModal: document.getElementById("help-modal"),
+    helpModalClose: document.getElementById("help-modal-close"),
   };
 
   const mentorPath = getMentorPath();
@@ -101,6 +104,25 @@ const COPY_RESET_MS = 1_500;
   }
 
   window.addEventListener("pagehide", cleanup);
+
+  if (elements.helpButton && elements.helpModal) {
+    elements.helpButton.addEventListener("click", () => {
+      elements.helpModal.classList.remove("hidden");
+    });
+    elements.helpModalClose.addEventListener("click", () => {
+      elements.helpModal.classList.add("hidden");
+    });
+    elements.helpModal.addEventListener("click", (e) => {
+      if (e.target === elements.helpModal) {
+        elements.helpModal.classList.add("hidden");
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !elements.helpModal.classList.contains("hidden")) {
+        elements.helpModal.classList.add("hidden");
+      }
+    });
+  }
 
   resetPageState();
   void loadMentorIdentity();
