@@ -533,6 +533,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     setScannerStarting('Starting camera…', 'Allow camera access when your browser asks, then point the device at a mentor QR code.', true);
 
     try {
+      updateScannerStage(true);
       await qrScanner.start();
       scannerActive = true;
       scannerStarting = false;
