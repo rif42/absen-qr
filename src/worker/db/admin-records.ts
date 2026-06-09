@@ -7,11 +7,12 @@ type AdminPersonOption = {
 
 type AdminRecord = {
   scanId: string;
-  studentId: string;
-  studentName: string;
-  studentSecretId: string;
-  mentorId: string;
-  mentorName: string;
+  fromId: string;
+  fromName: string;
+  fromRole: "student" | "mentor";
+  toId: string;
+  toName: string;
+  toRole: "student" | "mentor";
   eventDate: string;
   scannedAt: string;
   entryMethod: "qr" | "fallback_code";
@@ -20,11 +21,13 @@ type AdminRecord = {
 };
 
 type AdminExportRow = {
-  studentName: string;
-  studentSecretId: string;
-  mentorName: string;
+  scannerName: string;
+  scannerRole: "student" | "mentor";
+  scannedName: string;
+  scannedRole: "student" | "mentor";
   eventDate: string;
   notes: string;
+  entryMethod: "qr" | "fallback_code";
 };
 
 type AdminRecordsPayload = {
@@ -35,21 +38,24 @@ type AdminRecordsPayload = {
   mentors: AdminPersonOption[];
 };
 
-type UpdateAdminRecordInput = {
+type AdminUpdateScanRecordPayload = {
   scanId: string;
   notes?: string;
-  studentId?: string;
-  mentorId?: string;
+  fromId?: string;
+  toId?: string;
+  fromRole?: "student" | "mentor";
+  toRole?: "student" | "mentor";
   updatedAt: string;
 };
 
 type AdminRecordRow = {
   scan_id: string;
-  student_id: string;
-  student_name: string;
-  student_secret_id: string;
-  mentor_id: string;
-  mentor_name: string;
+  from_id: string;
+  from_name: string;
+  from_role: "student" | "mentor";
+  to_id: string;
+  to_name: string;
+  to_role: "student" | "mentor";
   event_date: string;
   scanned_at: string;
   entry_method: "qr" | "fallback_code";
@@ -58,11 +64,13 @@ type AdminRecordRow = {
 };
 
 type AdminExportRowRecord = {
-  student_name: string;
-  student_secret_id: string;
-  mentor_name: string;
+  from_name: string;
+  from_role: "student" | "mentor";
+  to_name: string;
+  to_role: "student" | "mentor";
   event_date: string;
   notes: string;
+  entry_method: "qr" | "fallback_code";
 };
 
 function mapAdminPersonOption(person: { person_id: string; display_name: string }): AdminPersonOption {
@@ -75,11 +83,12 @@ function mapAdminPersonOption(person: { person_id: string; display_name: string 
 function mapAdminRecord(row: AdminRecordRow): AdminRecord {
   return {
     scanId: row.scan_id,
-    studentId: row.student_id,
-    studentName: row.student_name,
-    studentSecretId: row.student_secret_id,
-    mentorId: row.mentor_id,
-    mentorName: row.mentor_name,
+    fromId: row.from_id,
+    fromName: row.from_name,
+    fromRole: row.from_role,
+    toId: row.to_id,
+    toName: row.to_name,
+    toRole: row.to_role,
     eventDate: row.event_date,
     scannedAt: row.scanned_at,
     entryMethod: row.entry_method,
@@ -90,42 +99,43 @@ function mapAdminRecord(row: AdminRecordRow): AdminRecord {
 
 function mapAdminExportRow(row: AdminExportRowRecord): AdminExportRow {
   return {
-    studentName: row.student_name,
-    studentSecretId: row.student_secret_id,
-    mentorName: row.mentor_name,
+    scannerName: row.from_name,
+    scannerRole: row.from_role,
+    scannedName: row.to_name,
+    scannedRole: row.to_role,
     eventDate: row.event_date,
-    notes: row.notes
+    notes: row.notes,
+    entryMethod: row.entry_method
   };
 }
 
 function isMissingScanRecordsEntryMethodColumnError(error: unknown): boolean {
-  return error instanceof Error && /no such column:\s*(?:scan_records\.)?entry_method/i.test(error.message);
+  return error instanceof Error && /no such column:.*entry_method/i.test(error.message);
 }
 
 function buildAdminRecordSelectQuery(entryMethodExpression: string, whereClause: string, orderClause: string): string {
   return `
-        SELECT
-          scan_records.scan_id,
-          scan_records.student_id,
-          student.display_name AS student_name,
-          student.secret_id AS student_secret_id,
-          scan_records.mentor_id,
-          mentor.display_name AS mentor_name,
-          scan_records.event_date,
-          scan_records.scanned_at,
-          ${entryMethodExpression} AS entry_method,
-          scan_records.notes,
-          scan_records.updated_at
-        FROM scan_records
-        JOIN people AS student
-          ON student.person_id = scan_records.student_id
-         AND student.role = 'student'
-        JOIN people AS mentor
-          ON mentor.person_id = scan_records.mentor_id
-         AND mentor.role = 'mentor'
-        ${whereClause}
-        ${orderClause}
-      `;
+    SELECT
+      sr.scan_id,
+      sr.from_id,
+      sr.to_id,
+      sr.from_role,
+      sr.to_role,
+      sr.event_date,
+      sr.scanned_at,
+      ${entryMethodExpression} AS entry_method,
+      sr.notes,
+      sr.updated_at,
+      from_person.display_name AS from_name,
+      to_person.display_name AS to_name
+    FROM scan_records AS sr
+    JOIN people AS from_person
+      ON from_person.person_id = sr.from_id
+    JOIN people AS to_person
+      ON to_person.person_id = sr.to_id
+    ${whereClause}
+    ${orderClause}
+  `;
 }
 
 async function queryAdminRecords(
@@ -138,9 +148,9 @@ async function queryAdminRecords(
     .prepare(
       buildAdminRecordSelectQuery(
         entryMethodExpression,
-        `WHERE scan_records.event_date >= ?1
-          AND scan_records.event_date <= ?2`,
-        `ORDER BY scan_records.scanned_at DESC, scan_records.scan_id DESC`
+        `WHERE sr.event_date >= ?1
+          AND sr.event_date <= ?2`,
+        `ORDER BY sr.scanned_at DESC, sr.scan_id DESC`
       )
     )
     .bind(startDate, endDate)
@@ -158,7 +168,7 @@ async function queryAdminRecordById(
     .prepare(
       buildAdminRecordSelectQuery(
         entryMethodExpression,
-        `WHERE scan_records.scan_id = ?1`,
+        `WHERE sr.scan_id = ?1`,
         `LIMIT 1`
       )
     )
@@ -184,7 +194,7 @@ export async function listAdminRecords(
   endDate = startDate
 ): Promise<AdminRecord[]> {
   try {
-    return await queryAdminRecords(db, startDate, endDate, "scan_records.entry_method");
+    return await queryAdminRecords(db, startDate, endDate, "sr.entry_method");
   } catch (error) {
     if (!isMissingScanRecordsEntryMethodColumnError(error)) {
       throw error;
@@ -196,7 +206,7 @@ export async function listAdminRecords(
 
 export async function findAdminRecordById(db: D1Database, scanId: string): Promise<AdminRecord | null> {
   try {
-    return await queryAdminRecordById(db, scanId, "scan_records.entry_method");
+    return await queryAdminRecordById(db, scanId, "sr.entry_method");
   } catch (error) {
     if (!isMissingScanRecordsEntryMethodColumnError(error)) {
       throw error;
@@ -206,7 +216,7 @@ export async function findAdminRecordById(db: D1Database, scanId: string): Promi
   }
 }
 
-export async function updateAdminRecord(db: D1Database, input: UpdateAdminRecordInput): Promise<AdminRecord | null> {
+export async function updateAdminRecord(db: D1Database, input: AdminUpdateScanRecordPayload): Promise<AdminRecord | null> {
   const existingRecord = await findAdminRecordById(db, input.scanId);
 
   if (!existingRecord) {
@@ -221,14 +231,24 @@ export async function updateAdminRecord(db: D1Database, input: UpdateAdminRecord
     values.push(input.notes);
   }
 
-  if (input.studentId !== undefined) {
-    assignments.push(`student_id = ?${assignments.length + 1}`);
-    values.push(input.studentId);
+  if (input.fromId !== undefined) {
+    assignments.push(`from_id = ?${assignments.length + 1}`);
+    values.push(input.fromId);
   }
 
-  if (input.mentorId !== undefined) {
-    assignments.push(`mentor_id = ?${assignments.length + 1}`);
-    values.push(input.mentorId);
+  if (input.toId !== undefined) {
+    assignments.push(`to_id = ?${assignments.length + 1}`);
+    values.push(input.toId);
+  }
+
+  if (input.fromRole !== undefined) {
+    assignments.push(`from_role = ?${assignments.length + 1}`);
+    values.push(input.fromRole);
+  }
+
+  if (input.toRole !== undefined) {
+    assignments.push(`to_role = ?${assignments.length + 1}`);
+    values.push(input.toRole);
   }
 
   assignments.push(`updated_at = ?${assignments.length + 1}`);
@@ -279,21 +299,21 @@ export async function listAdminExportRows(
     .prepare(
       `
         SELECT
-          student.display_name AS student_name,
-          student.secret_id AS student_secret_id,
-          mentor.display_name AS mentor_name,
-          scan_records.event_date,
-          scan_records.notes
-        FROM scan_records
-        JOIN people AS student
-          ON student.person_id = scan_records.student_id
-         AND student.role = 'student'
-        JOIN people AS mentor
-          ON mentor.person_id = scan_records.mentor_id
-         AND mentor.role = 'mentor'
-        WHERE scan_records.event_date >= ?1
-          AND scan_records.event_date <= ?2
-        ORDER BY scan_records.scanned_at ASC, scan_records.scan_id ASC
+          from_person.display_name AS from_name,
+          from_person.role AS from_role,
+          to_person.display_name AS to_name,
+          to_person.role AS to_role,
+          sr.event_date,
+          sr.notes,
+          sr.entry_method
+        FROM scan_records AS sr
+        JOIN people AS from_person
+          ON from_person.person_id = sr.from_id
+        JOIN people AS to_person
+          ON to_person.person_id = sr.to_id
+        WHERE sr.event_date >= ?1
+          AND sr.event_date <= ?2
+        ORDER BY sr.scanned_at ASC, sr.scan_id ASC
       `
     )
     .bind(startDate, endDate)
@@ -322,4 +342,4 @@ export async function getAdminRecordsPayload(
   };
 }
 
-export type { AdminExportRow, AdminPersonOption, AdminRecord, AdminRecordsPayload, UpdateAdminRecordInput };
+export type { AdminExportRow, AdminPersonOption, AdminRecord, AdminRecordsPayload, AdminUpdateScanRecordPayload };

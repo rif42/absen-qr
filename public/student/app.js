@@ -229,7 +229,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       const normalized = normalizeHistory(payload);
       const newNotes = detectNewNotes(previousHistory, normalized);
       for (const entry of newNotes) {
-        showNoteNotification(entry.mentorName, entry.notes);
+        showNoteNotification(entry.otherName, entry.notes);
       }
       previousHistory = normalized;
       storeHistory(normalized);
@@ -292,8 +292,8 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
     }
 
     return source.map((entry) => ({
-      mentorName:
-        entry.mentorName || entry.mentor_name || entry.displayName || entry.display_name || entry.name || 'Mentor',
+      otherName:
+        entry.otherName || entry.other_name || entry.displayName || entry.display_name || entry.name || 'Mentor',
       scannedAt: entry.scannedAt || entry.scanned_at || entry.updatedAt || entry.updated_at || '',
       notes: entry.notes || '',
     }));
@@ -363,7 +363,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
         const item = document.createElement('li');
         const mentorName = document.createElement('span');
         mentorName.className = 'history-name';
-        mentorName.textContent = entry.mentorName;
+        mentorName.textContent = entry.otherName;
 
         const meta = document.createElement('span');
         meta.className = 'history-meta';
@@ -423,10 +423,10 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
   }
 
   function detectNewNotes(previous, current) {
-    const previousMap = new Map(previous.map((e) => [e.scannedAt + e.mentorName, e.notes]));
+    const previousMap = new Map(previous.map((e) => [e.scannedAt + e.otherName, e.notes]));
     const newNotes = [];
     for (const entry of current) {
-      const key = entry.scannedAt + entry.mentorName;
+      const key = entry.scannedAt + entry.otherName;
       const prevNotes = previousMap.get(key);
       if (entry.notes && prevNotes !== entry.notes) {
         newNotes.push(entry);
@@ -864,7 +864,7 @@ import QrScanner from '/vendor/qr-scanner/qr-scanner.min.js';
       await loadHistory();
 
       // Show dialog on successful scan
-      alert('SCAN SUCCESSFUL! ' + (responseBody.scan?.mentorName || 'Mentor'));
+      alert('SCAN SUCCESSFUL! ' + (responseBody.scannedPerson?.displayName || 'Mentor'));
       hideFallbackForm();
       await stopScanner(true);
       setPageStatus('success', 'Mentor scan recorded. Today\u2019s history has been refreshed.');

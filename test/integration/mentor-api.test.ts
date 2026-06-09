@@ -93,7 +93,7 @@ describe("mentor API", () => {
             scan_id: "scan-mentor-1",
             student_id: student1.person_id,
             mentor_id: mentor1.person_id,
-            event_date: nonTodayEventDate,
+            event_date: runtimeUtcDate,
             scanned_at: `${runtimeUtcDate}T08:00:00.000Z`,
             notes: "First note",
             updated_at: `${runtimeUtcDate}T08:00:00.000Z`
@@ -102,7 +102,7 @@ describe("mentor API", () => {
             scan_id: "scan-mentor-2",
             student_id: student2.person_id,
             mentor_id: mentor1.person_id,
-            event_date: nonTodayEventDate,
+            event_date: runtimeUtcDate,
             scanned_at: `${runtimeUtcDate}T09:00:00.000Z`,
             notes: "Second note",
             updated_at: `${runtimeUtcDate}T09:00:00.000Z`
@@ -111,7 +111,7 @@ describe("mentor API", () => {
             scan_id: "scan-other-mentor",
             student_id: student3.person_id,
             mentor_id: mentor2.person_id,
-            event_date: nonTodayEventDate,
+            event_date: runtimeUtcDate,
             scanned_at: `${runtimeUtcDate}T10:00:00.000Z`,
             notes: "Other mentor",
             updated_at: `${runtimeUtcDate}T10:00:00.000Z`
@@ -130,7 +130,7 @@ describe("mentor API", () => {
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
           new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
-          createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+          createEnv(database),
           {} as WorkerContext
         );
 
@@ -139,15 +139,29 @@ describe("mentor API", () => {
         recentScans: [
           {
             scanId: "scan-mentor-2",
-            studentId: student2.person_id,
-            studentName: student2.display_name,
+            fromId: student2.person_id,
+            toId: mentor1.person_id,
+            fromName: student2.display_name,
+            toName: mentor1.display_name,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: student2.display_name,
+            otherRole: "student",
+            direction: "incoming",
             scannedAt: `${runtimeUtcDate}T09:00:00.000Z`,
             notes: "Second note"
           },
           {
             scanId: "scan-mentor-1",
-            studentId: student1.person_id,
-            studentName: student1.display_name,
+            fromId: student1.person_id,
+            toId: mentor1.person_id,
+            fromName: student1.display_name,
+            toName: mentor1.display_name,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: student1.display_name,
+            otherRole: "student",
+            direction: "incoming",
             scannedAt: `${runtimeUtcDate}T08:00:00.000Z`,
             notes: "First note"
           }
@@ -181,7 +195,7 @@ describe("mentor API", () => {
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
           new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
-          createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+          createEnv(database),
           {} as WorkerContext
         );
 
@@ -198,7 +212,7 @@ describe("mentor API", () => {
             scan_id: "scan-fallback-recent",
             student_id: student1.person_id,
             mentor_id: mentor1.person_id,
-            event_date: nonTodayEventDate,
+            event_date: runtimeUtcDate,
             scanned_at: `${runtimeUtcDate}T09:00:00.000Z`,
             entry_method: "fallback_code",
             notes: "Fallback scan note",
@@ -208,7 +222,7 @@ describe("mentor API", () => {
             scan_id: "scan-qr-recent",
             student_id: student2.person_id,
             mentor_id: mentor1.person_id,
-            event_date: nonTodayEventDate,
+            event_date: runtimeUtcDate,
             scanned_at: `${runtimeUtcDate}T08:00:00.000Z`,
             entry_method: "qr",
             notes: "QR scan note",
@@ -219,7 +233,7 @@ describe("mentor API", () => {
       const fetchHandler = worker.fetch as FetchHandler;
       const response = await fetchHandler(
         new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/recent-scans`) as WorkerRequest,
-        createEnv(database, { EVENT_DATE: nonTodayEventDate }),
+        createEnv(database),
         {} as WorkerContext
       );
 
@@ -228,11 +242,25 @@ describe("mentor API", () => {
         recentScans: [
           {
             scanId: "scan-fallback-recent",
+            fromId: student1.person_id,
+            toId: mentor1.person_id,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: student1.display_name,
+            otherRole: "student",
+            direction: "incoming",
             entryMethod: "fallback_code",
             notes: "Fallback scan note"
           },
           {
             scanId: "scan-qr-recent",
+            fromId: student2.person_id,
+            toId: mentor1.person_id,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: student2.display_name,
+            otherRole: "student",
+            direction: "incoming",
             entryMethod: "qr",
             notes: "QR scan note"
           }
@@ -255,6 +283,11 @@ describe("mentor API", () => {
         }
       ]
     });
+
+    // Debug: verify mock state
+    expect(readMockD1State(database).scanRecords).toHaveLength(1);
+    expect(readMockD1State(database).scanRecords[0].scan_id).toBe("scan-note-target");
+
     const fetchHandler = worker.fetch as FetchHandler;
     const response = await fetchHandler(
       new Request(`https://example.com/mentor/${mentor1.secret_path_token}/api/notes/scan-note-target`, {
@@ -284,7 +317,7 @@ describe("mentor API", () => {
     });
   });
 
-  it("rejects note updates for scans that belong to another mentor", async () => {
+  it("allows any mentor to update notes on any existing scan", async () => {
     const database = createMockD1Database({
       scanRecords: [
         {
@@ -306,16 +339,21 @@ describe("mentor API", () => {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          notes: "Should not save"
+          notes: "Updated by different mentor"
         })
       }) as WorkerRequest,
       createEnv(database),
       {} as WorkerContext
     );
 
-    expect(response.status).toBe(404);
-    await expect(response.json()).resolves.toMatchObject({ error: "Not found" });
-    expect(readMockD1State(database).scanRecords[0].notes).toBe("");
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      scan: {
+        scanId: "scan-other-mentor-note",
+        notes: "Updated by different mentor"
+      }
+    });
+    expect(readMockD1State(database).scanRecords[0].notes).toBe("Updated by different mentor");
   });
 
   describe("fallback code", () => {

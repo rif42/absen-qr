@@ -1,7 +1,7 @@
 import { findPersonById } from "../db/people";
 import {
   createScanRecord,
-  findStudentMentorScanRecordByEventDate,
+  findScanRecordByPairAndDate,
   isDuplicateScanRecordError
 } from "../db/scan-records";
 import { getUtcDayKey } from "./event-day";
@@ -12,8 +12,10 @@ import type { PersonRecord } from "../types";
 export interface ScanSubmissionResult {
   scan: {
     scanId: string;
-    studentId: string;
-    mentorId: string;
+    fromId: string;
+    toId: string;
+    fromRole: string;
+    toRole: string;
     eventDate: string;
     scannedAt: string;
   };
@@ -36,14 +38,9 @@ export async function submitScan(
 
   const { role: scannedRole, personId: scannedPersonId } = parsed;
 
-  // Reject same role
-  if (scannerPerson.role === scannedRole) {
-    return badRequest("You can only scan the opposite role.");
-  }
-
   // Reject self-scan
   if (scannerPerson.person_id === scannedPersonId) {
-    return badRequest("You cannot scan yourself.");
+    return badRequest("Self-scan not allowed");
   }
 
   // Look up scanned person
@@ -53,18 +50,17 @@ export async function submitScan(
     return badRequest("Invalid QR payload.");
   }
 
-  // Determine student and mentor IDs
-  const studentId = scannerPerson.role === "student" ? scannerPerson.person_id : scannedPerson.person_id;
-  const mentorId = scannerPerson.role === "mentor" ? scannerPerson.person_id : scannedPerson.person_id;
-
   const scannedAt = new Date().toISOString();
   const eventDate = getUtcDayKey(scannedAt);
 
+  const fromId = scannerPerson.person_id;
+  const toId = scannedPerson.person_id;
+
   // Check for duplicate
-  const existingScan = await findStudentMentorScanRecordByEventDate(
+  const existingScan = await findScanRecordByPairAndDate(
     db,
-    studentId,
-    mentorId,
+    fromId,
+    toId,
     eventDate
   );
 
@@ -78,8 +74,10 @@ export async function submitScan(
   try {
     scan = await createScanRecord(db, {
       scanId: crypto.randomUUID(),
-      studentId,
-      mentorId,
+      fromId: scannerPerson.person_id,
+      toId: scannedPerson.person_id,
+      fromRole: scannerPerson.role,
+      toRole: scannedRole,
       eventDate,
       scannedAt
     });
@@ -93,8 +91,10 @@ export async function submitScan(
   return {
     scan: {
       scanId: scan.scan_id,
-      studentId: scan.student_id,
-      mentorId: scan.mentor_id,
+      fromId: scan.from_id,
+      toId: scan.to_id,
+      fromRole: scan.from_role,
+      toRole: scan.to_role,
       eventDate: scan.event_date,
       scannedAt: scan.scanned_at
     },

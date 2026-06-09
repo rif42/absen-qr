@@ -92,11 +92,13 @@ describe("student API", () => {
 
     await expect(response.json()).resolves.toMatchObject({
       scan: {
-        studentId: student1.person_id,
-        mentorId: mentor1.person_id,
+        fromId: student1.person_id,
+        toId: mentor1.person_id,
+        fromRole: "student",
+        toRole: "mentor",
         eventDate: configuredEventDate
       },
-      mentor: {
+      scannedPerson: {
         personId: mentor1.person_id,
         displayName: mentor1.display_name
       }
@@ -104,8 +106,8 @@ describe("student API", () => {
 
     expect(readMockD1State(database).scanRecords).toHaveLength(1);
     expect(readMockD1State(database).scanRecords[0]).toMatchObject({
-      student_id: student1.person_id,
-      mentor_id: mentor1.person_id,
+      from_id: student1.person_id,
+      to_id: mentor1.person_id,
       event_date: configuredEventDate
     });
   });
@@ -335,15 +337,22 @@ describe("student API", () => {
       await expect(response.json()).resolves.toMatchObject({
         success: true,
         scan: {
-          mentorName: mentor1.display_name
+          fromId: student1.person_id,
+          toId: mentor1.person_id,
+          fromRole: "student",
+          toRole: "mentor"
+        },
+        scannedPerson: {
+          personId: mentor1.person_id,
+          displayName: mentor1.display_name
         }
       });
 
       const state = readMockD1State(database);
       expect(state.scanRecords).toHaveLength(1);
       expect(state.scanRecords[0]).toMatchObject({
-        student_id: student1.person_id,
-        mentor_id: mentor1.person_id,
+        from_id: student1.person_id,
+        to_id: mentor1.person_id,
         entry_method: "fallback_code"
       });
       expect(state.fallback_codes[0].consumed_at).not.toBeNull();
@@ -622,19 +631,33 @@ describe("student API", () => {
       );
 
       expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
+      await expect(response.json()).resolves.toMatchObject({
         history: [
           {
             scanId: "scan-history-2",
-            mentorId: mentor2.person_id,
-            mentorName: mentor2.display_name,
+            fromId: student1.person_id,
+            toId: mentor2.person_id,
+            fromName: student1.display_name,
+            toName: mentor2.display_name,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: mentor2.display_name,
+            otherRole: "mentor",
+            direction: "outgoing",
             scannedAt: `${configuredEventDate}T09:00:00.000Z`,
             notes: "Second mentor"
           },
           {
             scanId: "scan-history-1",
-            mentorId: mentor1.person_id,
-            mentorName: mentor1.display_name,
+            fromId: student1.person_id,
+            toId: mentor1.person_id,
+            fromName: student1.display_name,
+            toName: mentor1.display_name,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: mentor1.display_name,
+            otherRole: "mentor",
+            direction: "outgoing",
             scannedAt: `${configuredEventDate}T08:00:00.000Z`,
             notes: "First mentor"
           }
@@ -724,12 +747,24 @@ describe("student API", () => {
         history: [
           {
             scanId: "scan-qr-history",
-            mentorId: mentor2.person_id,
+            fromId: student1.person_id,
+            toId: mentor2.person_id,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: mentor2.display_name,
+            otherRole: "mentor",
+            direction: "outgoing",
             notes: "QR scan"
           },
           {
             scanId: "scan-fallback-history",
-            mentorId: mentor1.person_id,
+            fromId: student1.person_id,
+            toId: mentor1.person_id,
+            fromRole: "student",
+            toRole: "mentor",
+            otherName: mentor1.display_name,
+            otherRole: "mentor",
+            direction: "outgoing",
             notes: "Fallback from code"
           }
         ]
@@ -799,8 +834,8 @@ describe("student API", () => {
       const scanRecords = state.scanRecords;
       expect(scanRecords).toHaveLength(1);
       expect(scanRecords[0]).toMatchObject({
-        student_id: student1.person_id,
-        mentor_id: mentor1.person_id,
+        from_id: student1.person_id,
+        to_id: mentor1.person_id,
         entry_method: "fallback_code"
       });
     });

@@ -5,9 +5,9 @@ import {
 } from "../db/fallback-codes";
 import {
   createScanRecord,
-  findStudentMentorScanRecordByEventDate,
+  findScanRecordByPairAndDate,
   isDuplicateScanRecordError,
-  listStudentHistory
+  listPersonHistory
 } from "../db/scan-records";
 import { getCurrentUtcDate, getUtcDayKey } from "../services/event-day";
 import { badRequest, conflict, internalServerError, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
@@ -119,7 +119,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     return json(
       {
         scan: result.scan,
-        mentor: result.scannedPerson
+        scannedPerson: result.scannedPerson
       },
       { status: 201 }
     );
@@ -144,21 +144,26 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
       return notFound();
     }
 
-    const history = await listStudentHistory(env.DB, student.person_id, currentUtcDate);
-    const historyEntries = await Promise.all(
-      history.map(async (scanRecord) => {
-        const mentor = await findPersonById(env.DB, "mentor", scanRecord.mentor_id);
+    const history = await listPersonHistory(env.DB, student.person_id, currentUtcDate);
+    const historyEntries = history.map((scanRecord) => {
+      const isStudentFrom = scanRecord.from_id === student.person_id;
 
-        return {
-          scanId: scanRecord.scan_id,
-          mentorId: scanRecord.mentor_id,
-          mentorName: mentor?.display_name ?? "Mentor",
-          scannedAt: scanRecord.scanned_at,
-          entryMethod: scanRecord.entry_method,
-          notes: scanRecord.notes
-        };
-      })
-    );
+      return {
+        scanId: scanRecord.scan_id,
+        fromId: scanRecord.from_id,
+        toId: scanRecord.to_id,
+        fromName: scanRecord.from_name,
+        toName: scanRecord.to_name,
+        fromRole: scanRecord.from_role,
+        toRole: scanRecord.to_role,
+        otherName: isStudentFrom ? scanRecord.to_name : scanRecord.from_name,
+        otherRole: isStudentFrom ? scanRecord.to_role : scanRecord.from_role,
+        direction: isStudentFrom ? "outgoing" : "incoming",
+        scannedAt: scanRecord.scanned_at,
+        entryMethod: scanRecord.entry_method,
+        notes: scanRecord.notes
+      };
+    });
 
     return json({ history: historyEntries });
   }
@@ -241,7 +246,7 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     const scannedAt = new Date().toISOString();
     const eventDate = getUtcDayKey(scannedAt);
 
-    const existingScan = await findStudentMentorScanRecordByEventDate(
+    const existingScan = await findScanRecordByPairAndDate(
       env.DB,
       student.person_id,
       fallbackCode.mentor_id,
@@ -260,8 +265,10 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
     try {
       scan = await createScanRecord(env.DB, {
         scanId,
-        studentId: student.person_id,
-        mentorId: fallbackCode.mentor_id,
+        fromId: student.person_id,
+        toId: fallbackCode.mentor_id,
+        fromRole: "student",
+        toRole: "mentor",
         eventDate,
         scannedAt,
         entryMethod: "fallback_code"
@@ -290,8 +297,16 @@ export async function handleStudentApi(request: Request, env: Env, secretToken: 
         success: true,
         scan: {
           scanId: scan.scan_id,
-          mentorName: mentor?.display_name ?? "Mentor",
+          fromId: scan.from_id,
+          toId: scan.to_id,
+          fromRole: scan.from_role,
+          toRole: scan.to_role,
+          eventDate: scan.event_date,
           scannedAt: scan.scanned_at
+        },
+        scannedPerson: {
+          personId: mentor?.person_id ?? fallbackCode.mentor_id,
+          displayName: mentor?.display_name ?? "Mentor"
         }
       },
       { status: 201 }

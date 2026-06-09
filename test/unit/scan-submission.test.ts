@@ -20,15 +20,19 @@ describe("submitScan", () => {
     expect(result).not.toBeInstanceOf(Response);
 
     const successResult = result as Exclude<typeof result, Response>;
-    expect(successResult.scan.studentId).toBe(student1.person_id);
-    expect(successResult.scan.mentorId).toBe(mentor1.person_id);
+    expect(successResult.scan.fromId).toBe(student1.person_id);
+    expect(successResult.scan.toId).toBe(mentor1.person_id);
+    expect(successResult.scan.fromRole).toBe("student");
+    expect(successResult.scan.toRole).toBe("mentor");
     expect(successResult.scannedPerson.personId).toBe(mentor1.person_id);
     expect(successResult.scannedPerson.displayName).toBe(mentor1.display_name);
 
     const state = readMockD1State(db);
     expect(state.scanRecords).toHaveLength(1);
-    expect(state.scanRecords[0].student_id).toBe(student1.person_id);
-    expect(state.scanRecords[0].mentor_id).toBe(mentor1.person_id);
+    expect(state.scanRecords[0].from_id).toBe(student1.person_id);
+    expect(state.scanRecords[0].to_id).toBe(mentor1.person_id);
+    expect(state.scanRecords[0].from_role).toBe("student");
+    expect(state.scanRecords[0].to_role).toBe("mentor");
   });
 
   it("allows a mentor to scan a student", async () => {
@@ -43,18 +47,22 @@ describe("submitScan", () => {
     expect(result).not.toBeInstanceOf(Response);
 
     const successResult = result as Exclude<typeof result, Response>;
-    expect(successResult.scan.studentId).toBe(student1.person_id);
-    expect(successResult.scan.mentorId).toBe(mentor1.person_id);
+    expect(successResult.scan.fromId).toBe(mentor1.person_id);
+    expect(successResult.scan.toId).toBe(student1.person_id);
+    expect(successResult.scan.fromRole).toBe("mentor");
+    expect(successResult.scan.toRole).toBe("student");
     expect(successResult.scannedPerson.personId).toBe(student1.person_id);
     expect(successResult.scannedPerson.displayName).toBe(student1.display_name);
 
     const state = readMockD1State(db);
     expect(state.scanRecords).toHaveLength(1);
-    expect(state.scanRecords[0].student_id).toBe(student1.person_id);
-    expect(state.scanRecords[0].mentor_id).toBe(mentor1.person_id);
+    expect(state.scanRecords[0].from_id).toBe(mentor1.person_id);
+    expect(state.scanRecords[0].to_id).toBe(student1.person_id);
+    expect(state.scanRecords[0].from_role).toBe("mentor");
+    expect(state.scanRecords[0].to_role).toBe("student");
   });
 
-  it("rejects same-role scan (student scanning student)", async () => {
+  it("allows same-role scan (student scanning student)", async () => {
     const db = createMockD1Database();
 
     const result = await submitScan(
@@ -63,16 +71,19 @@ describe("submitScan", () => {
       `absenqr:v1:student:${student2.person_id}`
     );
 
-    expect(result).toBeInstanceOf(Response);
-    const response = result as Response;
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: "You can only scan the opposite role." });
+    expect(result).not.toBeInstanceOf(Response);
+
+    const successResult = result as Exclude<typeof result, Response>;
+    expect(successResult.scan.fromId).toBe(student1.person_id);
+    expect(successResult.scan.toId).toBe(student2.person_id);
+    expect(successResult.scan.fromRole).toBe("student");
+    expect(successResult.scan.toRole).toBe("student");
 
     const state = readMockD1State(db);
-    expect(state.scanRecords).toHaveLength(0);
+    expect(state.scanRecords).toHaveLength(1);
   });
 
-  it("rejects same-role scan (mentor scanning mentor)", async () => {
+  it("allows same-role scan (mentor scanning mentor)", async () => {
     const db = createMockD1Database();
 
     const result = await submitScan(
@@ -81,13 +92,16 @@ describe("submitScan", () => {
       `absenqr:v1:mentor:${mentor2.person_id}`
     );
 
-    expect(result).toBeInstanceOf(Response);
-    const response = result as Response;
-    expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: "You can only scan the opposite role." });
+    expect(result).not.toBeInstanceOf(Response);
+
+    const successResult = result as Exclude<typeof result, Response>;
+    expect(successResult.scan.fromId).toBe(mentor1.person_id);
+    expect(successResult.scan.toId).toBe(mentor2.person_id);
+    expect(successResult.scan.fromRole).toBe("mentor");
+    expect(successResult.scan.toRole).toBe("mentor");
 
     const state = readMockD1State(db);
-    expect(state.scanRecords).toHaveLength(0);
+    expect(state.scanRecords).toHaveLength(1);
   });
 
   it("rejects self-scan", async () => {
@@ -102,7 +116,7 @@ describe("submitScan", () => {
     expect(result).toBeInstanceOf(Response);
     const response = result as Response;
     expect(response.status).toBe(400);
-    expect(await response.json()).toEqual({ error: "You cannot scan yourself." });
+    expect(await response.json()).toEqual({ error: "Self-scan not allowed" });
 
     const state = readMockD1State(db);
     expect(state.scanRecords).toHaveLength(0);
@@ -148,8 +162,10 @@ describe("submitScan", () => {
       scanRecords: [
         {
           scan_id: "existing-scan-id",
-          student_id: student1.person_id,
-          mentor_id: mentor1.person_id,
+          from_id: student1.person_id,
+          to_id: mentor1.person_id,
+          from_role: "student",
+          to_role: "mentor",
           event_date: eventDate,
           scanned_at: scannedAt,
           entry_method: "qr",
@@ -177,7 +193,7 @@ describe("submitScan", () => {
   it("rejects duplicate scan when unique constraint fails during insert", async () => {
     const db = createMockD1Database({
       insertScanRecordErrorMessage:
-        "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
+        "UNIQUE constraint failed: scan_records.from_id, scan_records.to_id, scan_records.event_date"
     });
 
     const result = await submitScan(

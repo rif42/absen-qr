@@ -1,6 +1,6 @@
 import { findPersonById, findPersonBySecretToken } from "../db/people";
 import { createFallbackCode, getActiveFallbackCodeForMentor } from "../db/fallback-codes";
-import { findMentorScanRecordById, listMentorRecentScans, updateScanRecordNotes } from "../db/scan-records";
+import { findScanRecordById, listPersonHistory, updateScanRecordNotes } from "../db/scan-records";
 import { getCurrentUtcDate } from "../services/event-day";
 import { badRequest, conflict, created, json, methodNotAllowed, notFound, notImplemented } from "../services/http";
 import { renderQrSvg } from "../services/qr-svg";
@@ -97,21 +97,26 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
       return notFound();
     }
 
-    const recentScans = await listMentorRecentScans(env.DB, mentor.person_id, currentUtcDate);
-    const recentScanEntries = await Promise.all(
-      recentScans.map(async (scanRecord) => {
-        const student = await findPersonById(env.DB, "student", scanRecord.student_id);
+    const recentScans = await listPersonHistory(env.DB, mentor.person_id, currentUtcDate);
+    const recentScanEntries = recentScans.map((scanRecord) => {
+      const isMentorFrom = scanRecord.from_id === mentor.person_id;
 
-        return {
-          scanId: scanRecord.scan_id,
-          studentId: scanRecord.student_id,
-          studentName: student?.display_name ?? "Student",
-          scannedAt: scanRecord.scanned_at,
-          entryMethod: scanRecord.entry_method,
-          notes: scanRecord.notes
-        };
-      })
-    );
+      return {
+        scanId: scanRecord.scan_id,
+        fromId: scanRecord.from_id,
+        toId: scanRecord.to_id,
+        fromName: scanRecord.from_name,
+        toName: scanRecord.to_name,
+        fromRole: scanRecord.from_role,
+        toRole: scanRecord.to_role,
+        otherName: isMentorFrom ? scanRecord.to_name : scanRecord.from_name,
+        otherRole: isMentorFrom ? scanRecord.to_role : scanRecord.from_role,
+        direction: isMentorFrom ? "outgoing" : "incoming",
+        scannedAt: scanRecord.scanned_at,
+        entryMethod: scanRecord.entry_method,
+        notes: scanRecord.notes
+      };
+    });
 
     return json({ recentScans: recentScanEntries });
   }
@@ -148,19 +153,13 @@ export async function handleMentorApi(request: Request, env: Env, secretToken: s
       return badRequest("Invalid mentor notes.");
     }
 
-    const existingRecord = await findMentorScanRecordById(env.DB, mentor.person_id, scanId);
+    const existingRecord = await findScanRecordById(env.DB, scanId);
 
     if (!existingRecord) {
       return notFound();
     }
 
-    const updatedRecord = await updateScanRecordNotes(
-      env.DB,
-      mentor.person_id,
-      scanId,
-      notes,
-      new Date().toISOString()
-    );
+    const updatedRecord = await updateScanRecordNotes(env.DB, scanId, notes);
 
     if (!updatedRecord) {
       return notFound();

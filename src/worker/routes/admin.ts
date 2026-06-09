@@ -9,8 +9,10 @@ import type { Env } from "../types";
 
 type AdminRecordPatchPayload = {
   notes?: string;
-  studentId?: string;
-  mentorId?: string;
+  fromId?: string;
+  toId?: string;
+  fromRole?: "student" | "mentor";
+  toRole?: "student" | "mentor";
 };
 
 const DUPLICATE_SCAN_ERROR_MESSAGE = "Duplicate mentor scan already recorded for this calendar day.";
@@ -51,14 +53,16 @@ function escapeCsvValue(value: string): string {
 }
 
 function serializeAdminExportCsv(rows: Awaited<ReturnType<typeof listAdminExportRows>>): string {
-  const header = "student name,secret id,mentor scanned,date,notes";
+  const header = "scanner_name,scanner_role,scanned_name,scanned_role,date,notes,entry_method";
   const lines = rows.map((row) =>
     [
-      escapeCsvValue(row.studentName),
-      escapeCsvValue(row.studentSecretId),
-      escapeCsvValue(row.mentorName),
+      escapeCsvValue(row.scannerName),
+      escapeCsvValue(row.scannerRole),
+      escapeCsvValue(row.scannedName),
+      escapeCsvValue(row.scannedRole),
       escapeCsvValue(row.eventDate),
-      escapeCsvValue(row.notes)
+      escapeCsvValue(row.notes),
+      escapeCsvValue(row.entryMethod)
     ].join(",")
   );
 
@@ -74,7 +78,7 @@ function parseAdminRecordPatchPayload(body: unknown): AdminRecordPatchPayload | 
     return badRequest("Invalid admin record patch payload.");
   }
 
-  const allowedKeys = new Set(["notes", "studentId", "mentorId"]);
+  const allowedKeys = new Set(["notes", "fromId", "toId", "fromRole", "toRole"]);
   const bodyKeys = Object.keys(body);
 
   if (bodyKeys.some((key) => !allowedKeys.has(key))) {
@@ -82,7 +86,7 @@ function parseAdminRecordPatchPayload(body: unknown): AdminRecordPatchPayload | 
   }
 
   if (bodyKeys.length === 0) {
-    return badRequest("PATCH body must include at least one of notes, studentId, or mentorId.");
+    return badRequest("PATCH body must include at least one of notes, fromId, toId, fromRole, or toRole.");
   }
 
   const payload: AdminRecordPatchPayload = {};
@@ -95,20 +99,36 @@ function parseAdminRecordPatchPayload(body: unknown): AdminRecordPatchPayload | 
     payload.notes = body.notes;
   }
 
-  if ("studentId" in body) {
-    if (typeof body.studentId !== "string") {
+  if ("fromId" in body) {
+    if (typeof body.fromId !== "string") {
       return badRequest("Invalid admin record patch payload.");
     }
 
-    payload.studentId = body.studentId;
+    payload.fromId = body.fromId;
   }
 
-  if ("mentorId" in body) {
-    if (typeof body.mentorId !== "string") {
+  if ("toId" in body) {
+    if (typeof body.toId !== "string") {
       return badRequest("Invalid admin record patch payload.");
     }
 
-    payload.mentorId = body.mentorId;
+    payload.toId = body.toId;
+  }
+
+  if ("fromRole" in body) {
+    if (typeof body.fromRole !== "string" || (body.fromRole !== "student" && body.fromRole !== "mentor")) {
+      return badRequest("Invalid admin record patch payload.");
+    }
+
+    payload.fromRole = body.fromRole;
+  }
+
+  if ("toRole" in body) {
+    if (typeof body.toRole !== "string" || (body.toRole !== "student" && body.toRole !== "mentor")) {
+      return badRequest("Invalid admin record patch payload.");
+    }
+
+    payload.toRole = body.toRole;
   }
 
   return payload;
@@ -211,18 +231,26 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
         return notFound();
       }
 
-      if (parsedPayload.studentId !== undefined) {
-        const student = await findPersonById(env.DB, "student", parsedPayload.studentId);
+      if (parsedPayload.fromId !== undefined) {
+        if (parsedPayload.fromRole === undefined) {
+          return badRequest("fromRole is required when fromId is provided.");
+        }
 
-        if (!student) {
+        const fromPerson = await findPersonById(env.DB, parsedPayload.fromRole, parsedPayload.fromId);
+
+        if (!fromPerson) {
           return notFound();
         }
       }
 
-      if (parsedPayload.mentorId !== undefined) {
-        const mentor = await findPersonById(env.DB, "mentor", parsedPayload.mentorId);
+      if (parsedPayload.toId !== undefined) {
+        if (parsedPayload.toRole === undefined) {
+          return badRequest("toRole is required when toId is provided.");
+        }
 
-        if (!mentor) {
+        const toPerson = await findPersonById(env.DB, parsedPayload.toRole, parsedPayload.toId);
+
+        if (!toPerson) {
           return notFound();
         }
       }
@@ -231,8 +259,10 @@ export async function handleAdminApi(request: Request, env: Env, secretToken: st
         const updatedRecord = await updateAdminRecord(env.DB, {
           scanId,
           notes: parsedPayload.notes,
-          studentId: parsedPayload.studentId,
-          mentorId: parsedPayload.mentorId,
+          fromId: parsedPayload.fromId,
+          toId: parsedPayload.toId,
+          fromRole: parsedPayload.fromRole,
+          toRole: parsedPayload.toRole,
           updatedAt: new Date().toISOString()
         });
 

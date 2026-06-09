@@ -457,7 +457,7 @@ const COPY_RESET_MS = 1_500;
     return source
       .map((entry) => ({
         scanId: entry.scanId || entry.scan_id || "",
-        studentName: entry.studentName || entry.student_name || entry.displayName || entry.display_name || entry.name || "Student",
+        otherName: entry.otherName || entry.other_name || entry.displayName || entry.display_name || entry.name || "Student",
         scannedAt: entry.scannedAt || entry.scanned_at || entry.updatedAt || entry.updated_at || "",
         notes: typeof entry.notes === "string" ? entry.notes : "",
       }))
@@ -528,11 +528,11 @@ const COPY_RESET_MS = 1_500;
     header.className = "scan-header";
 
     const headerText = document.createElement("div");
-    const studentName = document.createElement("p");
-    studentName.className = "scan-name";
+    const otherName = document.createElement("p");
+    otherName.className = "scan-name";
     const scanMeta = document.createElement("p");
     scanMeta.className = "scan-meta";
-    headerText.append(studentName, scanMeta);
+    headerText.append(otherName, scanMeta);
 
     header.append(headerText);
 
@@ -572,7 +572,7 @@ const COPY_RESET_MS = 1_500;
     item.append(header, noteState, label, textarea, actions);
 
     item._refs = {
-      studentName,
+      otherName,
       scanMeta,
       noteState,
       label,
@@ -608,7 +608,7 @@ const COPY_RESET_MS = 1_500;
 
     const isEditing = editingScanIds.has(scan.scanId) || !savedNotes;
 
-    refs.studentName.textContent = scan.studentName;
+    refs.otherName.textContent = scan.otherName;
     refs.scanMeta.textContent = scan.scannedAt
       ? `Scanned ${formatTimestamp(scan.scannedAt)}`
       : "Recorded for this event day.";
@@ -900,6 +900,7 @@ const COPY_RESET_MS = 1_500;
     setScannerStarting("Starting camera…", "Allow camera access when your browser asks, then point the device at a student QR code.", true);
 
     try {
+      updateScannerStage(true);
       await qrScanner.start();
       scannerActive = true;
       scannerStarting = false;

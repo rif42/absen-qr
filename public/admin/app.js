@@ -295,13 +295,20 @@
       return null;
     }
 
+    const fromRole = record.fromRole ?? record.from_role;
+    const toRole = record.toRole ?? record.to_role;
+    const derivedStudentId = fromRole === "student" ? record.fromId ?? record.from_id : record.toId ?? record.to_id;
+    const derivedMentorId = fromRole === "mentor" ? record.fromId ?? record.from_id : record.toId ?? record.to_id;
+    const derivedStudentName = fromRole === "student" ? record.fromName ?? record.from_name : record.toName ?? record.to_name;
+    const derivedMentorName = fromRole === "mentor" ? record.fromName ?? record.from_name : record.toName ?? record.to_name;
+
     return {
       scanId,
-      studentId: normalizeString(record.studentId ?? record.student_id),
-      studentName: normalizeString(record.studentName ?? record.student_name),
+      studentId: normalizeString(record.studentId ?? record.student_id ?? derivedStudentId),
+      studentName: normalizeString(record.studentName ?? record.student_name ?? derivedStudentName),
       studentSecretId: normalizeString(record.studentSecretId ?? record.student_secret_id),
-      mentorId: normalizeString(record.mentorId ?? record.mentor_id),
-      mentorName: normalizeString(record.mentorName ?? record.mentor_name),
+      mentorId: normalizeString(record.mentorId ?? record.mentor_id ?? derivedMentorId),
+      mentorName: normalizeString(record.mentorName ?? record.mentor_name ?? derivedMentorName),
       eventDate: normalizeString(record.eventDate ?? record.event_date),
       scannedAt: normalizeString(record.scannedAt ?? record.scanned_at),
       entryMethod: record.entryMethod === "fallback_code" ? "fallback_code" : "qr",

@@ -269,19 +269,25 @@ describe("import-users", () => {
     const remoteScanRecords = [
       {
         scan_id: "scan-001",
-        student_id: REAL_ROSTER.find((person) => person.role === "student")?.person_id,
-        mentor_id: REAL_ROSTER.find((person) => person.role === "mentor")?.person_id,
+        from_id: REAL_ROSTER.find((person) => person.role === "student")?.person_id,
+        to_id: REAL_ROSTER.find((person) => person.role === "mentor")?.person_id,
+        from_role: "student",
+        to_role: "mentor",
         event_date: "2026-04-17",
         scanned_at: "2026-04-17T01:23:45.000Z",
+        entry_method: "scan",
         notes: "Existing note",
         updated_at: "2026-04-17T01:23:45.000Z"
       },
       {
         scan_id: "scan-002",
-        student_id: REAL_ROSTER.filter((person) => person.role === "student")[1]?.person_id,
-        mentor_id: REAL_ROSTER.filter((person) => person.role === "mentor")[1]?.person_id,
+        from_id: REAL_ROSTER.filter((person) => person.role === "student")[1]?.person_id,
+        to_id: REAL_ROSTER.filter((person) => person.role === "mentor")[1]?.person_id,
+        from_role: "student",
+        to_role: "mentor",
         event_date: "2026-04-17",
         scanned_at: "2026-04-17T02:34:56.000Z",
+        entry_method: "scan",
         notes: "Second note",
         updated_at: "2026-04-17T02:34:56.000Z"
       }
@@ -334,7 +340,7 @@ describe("import-users", () => {
               return { parsedJson: makeJsonResult([{ scan_records_count: 2 }]) };
             }
 
-            if (sql.includes("SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;")) {
+            if (sql.includes("SELECT scan_id, from_id, to_id, from_role, to_role, event_date, scanned_at, entry_method, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;")) {
               return { parsedJson: makeJsonResult(remoteScanRecords) };
             }
 
@@ -368,7 +374,7 @@ describe("import-users", () => {
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT person_id, display_name, role, secret_id, secret_path_token FROM people ORDER BY person_id;"),
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT COUNT(*) AS people_count FROM people;"),
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT COUNT(*) AS scan_records_count FROM scan_records;"),
-      expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;"),
+      expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT scan_id, from_id, to_id, from_role, to_role, event_date, scanned_at, entry_method, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;"),
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --file"),
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT role, COUNT(*) AS count FROM people GROUP BY role ORDER BY role;"),
       expect.stringContaining("d1 execute absen-qr --remote --config wrangler.jsonc --json --command SELECT COUNT(*) AS count FROM scan_records;")
@@ -425,7 +431,17 @@ describe("import-users", () => {
     const outputPath = path.join(tempDirectory, "apply-evidence.json");
     const commands: string[][] = [];
 
-    await writeFile(csvPath, buildRosterCsv(), "utf8");
+    const validTokens = REAL_ROSTER.map((_, index) => `fix${String(index).padStart(9, "0")}`);
+    const rosterCsvWithTokens = [
+      "Name,Role,Secret Token",
+      ...REAL_ROSTER.map((person, index) => [
+        escapeCsvField(person.display_name),
+        person.role,
+        validTokens[index]
+      ].join(","))
+    ].join("\n");
+
+    await writeFile(csvPath, rosterCsvWithTokens, "utf8");
 
     await runImportUsers(
       {
@@ -453,7 +469,10 @@ describe("import-users", () => {
             }
 
             if (sql.includes("SELECT person_id, display_name, role, secret_id, secret_path_token FROM people ORDER BY person_id;")) {
-              return { parsedJson: makeJsonResult(REAL_ROSTER) };
+              return { parsedJson: makeJsonResult(REAL_ROSTER.map((person, index) => ({
+                ...person,
+                secret_path_token: validTokens[index]
+              }))) };
             }
 
             if (sql.includes("SELECT COUNT(*) AS people_count FROM people;")) {
@@ -462,6 +481,10 @@ describe("import-users", () => {
 
             if (sql.includes("SELECT COUNT(*) AS scan_records_count FROM scan_records;")) {
               return { parsedJson: makeJsonResult([{ scan_records_count: 0 }]) };
+            }
+
+            if (sql.includes("SELECT scan_id, from_id, to_id, from_role, to_role, event_date, scanned_at, entry_method, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;")) {
+              return { parsedJson: makeJsonResult([]) };
             }
 
             throw new Error(`Unexpected command: ${JSON.stringify(args)}`);
@@ -539,7 +562,7 @@ describe("import-users", () => {
                 return { parsedJson: makeJsonResult([{ scan_records_count: 0 }]) };
               }
 
-              if (sql.includes("SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;")) {
+              if (sql.includes("SELECT scan_id, from_id, to_id, from_role, to_role, event_date, scanned_at, entry_method, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;")) {
                 throw new Error("Remote backup failed");
               }
             }

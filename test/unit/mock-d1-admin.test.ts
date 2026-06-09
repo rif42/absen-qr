@@ -105,36 +105,32 @@ describe("mock D1 admin query shapes", () => {
       .prepare(
         `
           SELECT
-            scan_records.scan_id,
-            scan_records.student_id,
-            student.display_name AS student_name,
-            student.secret_id AS student_secret_id,
-            scan_records.mentor_id,
-            mentor.display_name AS mentor_name,
-            scan_records.event_date,
-            scan_records.scanned_at,
-            scan_records.notes,
-            scan_records.updated_at
-          FROM scan_records
-          JOIN people AS student
-            ON student.person_id = scan_records.student_id
-           AND student.role = 'student'
-          JOIN people AS mentor
-            ON mentor.person_id = scan_records.mentor_id
-           AND mentor.role = 'mentor'
-          WHERE scan_records.event_date >= ?1
-            AND scan_records.event_date <= ?2
-          ORDER BY scan_records.scanned_at DESC, scan_records.scan_id DESC
+            sr.scan_id,
+            sr.from_id,
+            from_person.display_name AS from_name,
+            sr.to_id,
+            to_person.display_name AS to_name,
+            sr.event_date,
+            sr.scanned_at,
+            sr.notes,
+            sr.updated_at
+          FROM scan_records AS sr
+          JOIN people AS from_person
+            ON from_person.person_id = sr.from_id
+          JOIN people AS to_person
+            ON to_person.person_id = sr.to_id
+          WHERE sr.event_date >= ?1
+            AND sr.event_date <= ?2
+          ORDER BY sr.scanned_at DESC, sr.scan_id DESC
         `
       )
       .bind(rangeStartDate, rangeEndDate)
       .all<{
         scan_id: string;
-        student_id: string;
-        student_name: string;
-        student_secret_id: string;
-        mentor_id: string;
-        mentor_name: string;
+        from_id: string;
+        from_name: string;
+        to_id: string;
+        to_name: string;
         event_date: string;
         scanned_at: string;
         notes: string;
@@ -144,11 +140,10 @@ describe("mock D1 admin query shapes", () => {
     expect(records.results).toMatchObject([
       {
         scan_id: "scan-admin-zeta",
-        student_id: student2.person_id,
-        student_name: student2.display_name,
-        student_secret_id: student2.secret_id,
-        mentor_id: mentor2.person_id,
-        mentor_name: mentor2.display_name,
+        from_id: student2.person_id,
+        from_name: student2.display_name,
+        to_id: mentor2.person_id,
+        to_name: mentor2.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Zeta note",
@@ -156,11 +151,10 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-alpha",
-        student_id: student1.person_id,
-        student_name: student1.display_name,
-        student_secret_id: student1.secret_id,
-        mentor_id: mentor1.person_id,
-        mentor_name: mentor1.display_name,
+        from_id: student1.person_id,
+        from_name: student1.display_name,
+        to_id: mentor1.person_id,
+        to_name: mentor1.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T09:00:00.000Z`,
         notes: "Alpha note",
@@ -168,11 +162,10 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-conflict-source",
-        student_id: student2.person_id,
-        student_name: student2.display_name,
-        student_secret_id: student2.secret_id,
-        mentor_id: mentor1.person_id,
-        mentor_name: mentor1.display_name,
+        from_id: student2.person_id,
+        from_name: student2.display_name,
+        to_id: mentor1.person_id,
+        to_name: mentor1.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T08:30:00.000Z`,
         notes: "Conflict candidate",
@@ -180,11 +173,10 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-delete-target",
-        student_id: student1.person_id,
-        student_name: student1.display_name,
-        student_secret_id: student1.secret_id,
-        mentor_id: mentor2.person_id,
-        mentor_name: mentor2.display_name,
+        from_id: student1.person_id,
+        from_name: student1.display_name,
+        to_id: mentor2.person_id,
+        to_name: mentor2.display_name,
         event_date: rangeEndDate,
         scanned_at: `${rangeEndDate}T07:00:00.000Z`,
         notes: "Delete me",
@@ -192,11 +184,10 @@ describe("mock D1 admin query shapes", () => {
       },
       {
         scan_id: "scan-admin-early",
-        student_id: student3.person_id,
-        student_name: student3.display_name,
-        student_secret_id: student3.secret_id,
-        mentor_id: mentor3.person_id,
-        mentor_name: mentor3.display_name,
+        from_id: student3.person_id,
+        from_name: student3.display_name,
+        to_id: mentor3.person_id,
+        to_name: mentor3.display_name,
         event_date: rangeStartDate,
         scanned_at: `${rangeStartDate}T08:00:00.000Z`,
         notes: "Early note",
@@ -212,40 +203,42 @@ describe("mock D1 admin query shapes", () => {
       .prepare(
         `
           SELECT
-            student.display_name AS student_name,
-            student.secret_id AS student_secret_id,
-            mentor.display_name AS mentor_name,
-            scan_records.event_date,
-            scan_records.notes
-          FROM scan_records
-          JOIN people AS student
-            ON student.person_id = scan_records.student_id
-           AND student.role = 'student'
-          JOIN people AS mentor
-            ON mentor.person_id = scan_records.mentor_id
-           AND mentor.role = 'mentor'
-          WHERE scan_records.event_date >= ?1
-            AND scan_records.event_date <= ?2
-          ORDER BY scan_records.scanned_at ASC, scan_records.scan_id ASC
+            from_person.display_name AS from_name,
+            from_person.role AS from_role,
+            to_person.display_name AS to_name,
+            to_person.role AS to_role,
+            sr.event_date,
+            sr.notes,
+            sr.entry_method
+          FROM scan_records AS sr
+          JOIN people AS from_person
+            ON from_person.person_id = sr.from_id
+          JOIN people AS to_person
+            ON to_person.person_id = sr.to_id
+          WHERE sr.event_date >= ?1
+            AND sr.event_date <= ?2
+          ORDER BY sr.scanned_at ASC, sr.scan_id ASC
         `
       )
       .bind(rangeStartDate, rangeEndDate)
       .all<{
-        student_name: string;
-        student_secret_id: string;
-        mentor_name: string;
+        from_name: string;
+        from_role: string;
+        to_name: string;
+        to_role: string;
         event_date: string;
         notes: string;
+        entry_method: string;
       }>();
 
-    expect(rows.results.map((row) => row.student_name)).toEqual([
+    expect(rows.results.map((row) => row.from_name)).toEqual([
       student3.display_name,
       student1.display_name,
       student2.display_name,
       student1.display_name,
       student2.display_name
     ]);
-    expect(rows.results.map((row) => row.mentor_name)).toEqual([
+    expect(rows.results.map((row) => row.to_name)).toEqual([
       mentor3.display_name,
       mentor2.display_name,
       mentor1.display_name,
@@ -261,45 +254,40 @@ describe("mock D1 admin query shapes", () => {
       .prepare(
         `
           SELECT
-            scan_records.scan_id,
-            scan_records.student_id,
-            student.display_name AS student_name,
-            student.secret_id AS student_secret_id,
-            scan_records.mentor_id,
-            mentor.display_name AS mentor_name,
-            scan_records.event_date,
-            scan_records.scanned_at,
-            scan_records.notes,
-            scan_records.updated_at
-          FROM scan_records
-          JOIN people AS student
-            ON student.person_id = scan_records.student_id
-           AND student.role = 'student'
-          JOIN people AS mentor
-            ON mentor.person_id = scan_records.mentor_id
-           AND mentor.role = 'mentor'
-          WHERE scan_records.scan_id = ?1
+            sr.scan_id,
+            sr.from_id,
+            from_person.display_name AS from_name,
+            sr.to_id,
+            to_person.display_name AS to_name,
+            sr.event_date,
+            sr.scanned_at,
+            sr.notes,
+            sr.updated_at
+          FROM scan_records AS sr
+          JOIN people AS from_person
+            ON from_person.person_id = sr.from_id
+          JOIN people AS to_person
+            ON to_person.person_id = sr.to_id
+          WHERE sr.scan_id = ?1
           LIMIT 1
         `
       )
       .bind("scan-admin-alpha")
       .first<{
         scan_id: string;
-        student_id: string;
-        student_name: string;
-        student_secret_id: string;
-        mentor_id: string;
-        mentor_name: string;
+        from_id: string;
+        from_name: string;
+        to_id: string;
+        to_name: string;
         notes: string;
       }>();
 
     expect(record).toMatchObject({
       scan_id: "scan-admin-alpha",
-      student_id: student1.person_id,
-      student_name: student1.display_name,
-      student_secret_id: student1.secret_id,
-      mentor_id: mentor1.person_id,
-      mentor_name: mentor1.display_name,
+      from_id: student1.person_id,
+      from_name: student1.display_name,
+      to_id: mentor1.person_id,
+      to_name: mentor1.display_name,
       notes: "Alpha note"
     });
   });
@@ -311,7 +299,7 @@ describe("mock D1 admin query shapes", () => {
       .prepare(
         `
           UPDATE scan_records
-          SET notes = ?1, student_id = ?2, mentor_id = ?3, updated_at = ?4
+          SET notes = ?1, from_id = ?2, to_id = ?3, updated_at = ?4
           WHERE scan_id = ?5
         `
       )
@@ -328,8 +316,8 @@ describe("mock D1 admin query shapes", () => {
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",
-          student_id: student3.person_id,
-          mentor_id: mentor3.person_id,
+          from_id: student3.person_id,
+          to_id: mentor3.person_id,
           notes: "Updated by admin",
           updated_at: `${configuredEventDate}T11:00:00.000Z`
         })
@@ -345,7 +333,7 @@ describe("mock D1 admin query shapes", () => {
         .prepare(
           `
             UPDATE scan_records
-            SET student_id = ?1, mentor_id = ?2, updated_at = ?3
+            SET from_id = ?1, to_id = ?2, updated_at = ?3
             WHERE scan_id = ?4
           `
         )
@@ -357,15 +345,15 @@ describe("mock D1 admin query shapes", () => {
         )
         .run()
     ).rejects.toThrow(
-      "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
+      "UNIQUE constraint failed: scan_records.from_id, scan_records.to_id, scan_records.event_date"
     );
 
     expect(readMockD1State(db).scanRecords).toMatchObject(
       expect.arrayContaining([
         expect.objectContaining({
           scan_id: "scan-admin-conflict-source",
-          student_id: student2.person_id,
-          mentor_id: mentor1.person_id,
+          from_id: student2.person_id,
+          to_id: mentor1.person_id,
           updated_at: `${configuredEventDate}T08:30:00.000Z`
         })
       ])

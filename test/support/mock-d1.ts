@@ -22,7 +22,10 @@ type MockState = {
   missingScanRecordsEntryMethodColumn: boolean;
 };
 
-type MockScanRecordSeed = Omit<ScanRecord, "entry_method"> & Partial<Pick<ScanRecord, "entry_method">>;
+type MockScanRecordSeed = Partial<Omit<ScanRecord, "entry_method">> & Partial<Pick<ScanRecord, "entry_method">> & {
+  student_id?: string;
+  mentor_id?: string;
+};
 
 type MockFallbackCodeSeed = Pick<
   MentorFallbackCodeRecord,
@@ -70,9 +73,19 @@ type StatementExecutor = {
 const DEFAULT_PEOPLE: PersonRecord[] = REAL_ROSTER;
 
 function cloneScanRecord(scanRecord: MockScanRecordSeed): ScanRecord {
+  const isLegacy = "student_id" in scanRecord && "mentor_id" in scanRecord;
+
   return {
-    ...scanRecord,
-    entry_method: scanRecord.entry_method ?? "qr"
+    scan_id: scanRecord.scan_id ?? "",
+    from_id: isLegacy ? scanRecord.student_id! : (scanRecord.from_id ?? ""),
+    to_id: isLegacy ? scanRecord.mentor_id! : (scanRecord.to_id ?? ""),
+    from_role: isLegacy ? "student" : (scanRecord.from_role ?? "student"),
+    to_role: isLegacy ? "mentor" : (scanRecord.to_role ?? "mentor"),
+    event_date: scanRecord.event_date ?? scanRecord.scanned_at?.substring(0, 10) ?? "",
+    scanned_at: scanRecord.scanned_at ?? "",
+    entry_method: scanRecord.entry_method ?? "qr",
+    notes: scanRecord.notes ?? "",
+    updated_at: scanRecord.updated_at ?? ""
   };
 }
 
@@ -115,18 +128,19 @@ function getPersonById(state: MockState, role: PersonRecord["role"], personId: s
 }
 
 function buildAdminJoinedRow(state: MockState, scanRecord: ScanRecord) {
-  const student = getPersonById(state, "student", scanRecord.student_id);
-  const mentor = getPersonById(state, "mentor", scanRecord.mentor_id);
+  const fromPerson = getPersonById(state, scanRecord.from_role as PersonRecord["role"], scanRecord.from_id);
+  const toPerson = getPersonById(state, scanRecord.to_role as PersonRecord["role"], scanRecord.to_id);
 
-  if (!student || !mentor) {
+  if (!fromPerson || !toPerson) {
     return null;
   }
 
   return {
     ...scanRecord,
-    student_name: student.display_name,
-    student_secret_id: student.secret_id,
-    mentor_name: mentor.display_name
+    from_name: fromPerson.display_name,
+    to_name: toPerson.display_name,
+    from_secret_id: fromPerson.secret_id,
+    to_secret_id: toPerson.secret_id
   };
 }
 
@@ -201,12 +215,20 @@ function applyAdminScanRecordUpdate(state: MockState, normalizedSql: string, par
       nextValues.notes = value;
     }
 
-    if (column === "student_id" && typeof value === "string") {
-      nextValues.student_id = value;
+    if (column === "from_id" && typeof value === "string") {
+      nextValues.from_id = value;
     }
 
-    if (column === "mentor_id" && typeof value === "string") {
-      nextValues.mentor_id = value;
+    if (column === "to_id" && typeof value === "string") {
+      nextValues.to_id = value;
+    }
+
+    if (column === "from_role" && (value === "student" || value === "mentor")) {
+      nextValues.from_role = value;
+    }
+
+    if (column === "to_role" && (value === "student" || value === "mentor")) {
+      nextValues.to_role = value;
     }
 
     if (column === "updated_at" && typeof value === "string") {
@@ -221,19 +243,21 @@ function applyAdminScanRecordUpdate(state: MockState, normalizedSql: string, par
   const conflictingRecord = state.scanRecords.find(
     (candidate) =>
       candidate.scan_id !== scanRecord.scan_id &&
-      candidate.student_id === nextValues.student_id &&
-      candidate.mentor_id === nextValues.mentor_id &&
+      candidate.from_id === nextValues.from_id &&
+      candidate.to_id === nextValues.to_id &&
       candidate.event_date === nextValues.event_date
   );
 
   if (conflictingRecord) {
     throw new Error(
-      "UNIQUE constraint failed: scan_records.student_id, scan_records.mentor_id, scan_records.event_date"
+      "UNIQUE constraint failed: scan_records.from_id, scan_records.to_id, scan_records.event_date"
     );
   }
 
-  scanRecord.student_id = nextValues.student_id;
-  scanRecord.mentor_id = nextValues.mentor_id;
+  scanRecord.from_id = nextValues.from_id;
+  scanRecord.to_id = nextValues.to_id;
+  scanRecord.from_role = nextValues.from_role;
+  scanRecord.to_role = nextValues.to_role;
   scanRecord.notes = nextValues.notes;
   scanRecord.updated_at = nextValues.updated_at;
   scanRecord.entry_method = nextValues.entry_method;
@@ -368,16 +392,7 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             return (person ?? null) as T | null;
           }
 
-          if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where mentor_id = ?1 and scan_id = ?2")) {
-            const [mentorId, scanId] = params as [string, string];
-            const scanRecord = state.scanRecords.find(
-              (candidate) => candidate.mentor_id === mentorId && candidate.scan_id === scanId
-            );
-
-            return (scanRecord ?? null) as T | null;
-          }
-
-          if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where scan_records.scan_id = ?1")) {
+          if (normalizedSql.includes("from scan_records") && normalizedSql.includes("scan_id = ?1")) {
             const [scanId] = params as [string];
             const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
 
@@ -385,7 +400,10 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
               return null;
             }
 
-            if (normalizedSql.includes("join people as student") && normalizedSql.includes("join people as mentor")) {
+            if (
+              normalizedSql.includes("join people as from_person") &&
+              normalizedSql.includes("join people as to_person")
+            ) {
               return buildAdminJoinedRow(state, scanRecord) as T | null;
             }
 
@@ -394,13 +412,13 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and event_date = ?3")
+            normalizedSql.includes("where from_id = ?1 and to_id = ?2 and event_date = ?3")
           ) {
-            const [studentId, mentorId, eventDate] = params as [string, string, string];
+            const [fromId, toId, eventDate] = params as [string, string, string];
             const scanRecord = state.scanRecords.find(
               (candidate) =>
-                candidate.student_id === studentId &&
-                candidate.mentor_id === mentorId &&
+                candidate.from_id === fromId &&
+                candidate.to_id === toId &&
                 candidate.event_date === eventDate
             );
 
@@ -409,35 +427,13 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and substr(scanned_at, 1, 10) = ?3")
+            normalizedSql.includes("where from_id = ?1 and to_id = ?2 and event_date = ?3 and scan_id != ?4")
           ) {
-            const [studentId, mentorId, utcDate] = params as [string, string, string];
+            const [fromId, toId, eventDate, scanId] = params as [string, string, string, string];
             const scanRecord = state.scanRecords.find(
               (candidate) =>
-                candidate.student_id === studentId &&
-                candidate.mentor_id === mentorId &&
-                candidate.scanned_at.slice(0, 10) === utcDate
-            );
-
-            return (scanRecord ?? null) as T | null;
-          }
-
-          if (normalizedSql.includes("from scan_records") && normalizedSql.includes("where scan_id = ?1")) {
-            const [scanId] = params as [string];
-            const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
-
-            return (scanRecord ?? null) as T | null;
-          }
-
-          if (
-            normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where student_id = ?1 and mentor_id = ?2 and event_date = ?3 and scan_id != ?4")
-          ) {
-            const [studentId, mentorId, eventDate, scanId] = params as [string, string, string, string];
-            const scanRecord = state.scanRecords.find(
-              (candidate) =>
-                candidate.student_id === studentId &&
-                candidate.mentor_id === mentorId &&
+                candidate.from_id === fromId &&
+                candidate.to_id === toId &&
                 candidate.event_date === eventDate &&
                 candidate.scan_id !== scanId
             );
@@ -496,24 +492,24 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
 
           if (
             normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where student_id = ?1 and substr(scanned_at, 1, 10) = ?2")
+            normalizedSql.includes("join people as from_person") &&
+            normalizedSql.includes("join people as to_person") &&
+            normalizedSql.includes("(sr.from_id = ?1 or sr.to_id = ?1)") &&
+            normalizedSql.includes("sr.event_date = ?2")
           ) {
-            const [studentId, utcDate] = params as [string, string];
+            const [personId, eventDate] = params as [string, string];
             const results = state.scanRecords
-              .filter((scanRecord) => scanRecord.student_id === studentId && scanRecord.scanned_at.slice(0, 10) === utcDate)
-              .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
-
-            return createQueryResult(results as T[]);
-          }
-
-          if (
-            normalizedSql.includes("from scan_records") &&
-            normalizedSql.includes("where mentor_id = ?1 and substr(scanned_at, 1, 10) = ?2")
-          ) {
-            const [mentorId, utcDate] = params as [string, string];
-            const results = state.scanRecords
-              .filter((scanRecord) => scanRecord.mentor_id === mentorId && scanRecord.scanned_at.slice(0, 10) === utcDate)
-              .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at));
+              .filter((scanRecord) => (scanRecord.from_id === personId || scanRecord.to_id === personId) && scanRecord.event_date === eventDate)
+              .sort((left, right) => right.scanned_at.localeCompare(left.scanned_at))
+              .map((scanRecord) => {
+                const fromPerson = getPersonById(state, scanRecord.from_role as PersonRecord["role"], scanRecord.from_id);
+                const toPerson = getPersonById(state, scanRecord.to_role as PersonRecord["role"], scanRecord.to_id);
+                return {
+                  ...scanRecord,
+                  from_name: fromPerson?.display_name ?? "",
+                  to_name: toPerson?.display_name ?? ""
+                };
+              });
 
             return createQueryResult(results as T[]);
           }
@@ -522,14 +518,17 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
             normalizedSql.includes("from scan_records") &&
             normalizedSql.includes("event_date >= ?1") &&
             normalizedSql.includes("event_date <= ?2") &&
-            normalizedSql.includes("join people as student") &&
-            normalizedSql.includes("join people as mentor")
+            (
+              (normalizedSql.includes("join people as student") && normalizedSql.includes("join people as mentor")) ||
+              (normalizedSql.includes("join people as from_person") && normalizedSql.includes("join people as to_person"))
+            ) &&
+            !normalizedSql.includes("from_person.role")
           ) {
             const [startDate, endDate] = params as [string, string];
             const records = state.scanRecords
               .filter((scanRecord) => scanRecord.event_date >= startDate && scanRecord.event_date <= endDate)
               .sort((left, right) => {
-                if (normalizedSql.includes("order by scan_records.scanned_at asc, scan_records.scan_id asc")) {
+                if (normalizedSql.includes("order by sr.scanned_at asc, sr.scan_id asc") || normalizedSql.includes("order by scan_records.scanned_at asc, scan_records.scan_id asc")) {
                   return compareScanRecords(left, right, "asc");
                 }
 
@@ -537,6 +536,36 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
               });
 
             return createQueryResult(records.map((record) => buildAdminJoinedRow(state, record)).filter(Boolean) as T[]);
+          }
+
+          if (
+            normalizedSql.includes("from scan_records") &&
+            normalizedSql.includes("event_date >= ?1") &&
+            normalizedSql.includes("event_date <= ?2") &&
+            normalizedSql.includes("join people as from_person") &&
+            normalizedSql.includes("join people as to_person") &&
+            normalizedSql.includes("from_person.role")
+          ) {
+            const [startDate, endDate] = params as [string, string];
+            const records = state.scanRecords
+              .filter((scanRecord) => scanRecord.event_date >= startDate && scanRecord.event_date <= endDate)
+              .sort((left, right) => compareScanRecords(left, right, "asc"));
+
+            const results = records.map((record) => {
+              const fromPerson = getPersonById(state, record.from_role as PersonRecord["role"], record.from_id);
+              const toPerson = getPersonById(state, record.to_role as PersonRecord["role"], record.to_id);
+              return {
+                from_name: fromPerson?.display_name ?? "",
+                from_role: record.from_role,
+                to_name: toPerson?.display_name ?? "",
+                to_role: record.to_role,
+                event_date: record.event_date,
+                notes: record.notes,
+                entry_method: record.entry_method
+              };
+            });
+
+            return createQueryResult(results as T[]);
           }
 
           if (
@@ -578,33 +607,82 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
               throw new Error(message);
             }
 
-            const [scanId, studentId, mentorId, eventDate, scannedAt] = params as [
-              string,
-              string,
-              string,
-              string,
-              string
-            ];
-            const entryMethod = params.length === 8 ? (params[5] as ScanRecord["entry_method"]) : "qr";
-            const notes = (params.length === 8 ? params[6] : params[5]) as string;
-            const updatedAt = (params.length === 8 ? params[7] : params[6]) as string;
+            if (normalizedSql.includes("from_id")) {
+              // New directional schema (10 params)
+              const [scanId, fromId, toId, fromRole, toRole, eventDate, scannedAt, entryMethod, notes, updatedAt] = params as [
+                string,
+                string,
+                string,
+                ScanRecord["from_role"],
+                ScanRecord["to_role"],
+                string,
+                string,
+                ScanRecord["entry_method"],
+                string,
+                string
+              ];
 
-            state.scanRecords.push({
-              scan_id: scanId,
-              student_id: studentId,
-              mentor_id: mentorId,
-              event_date: eventDate,
-              scanned_at: scannedAt,
-              entry_method: entryMethod,
-              notes,
-              updated_at: updatedAt
-            });
+              state.scanRecords.push({
+                scan_id: scanId,
+                from_id: fromId,
+                to_id: toId,
+                from_role: fromRole,
+                to_role: toRole,
+                event_date: eventDate,
+                scanned_at: scannedAt,
+                entry_method: entryMethod ?? "qr",
+                notes: notes ?? "",
+                updated_at: updatedAt ?? scannedAt
+              });
+            } else {
+              // Old schema (8 params) - keep for backward compatibility
+              const [scanId, studentId, mentorId, eventDate, scannedAt] = params as [
+                string,
+                string,
+                string,
+                string,
+                string
+              ];
+              const entryMethod = params.length === 8 ? (params[5] as ScanRecord["entry_method"]) : "qr";
+              const notes = (params.length === 8 ? params[6] : params[5]) as string;
+              const updatedAt = (params.length === 8 ? params[7] : params[6]) as string;
+
+              state.scanRecords.push({
+                scan_id: scanId,
+                from_id: studentId,
+                to_id: mentorId,
+                from_role: "student",
+                to_role: "mentor",
+                event_date: eventDate,
+                scanned_at: scannedAt,
+                entry_method: entryMethod,
+                notes,
+                updated_at: updatedAt
+              });
+            }
           }
 
-          if (normalizedSql.startsWith("update scan_records set notes = ?1, updated_at = ?2 where mentor_id = ?3 and scan_id = ?4")) {
-            const [notes, updatedAt, mentorId, scanId] = params as [string, string, string, string];
+          if (
+            normalizedSql.startsWith("update scan_records set notes = ?1, updated_at = ?2 where scan_id = ?3")
+          ) {
+            const [notes, updatedAt, scanId] = params as [string, string, string];
+            const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
+
+            if (scanRecord) {
+              scanRecord.notes = notes;
+              scanRecord.updated_at = updatedAt;
+            }
+          }
+
+          if (
+            normalizedSql.startsWith("update scan_records set notes = ?1, updated_at = ?2") &&
+            normalizedSql.includes("where (from_id = ?3 or to_id = ?3) and scan_id = ?4")
+          ) {
+            const [notes, updatedAt, personId, scanId] = params as [string, string, string, string];
             const scanRecord = state.scanRecords.find(
-              (candidate) => candidate.mentor_id === mentorId && candidate.scan_id === scanId
+              (candidate) =>
+                (candidate.from_id === personId || candidate.to_id === personId) &&
+                candidate.scan_id === scanId
             );
 
             if (scanRecord) {
@@ -626,13 +704,13 @@ function createStatement(state: MockState, sql: string): { bind: (...params: unk
           }
 
           if (
-            normalizedSql.startsWith("update scan_records set event_date = ?1, entry_method = 'qr' where scan_id = ?2")
+            normalizedSql.startsWith("update scan_records set event_date = ?1, entry_method = ?2 where scan_id = ?3")
           ) {
-            const [eventDate, scanId] = params as [string, string];
+            const [eventDate, entryMethod, scanId] = params as [string, string, string];
             const scanRecord = state.scanRecords.find((candidate) => candidate.scan_id === scanId);
             if (scanRecord) {
               scanRecord.event_date = eventDate;
-              scanRecord.entry_method = "qr";
+              scanRecord.entry_method = entryMethod as ScanRecord["entry_method"];
             }
           }
 

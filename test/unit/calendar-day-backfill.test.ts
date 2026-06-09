@@ -9,8 +9,10 @@ describe("auditAndBackfillEventDates", () => {
       scanRecords: [
         {
           scan_id: "scan-stale-001",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          from_id: "student-001",
+          to_id: "mentor-001",
+          from_role: "student",
+          to_role: "mentor",
           event_date: "2026-01-14",
           scanned_at: "2026-01-15T08:00:00.000Z",
           notes: "",
@@ -35,8 +37,10 @@ describe("auditAndBackfillEventDates", () => {
       scanRecords: [
         {
           scan_id: "scan-collision-source",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          from_id: "student-001",
+          to_id: "mentor-001",
+          from_role: "student",
+          to_role: "mentor",
           event_date: "2026-01-14",
           scanned_at: "2026-01-15T08:00:00.000Z",
           notes: "",
@@ -44,8 +48,10 @@ describe("auditAndBackfillEventDates", () => {
         },
         {
           scan_id: "scan-collision-blocker",
-          student_id: "student-001",
-          mentor_id: "mentor-001",
+          from_id: "student-001",
+          to_id: "mentor-001",
+          from_role: "student",
+          to_role: "mentor",
           event_date: "2026-01-15",
           scanned_at: "2026-01-15T09:00:00.000Z",
           notes: "",
@@ -55,7 +61,7 @@ describe("auditAndBackfillEventDates", () => {
     });
 
     await expect(auditAndBackfillEventDates(db)).rejects.toThrow(
-      /Backfill aborted: 1 row\(s\) would violate the unique \(student_id, mentor_id, event_date\) constraint/
+      /Backfill aborted: 1 row\(s\) would violate the unique \(from_id, to_id, event_date\) constraint/
     );
 
     const state = readMockD1State(db);

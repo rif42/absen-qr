@@ -34,8 +34,10 @@ export type PersonRecord = {
 
 export type ScanRecord = {
   scan_id: string;
-  student_id: string;
-  mentor_id: string;
+  from_id: string;
+  to_id: string;
+  from_role: "student" | "mentor";
+  to_role: "student" | "mentor";
   event_date: string;
   scanned_at: string;
   entry_method: "qr" | "fallback_code";

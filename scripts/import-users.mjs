@@ -370,7 +370,7 @@ async function runRemoteApply({ options, outputPath, artifactBase, canonicalRost
 
   const peopleBackupPath = path.join(backupDirectory, "people-pre-apply.json");
   const scanRecordsBackupPath = path.join(backupDirectory, "scan-records-pre-apply.json");
-  const scanRecordsBackupQuery = "SELECT scan_id, student_id, mentor_id, event_date, scanned_at, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;";
+  const scanRecordsBackupQuery = "SELECT scan_id, from_id, to_id, from_role, to_role, event_date, scanned_at, entry_method, notes, updated_at FROM scan_records ORDER BY event_date, scanned_at, scan_id;";
 
   const scanRecordsBackupResult = await executeLoggedCommand(commandLog, [
     "d1",
