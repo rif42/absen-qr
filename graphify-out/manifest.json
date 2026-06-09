@@ -1,0 +1,677 @@
+{
+  "D:\\work\\absen-qr\\.graphify_cached.json": {
+    "mtime": 1780725452.0698454,
+    "ast_hash": "1d7aba532ec11c2898392d4c5aad9b5f",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.graphify_extract.json": {
+    "mtime": 1780725452.0698454,
+    "ast_hash": "cbd1201d3c6780a7da3b1c645b13fb3c",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\absen_export.sql": {
+    "mtime": 1780725452.0797992,
+    "ast_hash": "5434273af0d2f581c235e1a1a20b9e59",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\opencode.json": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "19a51febeea85351e9fcc679b3df35f4",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\package.json": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "bf10dd98200281a40467a29123324f45",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\playwright.config.ts": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "90594afc7d8cf5ee4ae1a88b34c44db9",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\server.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "a6bf93d3c686c503c018663fda9b1b87",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\tsconfig.json": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "c4ff76806fead0352b4f11dea616dbec",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\vitest.config.ts": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "21792f4e2623a3b4c575cf2957b120a1",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.opencode\\package.json": {
+    "mtime": 1780725605.1965342,
+    "ast_hash": "c9442b1dfba4cd254e8dc712cf2d3da8",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.opencode\\plugins\\graphify.js": {
+    "mtime": 1780725452.0698454,
+    "ast_hash": "05c1b965c8d4f9d185bdd6abcd3eb51f",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.wrangler\\tmp\\bundle-luCF2Q\\middleware-insertion-facade.js": {
+    "mtime": 1780725586.8807425,
+    "ast_hash": "9c7971dc9e4568cf500ad6cd360e83ed",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.wrangler\\tmp\\bundle-luCF2Q\\middleware-loader.entry.ts": {
+    "mtime": 1780725586.959726,
+    "ast_hash": "f7be84732be199eea082a34abd08dd3d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.wrangler\\tmp\\dev-3Jmyqv\\index.js": {
+    "mtime": 1780727385.7476006,
+    "ast_hash": "3780d8b4891391485173637c9acc648d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\migrations\\0001_initial_schema.sql": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "55d1b291f191a7a6514ac3d787731973",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\migrations\\0002_backfill_event_dates.sql": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "cd061ba844ad660abf9ed79763cdfd46",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\migrations\\0003_fallback_codes.sql": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "d2df8398f0a1b3000032ef98041f559b",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\migrations\\0004_directional_scan_records.sql": {
+    "mtime": 1780980850.802612,
+    "ast_hash": "2eb51dc68ad8501d3abc812f55561d21",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\admin\\app.js": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "3c8d07d9bf3da16d617af971dc25d394",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\mentor\\app.js": {
+    "mtime": 1780979739.548336,
+    "ast_hash": "9909ba3667a951265cebc97d7d7282b2",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\student\\app.js": {
+    "mtime": 1780979546.4780824,
+    "ast_hash": "1b3711780f8cfc2dbd786480a400fe86",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\vendor\\qr-scanner\\qr-scanner-worker.min.js": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "f07c346535da99b394b4ab29624f69b0",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\vendor\\qr-scanner\\qr-scanner.min.js": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "e19b531192a9ae88ff15e813b0a0d7d8",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\scripts\\add-user.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "636e106778bac1582874c4c32f1352c3",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\scripts\\import-users.mjs": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "dd50ebb9aa5a6647a00323f677333925",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\dev.sql": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "b9207218d4f19a7202f9d6eba765ab5b",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\e2e-admin.sql": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "9e957993d1b3432936862806f3244cb5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\import.json": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "8aaa91b082766d0a71ecce660ca035c9",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\import-remote-backups\\apply-remote.sql": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "ee440391ec529da97ba061d608f8f08e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\import-remote-backups\\people-pre-apply.json": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "032cf7c7b4606b78cffea781740f0538",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\seed\\import-remote-backups\\scan-records-pre-apply.json": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "ac593b549bd5712a0acef2864365b69e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\types\\admin-page-app.d.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "deb7222c2958fd32af64cad5a17f558e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\types\\qrcode-svg.d.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "72272e62aa581d96ced89cd2097d2b16",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\index.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "d411499a2ae5775888857c174863596d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\types.ts": {
+    "mtime": 1780980541.2797155,
+    "ast_hash": "5d16ea5a58af304d418b5f2ddb910fad",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\db\\admin-records.ts": {
+    "mtime": 1780981964.6206393,
+    "ast_hash": "06bc7ccb126e1be6f2f4a7ddd52a5a26",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\db\\fallback-codes.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "af6a9b89610642bdecda9fa89421dc43",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\db\\people.ts": {
+    "mtime": 1780725452.1022153,
+    "ast_hash": "3ebd2f8867251fa30e8690fbf0049887",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\db\\scan-records.ts": {
+    "mtime": 1780982205.665893,
+    "ast_hash": "e324f9d5880036ee42c5b3f9782e4b5d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\routes\\admin.ts": {
+    "mtime": 1780981627.038868,
+    "ast_hash": "df586e413e1ba2373d1f9151198bc51c",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\routes\\mentor.ts": {
+    "mtime": 1780982298.3324754,
+    "ast_hash": "2a58e6b0c420039757d0208edb68a6ab",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\routes\\root.ts": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "7d1fee575b466c1c79e11ad2efc98e22",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\routes\\student.ts": {
+    "mtime": 1780981878.3441908,
+    "ast_hash": "60f87549680605948c1e297f0c4eabe6",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\services\\event-day.ts": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "10d6163a2923a5e3d1f2da69c9b1052b",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\services\\http.ts": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "4d232c999f62585b34d5d617db1b625a",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\services\\qr-payload.ts": {
+    "mtime": 1780726817.187253,
+    "ast_hash": "9e6276cb020f196a150530c38b237406",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\services\\qr-svg.ts": {
+    "mtime": 1780726789.45421,
+    "ast_hash": "dca83b758daba12f54d4c6b047aa15d1",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\services\\scan-submission.ts": {
+    "mtime": 1780982219.0591602,
+    "ast_hash": "6fe3aa8624dcc38bb8aad4ec9ee45e82",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\src\\worker\\validation\\scan-records.ts": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "e6fac824999d7a3330a8ff16d6952590",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\e2e\\admin-flow.spec.ts": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "36cac186c0b688adc1dc6813db6f3d8c",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\e2e\\admin.setup.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "8232aebba0a5862be96f2aa0c4f6b38c",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\admin-api.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "4483130626a8ccb5843a353c3cc77bdb",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\admin-page-app.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "592ad5615827fb944f295bccc455f01e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\admin-page-dom.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "91af3f73ff54a611c3322abd183e3269",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\mentor-api.test.ts": {
+    "mtime": 1780982188.2039113,
+    "ast_hash": "aa5319ced659739643f760374f9588ef",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\mentor-page-dom.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "479af22f8aebdb28e13684300da21fef",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\student-api.test.ts": {
+    "mtime": 1780981969.2971647,
+    "ast_hash": "29b312fc475ca77ebea816c2f03ed07c",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\student-page-app.test.ts": {
+    "mtime": 1780727935.5045767,
+    "ast_hash": "aba127227958a3c4fa3ee9d7fdaf7f42",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\student-page-dom.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "0ad596047a56d8bbf1d4cc6ef859a71d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\integration\\worker-smoke.test.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "8ee4324478ae89bfa38aa2859cfb5133",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\support\\mock-d1.ts": {
+    "mtime": 1780982141.2530944,
+    "ast_hash": "30657ab15ce584d580fdc53998580598",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\support\\real-roster.ts": {
+    "mtime": 1780725452.1098907,
+    "ast_hash": "a4a5e5c472002c5bb9695032fa6a90bf",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\admin-records.test.ts": {
+    "mtime": 1780981380.802795,
+    "ast_hash": "3a5fb1f052acef15f8dc62a377367e90",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\calendar-day-backfill.test.ts": {
+    "mtime": 1780981571.5796056,
+    "ast_hash": "0a31c0fbfb6af9d602e6cb77f95a0413",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\calendar-day-semantics.test.ts": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "8c28f737138017bd907593cc5fa1f299",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\import-users.test.ts": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "6a8d7d96f124be7f40beac857574e85d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\mock-d1-admin.test.ts": {
+    "mtime": 1780982055.9267094,
+    "ast_hash": "716d121bb69d67b1ca205350ab02662e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\mock-d1.test.ts": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "445dd775b2f0b800ba2cefcce7690773",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\normalize-history.test.ts": {
+    "mtime": 1780725452.112502,
+    "ast_hash": "04a93aea25498aff949549d233fcb214",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\qr-payload.test.ts": {
+    "mtime": 1780726834.8911307,
+    "ast_hash": "dcad2ea0ca06ccc75cb3905504acbc17",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test\\unit\\scan-submission.test.ts": {
+    "mtime": 1780981249.6700032,
+    "ast_hash": "4833da008ecdda261bb16d956edda8fe",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\test-results\\.last-run.json": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "5970244f4baa12f805a34ee49fa86ab5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.graphify_uncached.txt": {
+    "mtime": 1780725452.0698454,
+    "ast_hash": "170681fdb8a41e7205b4486f04272cc5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\AGENTS.md": {
+    "mtime": 1780725452.0797992,
+    "ast_hash": "0e7c1f7627d681c1cb542d5b4ec137fb",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\README.md": {
+    "mtime": 1780725452.0797992,
+    "ast_hash": "4347a0a1c5dafd73d7dd271afec4a578",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-10T06-27-57-359Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "1df48a12a9ed86960cc98740128b8ac9",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-10T06-28-18-691Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "580000fe97e02450448e26afb3ece44d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-01-01-122Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-01-17-983Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-01-44-371Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-02-08-404Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "1df48a12a9ed86960cc98740128b8ac9",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-02-44-190Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-02-52-225Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-03-24-919Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T07-03-48-986Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "17bfb21b31987e5257d859f31284749f",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T16-24-34-742Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T16-49-54-636Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T16-50-37-873Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T16-52-01-038Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-13T16-52-47-693Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "874466aba01dbfb95642a6e9c6b3122e",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-32-59-178Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "86a708606c25aa6e30c9ef61099e2bdc",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-33-13-290Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "1df48a12a9ed86960cc98740128b8ac9",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-33-24-380Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "580000fe97e02450448e26afb3ece44d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-33-47-172Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-34-03-684Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-34-25-323Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "8d0b806b0bac656c68e1900173c1cb97",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-34-27-277Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "69970b007f3ca8967e13d3dd5aa83d73",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-34-53-536Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-42-18-542Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-42-52-254Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-43-11-921Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "dae431d0444b489c1b19bf62a29eda91",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-43-13-879Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "dd1f0caa38df30f7f1d595b3a7009404",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T02-43-29-965Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "b2b5c16f3cf592722855d349276255a5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T07-07-02-825Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "6d4327a84be8d794565a44844dce21dd",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T07-08-31-398Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "02f9f95773ec35e131a29dc8c9b3e512",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T07-09-40-799Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "323fdfdd3a4591b00735ff53ae3f0ab8",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T07-21-55-143Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "323fdfdd3a4591b00735ff53ae3f0ab8",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\.playwright-mcp\\page-2026-04-14T07-23-33-499Z.yml": {
+    "mtime": 1780725452.0731294,
+    "ast_hash": "48aa63fc138f1a7dbc4df78c0bc5dd33",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\docs\\README.md": {
+    "mtime": 1780725452.0825136,
+    "ast_hash": "f670db1fabb4684ef52c95cd20b5b284",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\docs\\implementation\\mentor-student-qr-attendance-v1-plan.md": {
+    "mtime": 1780725452.0825136,
+    "ast_hash": "6aa283e3b3d060b7fa2d0a06fc1383b5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\docs\\prd\\mentor-student-qr-attendance-v1.md": {
+    "mtime": 1780725452.0825136,
+    "ast_hash": "a19d86ec6714cd151101e29e21e13180",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\index.html": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "1685f1a4e7878865f7f9f993b31533df",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\admin\\index.html": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "0cff454561bc264ec17532c717af13e2",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\mentor\\index.html": {
+    "mtime": 1780979737.025385,
+    "ast_hash": "10b575234559dbb240047d1b9bbebcb5",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\student\\index.html": {
+    "mtime": 1780979545.7090106,
+    "ast_hash": "a9e7361a5b8caad542c505bee7200c87",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\ledgers\\CONTINUITY_ses_1553.md": {
+    "mtime": 1780982285.6541507,
+    "ast_hash": "fb9bc89b069255a2e179e8aac13d2f03",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\ledgers\\CONTINUITY_ses_1554.md": {
+    "mtime": 1780981546.1629543,
+    "ast_hash": "231bf7d3f2d698a7e1609089916060b1",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\ledgers\\CONTINUITY_ses_1555.md": {
+    "mtime": 1780981762.651519,
+    "ast_hash": "6079cba837e374367aa27c455549d58d",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\ledgers\\CONTINUITY_ses_1646.md": {
+    "mtime": 1780727771.3957827,
+    "ast_hash": "5827ebf48c0a733bcc1b0f50e420b33a",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\ledgers\\CONTINUITY_ses_1647.md": {
+    "mtime": 1780882324.120346,
+    "ast_hash": "9a08bf3ac5ad512eb5ea54a200194c64",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\designs\\2026-06-06-bidirectional-qr-scanning-design.md": {
+    "mtime": 1780884487.214617,
+    "ast_hash": "61ae9ba61e85793f10aecf64b5367051",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\designs\\2026-06-06-qr-scan-feature-design.md": {
+    "mtime": 1780727981.0924315,
+    "ast_hash": "835e41641c2294539eed66179f5bdfef",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\designs\\2026-06-09-generalized-scan-records-design.md": {
+    "mtime": 1780980236.3879175,
+    "ast_hash": "0358945c99b9f4e926e35dbb3a0f1de4",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\designs\\2026-06-09-scan-records-schema-migration-design.md": {
+    "mtime": 1780980284.2410183,
+    "ast_hash": "99a48eeb5ef288028c7d3a772203c347",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\plans\\2026-06-06-bidirectional-qr-scanning.md": {
+    "mtime": 1780727385.6289043,
+    "ast_hash": "fb170db60939d33ad8a6e7da57e6acd4",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\plans\\2026-06-09-generalized-scan-records.md": {
+    "mtime": 1780980587.6375866,
+    "ast_hash": "218ffe1da739de4fc36ce23945733c30",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\thoughts\\shared\\plans\\2026-06-09-scan-records-schema-migration.md": {
+    "mtime": 1780980378.592017,
+    "ast_hash": "bf39d38001c6a85d830bea67d1d6b83f",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\admin-page.png": {
+    "mtime": 1780725452.0825136,
+    "ast_hash": "3d6a1f338647ee23179aafaec6088324",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\mentor-page-full.png": {
+    "mtime": 1780725452.0966198,
+    "ast_hash": "536ecb7db3d0960b1aaf9052014baa04",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\student-mobile-redesign.png": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "16c4c392e1dbc3de8b1e03f3803dee44",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\student-page-full.png": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "b38af15ca425cfe468e30e93920b7869",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\student-page.png": {
+    "mtime": 1780725452.1051168,
+    "ast_hash": "febbe67f2beac48cce76ea0660a16c96",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\absen-qr-how-to-use.jpg": {
+    "mtime": 1778143774.946,
+    "ast_hash": "83b8c045f32f24d52c57200349e60ecd",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\apu.webp": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "286be6cf4a605b4b437e47a467b3f9a6",
+    "semantic_hash": ""
+  },
+  "D:\\work\\absen-qr\\public\\bg.webp": {
+    "mtime": 1780725452.0996473,
+    "ast_hash": "9accca7bcc52a16c55ff70593ba40e5e",
+    "semantic_hash": ""
+  }
+}
